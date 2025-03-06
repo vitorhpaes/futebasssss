@@ -1,0 +1,14 @@
+{
+  "name": "futebass-ia",
+  "version": "0.0.1",
+  "private": true,
+  "workspaces": [
+    "server"
+  ],
+  "devDependencies": {
+    "@commitlint/cli": "^19.7.1",
+    "@commitlint/config-conventional": "^19.7.1",
+    "husky": "^9.1.7",
+    "lerna": "^8.2.1"
+  }
+}
