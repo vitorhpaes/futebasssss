@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserType } from '@prisma/client';
+import { UserType, Position } from '@prisma/client';
 import {
   IsEmail,
   IsEnum,
@@ -55,10 +55,10 @@ export class CreateUserDto {
 
   @ApiProperty({
     description: 'Posição do jogador',
-    example: 'Zagueiro',
-    enum: ['Zagueiro', 'Meio-campista', 'Atacante'],
+    example: 'DEFENDER',
+    enum: Position,
   })
-  @IsString()
+  @IsEnum(Position)
   @IsOptional()
-  position?: string;
+  position?: Position;
 }

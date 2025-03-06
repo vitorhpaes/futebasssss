@@ -1,4 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
+import { Position } from '@prisma/client';
 
 export class UpdateUserDto {
   @ApiProperty({
@@ -6,6 +8,8 @@ export class UpdateUserDto {
     example: 'usuario@exemplo.com',
     required: false,
   })
+  @IsEmail()
+  @IsOptional()
   email?: string;
 
   @ApiProperty({
@@ -13,6 +17,8 @@ export class UpdateUserDto {
     example: 'Nome do Usuário',
     required: false,
   })
+  @IsString()
+  @IsOptional()
   name?: string;
 
   @ApiProperty({
@@ -20,13 +26,17 @@ export class UpdateUserDto {
     example: '+5511999999999',
     required: false,
   })
+  @IsString()
+  @IsOptional()
   phone?: string;
 
   @ApiProperty({
     description: 'Posição do jogador',
-    example: 'Zagueiro',
-    enum: ['Zagueiro', 'Meio-campista', 'Atacante'],
+    example: 'DEFENDER',
+    enum: Position,
     required: false,
   })
-  position?: string;
+  @IsEnum(Position)
+  @IsOptional()
+  position?: Position;
 }
