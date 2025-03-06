@@ -1,17 +1,15 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
   Patch,
   Param,
   Delete,
   ParseIntPipe,
+  Body,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from '@prisma/client';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
 
@@ -43,17 +41,6 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<User | null> {
     return this.usersService.findOne(id);
-  }
-
-  @Post()
-  @ApiOperation({ summary: 'Criar um novo usuário' })
-  @ApiResponse({
-    status: 201,
-    description: 'Usuário criado com sucesso',
-    type: UserEntity,
-  })
-  async create(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.usersService.create(createUserDto);
   }
 
   @Patch(':id')

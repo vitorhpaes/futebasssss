@@ -44,4 +44,21 @@ export class CreateUserDto {
   @IsEnum(UserType)
   @IsOptional()
   type?: UserType;
+
+  @ApiProperty({
+    description: 'Telefone do usuário',
+    example: '+5511999999999',
+  })
+  @IsString()
+  @IsOptional()
+  phone?: string;
+
+  @ApiProperty({
+    description: 'Posição do jogador',
+    example: 'Zagueiro',
+    enum: ['Zagueiro', 'Meio-campista', 'Atacante'],
+  })
+  @IsString()
+  @IsOptional()
+  position?: string;
 }

@@ -40,4 +40,17 @@ export class UserEntity {
     example: '2023-01-01T00:00:00.000Z',
   })
   updatedAt: Date;
+
+  @ApiProperty({
+    description: 'Telefone do usuário',
+    example: '+5511999999999',
+  })
+  phone: string;
+
+  @ApiProperty({
+    description: 'Posição do jogador',
+    example: 'Zagueiro',
+    enum: ['Zagueiro', 'Meio-campista', 'Atacante'],
+  })
+  position: string;
 }

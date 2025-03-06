@@ -18,6 +18,12 @@ enum UserType {
   ADMIN
 }
 
+enum Position {
+  DEFENDER
+  MIDFIELDER
+  FORWARD
+}
+
 model User {
   id        Int      @id @default(autoincrement())
   email     String   @unique
@@ -26,6 +32,7 @@ model User {
   type      UserType @default(PLAYER)
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+  position  Position?  @map("position")
 
   @@map("users")
 }

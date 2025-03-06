@@ -14,4 +14,19 @@ export class UpdateUserDto {
     required: false,
   })
   name?: string;
+
+  @ApiProperty({
+    description: 'Telefone do usuário',
+    example: '+5511999999999',
+    required: false,
+  })
+  phone?: string;
+
+  @ApiProperty({
+    description: 'Posição do jogador',
+    example: 'Zagueiro',
+    enum: ['Zagueiro', 'Meio-campista', 'Atacante'],
+    required: false,
+  })
+  position?: string;
 }
