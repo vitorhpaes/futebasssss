@@ -1,5 +1,8 @@
 import { ApiProperty, ApiHideProperty } from '@nestjs/swagger';
-import { Position, UserType } from '@prisma/client';
+import { UserType } from '@prisma/client';
+
+const POSITION_VALUES = ['DEFENDER', 'MIDFIELDER', 'FORWARD'];
+const USER_TYPE_VALUES = ['PLAYER', 'ADMIN'];
 
 export class UserEntity {
   @ApiProperty({
@@ -26,7 +29,7 @@ export class UserEntity {
   @ApiProperty({
     description: 'Tipo de usuário',
     example: 'PLAYER',
-    enum: UserType,
+    enum: USER_TYPE_VALUES,
   })
   type: UserType;
 
@@ -51,7 +54,7 @@ export class UserEntity {
   @ApiProperty({
     description: 'Posição do jogador',
     example: 'DEFENDER',
-    enum: Position,
+    enum: POSITION_VALUES,
     nullable: true,
   })
   position: string | null;

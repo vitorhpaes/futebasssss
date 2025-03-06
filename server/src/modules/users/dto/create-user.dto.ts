@@ -9,6 +9,8 @@ import {
   MinLength,
 } from 'class-validator';
 
+const POSITION_VALUES = ['DEFENDER', 'MIDFIELDER', 'FORWARD'];
+
 export class CreateUserDto {
   @ApiProperty({
     description: 'Email do usuário',
@@ -38,8 +40,8 @@ export class CreateUserDto {
   @ApiProperty({
     description: 'Tipo de usuário',
     example: 'PLAYER',
-    enum: UserType,
-    default: UserType.PLAYER,
+    enum: ['PLAYER', 'ADMIN'],
+    default: 'PLAYER',
   })
   @IsEnum(UserType)
   @IsOptional()
@@ -56,7 +58,7 @@ export class CreateUserDto {
   @ApiProperty({
     description: 'Posição do jogador',
     example: 'DEFENDER',
-    enum: Position,
+    enum: POSITION_VALUES,
   })
   @IsEnum(Position)
   @IsOptional()

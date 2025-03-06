@@ -2,6 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
 import { Position } from '@prisma/client';
 
+const POSITION_VALUES = ['DEFENDER', 'MIDFIELDER', 'FORWARD'];
+
 export class UpdateUserDto {
   @ApiProperty({
     description: 'Email do usuário',
@@ -33,7 +35,7 @@ export class UpdateUserDto {
   @ApiProperty({
     description: 'Posição do jogador',
     example: 'DEFENDER',
-    enum: Position,
+    enum: POSITION_VALUES,
     required: false,
   })
   @IsEnum(Position)
