@@ -3,31 +3,31 @@ import { IsNumber, IsOptional, Min } from 'class-validator';
 
 export class UpdateGameResultDto {
   @ApiProperty({
-    description: 'Placar do time A',
+    description: 'Pontuação do time A',
     example: 3,
     required: false,
   })
   @IsNumber()
   @IsOptional()
   @Min(0)
-  teamAScore?: number;
+  scoreA?: number;
 
   @ApiProperty({
-    description: 'Placar do time B',
+    description: 'Pontuação do time B',
     example: 2,
     required: false,
   })
   @IsNumber()
   @IsOptional()
   @Min(0)
-  teamBScore?: number;
+  scoreB?: number;
 
   @ApiProperty({
-    description: 'ID do time vencedor',
+    description: 'ID do time vencedor (calculado automaticamente se não fornecido)',
     example: 1,
     required: false,
   })
   @IsNumber()
   @IsOptional()
-  winnerTeamId?: number;
+  winnerId?: number;
 }

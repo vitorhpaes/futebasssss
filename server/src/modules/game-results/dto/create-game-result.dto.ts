@@ -1,13 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, Min } from 'class-validator';
+import { IsNumber, IsOptional, Min } from 'class-validator';
 
 export class CreateGameResultDto {
   @ApiProperty({
-    description: 'ID da sessão',
+    description: 'ID da sessão de jogo',
     example: 1,
   })
   @IsNumber()
-  @IsNotEmpty()
   sessionId: number;
 
   @ApiProperty({
@@ -15,7 +14,6 @@ export class CreateGameResultDto {
     example: 1,
   })
   @IsNumber()
-  @IsNotEmpty()
   teamAId: number;
 
   @ApiProperty({
@@ -23,35 +21,30 @@ export class CreateGameResultDto {
     example: 2,
   })
   @IsNumber()
-  @IsNotEmpty()
   teamBId: number;
 
   @ApiProperty({
-    description: 'Placar do time A',
+    description: 'Pontuação do time A',
     example: 3,
-    default: 0,
   })
   @IsNumber()
-  @IsOptional()
   @Min(0)
-  teamAScore?: number;
+  scoreA: number;
 
   @ApiProperty({
-    description: 'Placar do time B',
+    description: 'Pontuação do time B',
     example: 2,
-    default: 0,
   })
   @IsNumber()
-  @IsOptional()
   @Min(0)
-  teamBScore?: number;
+  scoreB: number;
 
   @ApiProperty({
-    description: 'ID do time vencedor',
+    description: 'ID do time vencedor (calculado automaticamente se não fornecido)',
     example: 1,
     required: false,
   })
   @IsNumber()
   @IsOptional()
-  winnerTeamId?: number;
+  winnerId?: number;
 }

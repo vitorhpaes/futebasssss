@@ -1,36 +1,34 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNumber, IsOptional } from 'class-validator';
 
 export class CreatePlayerFavoriteDto {
   @ApiProperty({
-    description: 'ID da sessão',
+    description: 'ID da sessão de jogo',
     example: 1,
   })
   @IsNumber()
-  @IsNotEmpty()
   sessionId: number;
 
   @ApiProperty({
-    description: 'ID do jogador que vota',
-    example: 1,
+    description: 'ID do jogador que está votando',
+    example: 2,
   })
   @IsNumber()
-  @IsNotEmpty()
   voterId: number;
 
   @ApiProperty({
     description: 'ID do jogador favorito',
-    example: 2,
+    example: 3,
   })
   @IsNumber()
-  @IsNotEmpty()
   favoriteId: number;
 
   @ApiProperty({
     description: 'ID do time do jogador favorito',
     example: 1,
+    required: false,
   })
   @IsNumber()
-  @IsNotEmpty()
-  teamId: number;
+  @IsOptional()
+  teamId?: number;
 }
