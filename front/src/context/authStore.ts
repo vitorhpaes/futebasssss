@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import api from '../services/api';
+import { ApiError } from '../services/auth/auth.interfaces';
 
 export type UserRole = 'admin' | 'player';
 
@@ -36,57 +38,42 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true, error: null });
           
-          // Simulando uma requisição de API (será substituído futuramente)
-          // Na implementação real, você chamará a API do seu backend
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          // Faz a requisição para a API
+          const response = await api.post('/auth/login', {
+            email,
+            password,
+            role
+          });
           
-          if (email === 'admin@example.com' && password === 'password' && role === 'admin') {
-            const fakeUser: User = {
-              id: 1,
-              name: 'Admin',
-              email: 'admin@example.com',
-              role: 'admin'
-            };
-            const fakeToken = 'fake-jwt-token-for-admin';
-            
-            set({ 
-              user: fakeUser, 
-              token: fakeToken, 
-              isAuthenticated: true, 
-              isLoading: false,
-              redirectPath: redirectPath || '/admin/dashboard'
-            });
-          } else if (email === 'player@example.com' && password === 'password' && role === 'player') {
-            const fakeUser: User = {
-              id: 2,
-              name: 'Player',
-              email: 'player@example.com',
-              role: 'player'
-            };
-            const fakeToken = 'fake-jwt-token-for-player';
-            
-            set({ 
-              user: fakeUser, 
-              token: fakeToken, 
-              isAuthenticated: true, 
-              isLoading: false,
-              redirectPath: redirectPath || '/player/dashboard'
-            });
-          } else {
-            set({ 
-              error: 'Credenciais inválidas', 
-              isLoading: false 
-            });
-          }
-        } catch {
+          // Extrai os dados da resposta
+          const { user, token } = response.data;
+          
+          // Atualiza o estado
           set({ 
-            error: 'Erro ao fazer login. Tente novamente.', 
+            user,
+            token,
+            isAuthenticated: true, 
+            isLoading: false,
+            redirectPath: redirectPath || (role === 'admin' ? '/admin/dashboard' : '/player/dashboard')
+          });
+        } catch (error) {
+          // Trata erros da API
+          const apiError = error as ApiError;
+          set({ 
+            error: apiError.message || 'Erro ao fazer login. Tente novamente.', 
             isLoading: false 
           });
+          throw apiError;
         }
       },
       
       logout: () => {
+        // Faz a chamada para logout na API
+        api.post('/auth/logout').catch(() => {
+          // Ignora erros ao fazer logout na API
+        });
+        
+        // Limpa o estado local independentemente da resposta da API
         set({ 
           user: null, 
           token: null, 

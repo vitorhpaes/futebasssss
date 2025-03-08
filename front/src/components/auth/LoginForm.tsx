@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import * as Form from '@radix-ui/react-form';
 import styled from 'styled-components';
-import { useAuthStore, UserRole } from '../../context/authStore';
+import { UserRole } from '../../context/authStore';
+import { useLogin } from '../../services/auth/auth.queries';
+import { loginCredentialsSchema } from '../../services/auth/auth.interfaces';
+import { z } from 'zod';
 
 const StyledForm = styled(Form.Root)`
   width: 100%;
@@ -78,11 +81,36 @@ interface LoginFormProps {
 export default function LoginForm({ role, redirectPath }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   
-  const { login, isLoading, error, clearError } = useAuthStore();
+  const { login, isLoading, error } = useLogin();
+
+  const validateForm = (): boolean => {
+    try {
+      loginCredentialsSchema.parse({ email, password, role });
+      setValidationErrors({});
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors: Record<string, string> = {};
+        error.errors.forEach((err) => {
+          if (err.path) {
+            errors[err.path[0]] = err.message;
+          }
+        });
+        setValidationErrors(errors);
+      }
+      return false;
+    }
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     await login(email, password, role, redirectPath);
   };
 
@@ -90,7 +118,7 @@ export default function LoginForm({ role, redirectPath }: LoginFormProps) {
 
   return (
     <StyledForm onSubmit={handleSubmit}>
-      {error && <FormError>{error}</FormError>}
+      {error && <FormError>{error.message}</FormError>}
 
       <FormField name="email">
         <FormLabel>Email</FormLabel>
@@ -99,7 +127,7 @@ export default function LoginForm({ role, redirectPath }: LoginFormProps) {
             type="email"
             required
             value={email}
-            onChange={(e) => { setEmail(e.target.value); clearError(); }}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder={placeholderEmail}
           />
         </Form.Control>
@@ -111,6 +139,9 @@ export default function LoginForm({ role, redirectPath }: LoginFormProps) {
               )}
               {validity?.typeMismatch && (
                 <ErrorMessage>Por favor, insira um email válido</ErrorMessage>
+              )}
+              {validationErrors.email && (
+                <ErrorMessage>{validationErrors.email}</ErrorMessage>
               )}
             </>
           )}
@@ -124,7 +155,7 @@ export default function LoginForm({ role, redirectPath }: LoginFormProps) {
             type="password"
             required
             value={password}
-            onChange={(e) => { setPassword(e.target.value); clearError(); }}
+            onChange={(e) => setPassword(e.target.value)}
             placeholder="Digite sua senha"
             minLength={6}
           />
@@ -137,6 +168,9 @@ export default function LoginForm({ role, redirectPath }: LoginFormProps) {
               )}
               {validity?.tooShort && (
                 <ErrorMessage>Senha deve ter no mínimo 6 caracteres</ErrorMessage>
+              )}
+              {validationErrors.password && (
+                <ErrorMessage>{validationErrors.password}</ErrorMessage>
               )}
             </>
           )}

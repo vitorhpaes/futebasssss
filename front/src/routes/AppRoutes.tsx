@@ -9,7 +9,7 @@ import AuthenticatedLayout from '../components/layout/AuthenticatedLayout';
 
 const AppRoutes = () => {
   const { isAuthenticated, user, redirectPath } = useAuthStore();
-
+  console.log({user, isAuthenticated, redirectPath});
   // Função para redirecionar usuários logados com base na role e redirectPath
   const handleRoot = () => {
     if (!isAuthenticated || !user) return <Navigate to="/auth/login" />;
