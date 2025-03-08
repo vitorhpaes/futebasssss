@@ -16,7 +16,8 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  login: (email: string, password: string, role: UserRole) => Promise<void>;
+  redirectPath: string | null;
+  login: (email: string, password: string, role: UserRole, redirectPath?: string) => Promise<void>;
   logout: () => void;
   clearError: () => void;
 }
@@ -29,8 +30,9 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false,
       error: null,
+      redirectPath: null,
       
-      login: async (email: string, password: string, role: UserRole) => {
+      login: async (email: string, password: string, role: UserRole, redirectPath?: string) => {
         try {
           set({ isLoading: true, error: null });
           
@@ -51,7 +53,8 @@ export const useAuthStore = create<AuthState>()(
               user: fakeUser, 
               token: fakeToken, 
               isAuthenticated: true, 
-              isLoading: false 
+              isLoading: false,
+              redirectPath: redirectPath || '/admin/dashboard'
             });
           } else if (email === 'player@example.com' && password === 'password' && role === 'player') {
             const fakeUser: User = {
@@ -66,7 +69,8 @@ export const useAuthStore = create<AuthState>()(
               user: fakeUser, 
               token: fakeToken, 
               isAuthenticated: true, 
-              isLoading: false 
+              isLoading: false,
+              redirectPath: redirectPath || '/player/dashboard'
             });
           } else {
             set({ 
@@ -86,7 +90,8 @@ export const useAuthStore = create<AuthState>()(
         set({ 
           user: null, 
           token: null, 
-          isAuthenticated: false 
+          isAuthenticated: false,
+          redirectPath: null
         });
       },
       

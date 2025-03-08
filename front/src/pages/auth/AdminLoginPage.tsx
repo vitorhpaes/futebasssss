@@ -9,8 +9,8 @@ const LoginContainer = styled.div`
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: ${({ theme }) => theme.colors.primary.dark}20;
-  background-image: linear-gradient(to bottom right, ${({ theme }) => theme.colors.primary.dark}30, ${({ theme }) => theme.colors.accent.dark}30);
+  background-color: ${({ theme }) => theme.colors.secondary.dark}20;
+  background-image: linear-gradient(to bottom right, ${({ theme }) => theme.colors.secondary.dark}30, ${({ theme }) => theme.colors.primary.dark}30);
 `;
 
 const LoginCard = styled.div`
@@ -21,7 +21,7 @@ const LoginCard = styled.div`
   width: 100%;
   max-width: 450px;
   margin: ${({ theme }) => theme.spacing[4]};
-  border-top: 5px solid ${({ theme }) => theme.colors.primary.main};
+  border-top: 5px solid ${({ theme }) => theme.colors.secondary.main};
 `;
 
 const LogoContainer = styled.div`
@@ -30,7 +30,7 @@ const LogoContainer = styled.div`
 `;
 
 const AppTitle = styled.h1`
-  color: ${({ theme }) => theme.colors.primary.main};
+  color: ${({ theme }) => theme.colors.secondary.main};
   font-size: 2.5rem;
   margin-bottom: ${({ theme }) => theme.spacing[2]};
 `;
@@ -42,9 +42,9 @@ const AppDescription = styled.p`
   text-align: center;
 `;
 
-const PlayerBadge = styled.div`
+const AdminBadge = styled.div`
   display: inline-block;
-  background-color: ${({ theme }) => theme.colors.primary.main};
+  background-color: ${({ theme }) => theme.colors.secondary.main};
   color: white;
   font-weight: 600;
   font-size: 0.8rem;
@@ -59,7 +59,7 @@ const FooterLink = styled(Link)`
   display: block;
   text-align: center;
   margin-top: ${({ theme }) => theme.spacing[4]};
-  color: ${({ theme }) => theme.colors.primary.main};
+  color: ${({ theme }) => theme.colors.secondary.main};
   font-size: 0.9rem;
   text-decoration: none;
   
@@ -68,7 +68,7 @@ const FooterLink = styled(Link)`
   }
 `;
 
-const LoginPage = () => {
+const AdminLoginPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user, redirectPath } = useAuthStore();
 
@@ -84,16 +84,16 @@ const LoginPage = () => {
       <LoginCard>
         <LogoContainer>
           <AppTitle>Futebasssss</AppTitle>
-          <PlayerBadge>Área de Jogadores</PlayerBadge>
+          <AdminBadge>Área Administrativa</AdminBadge>
           <AppDescription>
-            Acesso para jogadores e participantes do sistema
+            Acesso restrito para administradores do sistema
           </AppDescription>
         </LogoContainer>
-        <LoginForm role="player" redirectPath="/player/dashboard" />
-        <FooterLink to="/admin/login">Acessar como administrador</FooterLink>
+        <LoginForm role="admin" redirectPath="/admin/dashboard" />
+        <FooterLink to="/auth/login">Voltar para o login de jogadores</FooterLink>
       </LoginCard>
     </LoginContainer>
   );
 };
 
-export default LoginPage; 
+export default AdminLoginPage; 

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../modules/prisma/prisma.service';
-import { Team, Prisma } from '@prisma/client';
+import { Team } from '@prisma/client';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
 
@@ -38,14 +38,12 @@ export class TeamsService {
   }
 
   async getTeamPlayers(id: number, sessionId?: number) {
-    const query: Prisma.PlayerSessionFindManyArgs = {
+    const playerSessions = await this.prisma.playerSession.findMany({
       where: { teamId: id, ...(sessionId && { sessionId }) },
       include: {
         user: true,
       },
-    };
-
-    const playerSessions = await this.prisma.playerSession.findMany(query);
+    });
 
     return playerSessions.map((ps) => ({
       id: ps.user.id,

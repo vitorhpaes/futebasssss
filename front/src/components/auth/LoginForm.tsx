@@ -61,34 +61,6 @@ const SubmitButton = styled.button`
   }
 `;
 
-const RoleSelector = styled.div`
-  display: flex;
-  margin-bottom: ${({ theme }) => theme.spacing[4]};
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-  overflow: hidden;
-  border: 1px solid ${({ theme }) => theme.colors.neutral.main};
-`;
-
-const RoleButton = styled.button<{ $isActive: boolean }>`
-  flex: 1;
-  padding: ${({ theme }) => theme.spacing[3]};
-  background-color: ${({ theme, $isActive }) => $isActive 
-    ? theme.colors.primary.main 
-    : theme.colors.background.paper};
-  color: ${({ theme, $isActive }) => $isActive 
-    ? 'white' 
-    : theme.colors.text.primary};
-  border: none;
-  cursor: pointer;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: ${({ theme, $isActive }) => $isActive 
-      ? theme.colors.primary.dark 
-      : theme.colors.neutral.light};
-  }
-`;
-
 const FormError = styled.div`
   color: ${({ theme }) => theme.colors.error.main};
   background-color: ${({ theme }) => theme.colors.error.light}20;
@@ -98,38 +70,27 @@ const FormError = styled.div`
   text-align: center;
 `;
 
-export default function LoginForm() {
+interface LoginFormProps {
+  role: UserRole;
+  redirectPath: string;
+}
+
+export default function LoginForm({ role, redirectPath }: LoginFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<UserRole>('player');
   
   const { login, isLoading, error, clearError } = useAuthStore();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    await login(email, password, role);
+    await login(email, password, role, redirectPath);
   };
+
+  const placeholderEmail = role === 'admin' ? 'admin@example.com' : 'player@example.com';
 
   return (
     <StyledForm onSubmit={handleSubmit}>
       {error && <FormError>{error}</FormError>}
-
-      <RoleSelector>
-        <RoleButton 
-          type="button"
-          $isActive={role === 'player'} 
-          onClick={() => { setRole('player'); clearError(); }}
-        >
-          Jogador
-        </RoleButton>
-        <RoleButton 
-          type="button"
-          $isActive={role === 'admin'} 
-          onClick={() => { setRole('admin'); clearError(); }}
-        >
-          Administrador
-        </RoleButton>
-      </RoleSelector>
 
       <FormField name="email">
         <FormLabel>Email</FormLabel>
@@ -139,7 +100,7 @@ export default function LoginForm() {
             required
             value={email}
             onChange={(e) => { setEmail(e.target.value); clearError(); }}
-            placeholder={role === 'admin' ? 'admin@example.com' : 'player@example.com'}
+            placeholder={placeholderEmail}
           />
         </Form.Control>
         <Form.ValidityState>

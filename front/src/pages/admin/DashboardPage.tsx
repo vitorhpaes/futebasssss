@@ -47,6 +47,38 @@ const WelcomeTitle = styled.h2`
   margin-bottom: ${({ theme }) => theme.spacing[3]};
 `;
 
+const StatsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: ${({ theme }) => theme.spacing[4]};
+  margin-bottom: ${({ theme }) => theme.spacing[6]};
+`;
+
+const StatCard = styled.div`
+  background-color: ${({ theme }) => theme.colors.background.paper};
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
+  box-shadow: ${({ theme }) => theme.shadows.small};
+  padding: ${({ theme }) => theme.spacing[4]};
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+`;
+
+const StatValue = styled.div`
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: ${({ theme }) => theme.colors.secondary.main};
+  margin-bottom: ${({ theme }) => theme.spacing[2]};
+`;
+
+const StatLabel = styled.div`
+  color: ${({ theme }) => theme.colors.text.secondary};
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+`;
+
 const AdminDashboardPage = () => {
   const { user, logout } = useAuthStore();
 
@@ -65,6 +97,31 @@ const AdminDashboardPage = () => {
         </p>
       </WelcomeCard>
 
+      <h3>Resumo do Sistema</h3>
+      
+      <StatsGrid>
+        <StatCard>
+          <StatValue>24</StatValue>
+          <StatLabel>Jogadores Registrados</StatLabel>
+        </StatCard>
+        
+        <StatCard>
+          <StatValue>4</StatValue>
+          <StatLabel>Times Ativos</StatLabel>
+        </StatCard>
+        
+        <StatCard>
+          <StatValue>12</StatValue>
+          <StatLabel>Partidas Realizadas</StatLabel>
+        </StatCard>
+        
+        <StatCard>
+          <StatValue>3</StatValue>
+          <StatLabel>Partidas Agendadas</StatLabel>
+        </StatCard>
+      </StatsGrid>
+
+      <h3>Atividade Recente</h3>
       <p>
         Conteúdo futuro do dashboard irá aparecer aqui. Implementação em progresso...
       </p>
