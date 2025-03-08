@@ -60,7 +60,7 @@ const PlayerDashboardPage = () => {
       <WelcomeCard>
         <WelcomeTitle>Bem-vindo, {user?.name}!</WelcomeTitle>
         <p>
-          Este é o painel do jogador do FuteBass. Aqui você poderá ver suas estatísticas,
+          Este é o painel do jogador do Futebasssss. Aqui você poderá ver suas estatísticas,
           partidas passadas e futuras, além de confirmar sua participação em eventos.
         </p>
       </WelcomeCard>

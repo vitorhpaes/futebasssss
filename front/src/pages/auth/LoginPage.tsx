@@ -59,7 +59,7 @@ const LoginPage = () => {
     <LoginContainer>
       <LoginCard>
         <LogoContainer>
-          <AppTitle>FuteBass</AppTitle>
+          <AppTitle>Futebasssss</AppTitle>
           <AppDescription>
             Gerencie suas peladas de futebol com inteligência artificial
           </AppDescription>

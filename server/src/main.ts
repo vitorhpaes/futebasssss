@@ -7,8 +7,8 @@ async function bootstrap() {
 
   // Configuração do Swagger
   const config = new DocumentBuilder()
-    .setTitle('FuteBass API')
-    .setDescription('API para o sistema FuteBass')
+    .setTitle('Futebasssss API')
+    .setDescription('API para o sistema Futebasssss')
     .setVersion('1.0')
     .addTag('users')
     .build();

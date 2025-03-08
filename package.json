@@ -1,10 +1,10 @@
 {
-  "name": "futebass-ia",
+  "name": "futebasssss-ia",
   "version": "0.0.1",
   "private": true,
   "workspaces": [
     "server",
-    "client"
+    "front"
   ],
   "devDependencies": {
     "@commitlint/cli": "^19.7.1",

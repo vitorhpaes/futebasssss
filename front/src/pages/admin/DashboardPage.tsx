@@ -60,7 +60,7 @@ const AdminDashboardPage = () => {
       <WelcomeCard>
         <WelcomeTitle>Bem-vindo, {user?.name}!</WelcomeTitle>
         <p>
-          Este é o painel de administração do FuteBass. Aqui você poderá gerenciar jogadores,
+          Este é o painel de administração do Futebasssss. Aqui você poderá gerenciar jogadores,
           partidas, estatísticas e configurações do sistema.
         </p>
       </WelcomeCard>
