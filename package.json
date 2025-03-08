@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "private": true,
   "workspaces": [
-    "server"
+    "server",
+    "client"
   ],
   "devDependencies": {
     "@commitlint/cli": "^19.7.1",
