@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
+import { Position } from '@prisma/client';
 
 type UserWithoutPassword = {
   id: number;
@@ -50,9 +51,12 @@ export class AuthService {
     password?: string,
     name?: string,
     type?: 'PLAYER' | 'ADMIN',
+    phone?: string,
+    position?: Position,
+    observations?: string,
   ): Promise<UserWithoutPassword> {
     let userPassword: string;
-    let observations: string | undefined;
+    let userObservations: string | undefined = observations;
 
     // Gera senha aleatória se não fornecida
     if (!password) {
@@ -61,7 +65,9 @@ export class AuthService {
         Math.floor(Math.random() * 10),
       ).join('');
       userPassword = tempPassword;
-      observations = `Senha temporária gerada: ${tempPassword}`;
+      userObservations = userObservations
+        ? `${userObservations}; Senha temporária gerada: ${tempPassword}`
+        : `Senha temporária gerada: ${tempPassword}`;
     } else {
       userPassword = password;
     }
@@ -74,7 +80,9 @@ export class AuthService {
       password: hashedPassword,
       name,
       type: userType,
-      observations,
+      phone,
+      position,
+      observations: userObservations,
     });
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from '../pages/auth/LoginPage';
 import AdminLoginPage from '../pages/auth/AdminLoginPage';
 import AdminDashboardPage from '../pages/admin/DashboardPage';
+import PlayerListPage from '../pages/admin/PlayerListPage';
+import PlayerCreatePage from '../pages/admin/PlayerCreatePage';
 import PlayerDashboardPage from '../pages/player/DashboardPage';
 import ProtectedRoute from './ProtectedRoute';
 import { useAuthStore } from '../context/authStore';
@@ -9,7 +11,7 @@ import AuthenticatedLayout from '../components/layout/AuthenticatedLayout';
 
 const AppRoutes = () => {
   const { isAuthenticated, user, redirectPath } = useAuthStore();
-  console.log({user, isAuthenticated, redirectPath});
+
   // Função para redirecionar usuários logados com base na role e redirectPath
   const handleRoot = () => {
     if (!isAuthenticated || !user) return <Navigate to="/auth/login" />;
@@ -34,7 +36,9 @@ const AppRoutes = () => {
           <Route element={<AuthenticatedLayout />}>
             <Route path="dashboard" element={<AdminDashboardPage />} />
             <Route path="teams" element={<div>Página de Times (em construção)</div>} />
-            <Route path="players" element={<div>Página de Jogadores (em construção)</div>} />
+            {/* Rotas de gerenciamento de jogadores */}
+            <Route path="players" element={<PlayerListPage />} />
+            <Route path="players/create" element={<PlayerCreatePage />} />
             <Route path="matches" element={<div>Página de Partidas (em construção)</div>} />
           </Route>
         </Route>

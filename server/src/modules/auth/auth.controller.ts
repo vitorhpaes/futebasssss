@@ -76,6 +76,9 @@ export class AuthController {
       registerDto.password,
       registerDto.name,
       registerDto.type,
+      registerDto.phone,
+      registerDto.position,
+      registerDto.observations,
     );
   }
 

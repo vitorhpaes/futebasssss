@@ -8,12 +8,14 @@ import {
   Body,
   NotFoundException,
   HttpCode,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from '@prisma/client';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
+import { FindPlayersDto } from './dto/find-players.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -94,5 +96,23 @@ export class UsersController {
       throw new NotFoundException(`Usuário com ID ${id} não encontrado`);
     }
     return this.usersService.remove(id);
+  }
+
+  @Get('players')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Listar todos os jogadores com filtros' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de jogadores retornada com sucesso',
+    type: UserEntity,
+    isArray: true,
+  })
+  async findPlayers(@Query() findPlayersDto: FindPlayersDto): Promise<User[]> {
+    return this.usersService.findPlayers(
+      findPlayersDto.name,
+      findPlayersDto.position,
+      findPlayersDto.orderBy,
+      findPlayersDto.orderDirection,
+    );
   }
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../modules/prisma/prisma.service';
-import { User, Prisma, UserType } from '@prisma/client';
+import { User, Prisma, UserType, Position } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -9,6 +9,27 @@ export class UsersService {
 
   async findAll(): Promise<User[]> {
     return await this.prisma.user.findMany();
+  }
+
+  async findPlayers(
+    name?: string,
+    position?: Position,
+    orderBy?: string,
+    orderDirection: 'asc' | 'desc' = 'asc',
+  ): Promise<User[]> {
+    const validOrderFields = ['name', 'position'];
+    const orderField = validOrderFields.includes(orderBy) ? orderBy : 'name';
+
+    return await this.prisma.user.findMany({
+      where: {
+        type: UserType.PLAYER,
+        ...(name && { name: { contains: name, mode: 'insensitive' } }),
+        ...(position && { position }),
+      },
+      orderBy: {
+        [orderField]: orderDirection,
+      },
+    });
   }
 
   async findOne(id: number): Promise<User | null> {

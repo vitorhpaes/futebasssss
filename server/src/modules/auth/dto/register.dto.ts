@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { UserType } from '@prisma/client';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Position, UserType } from '@prisma/client';
 import {
   IsEmail,
   IsEnum,
@@ -46,4 +46,32 @@ export class RegisterDto {
   @IsEnum(UserType)
   @IsOptional()
   type?: UserType;
+
+  @ApiPropertyOptional({
+    description: 'Telefone do usuário',
+    example: '+5511999999999',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  phone?: string;
+
+  @ApiPropertyOptional({
+    description: 'Posição do jogador',
+    example: 'DEFENDER',
+    enum: ['DEFENDER', 'MIDFIELDER', 'FORWARD'],
+    required: false,
+  })
+  @IsEnum(Position)
+  @IsOptional()
+  position?: Position;
+
+  @ApiPropertyOptional({
+    description: 'Observações sobre o usuário',
+    example: 'Observações sobre o jogador',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  observations?: string;
 }
