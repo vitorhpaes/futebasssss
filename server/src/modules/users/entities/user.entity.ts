@@ -58,4 +58,11 @@ export class UserEntity {
     nullable: true,
   })
   position: string | null;
+
+  @ApiProperty({
+    description: 'Observações sobre o usuário',
+    example: 'Senha temporária gerada: abc123',
+    nullable: true,
+  })
+  observations: string | null;
 }

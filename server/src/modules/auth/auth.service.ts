@@ -47,11 +47,26 @@ export class AuthService {
 
   async register(
     email: string,
-    password: string,
+    password?: string,
     name?: string,
     type?: 'PLAYER' | 'ADMIN',
   ): Promise<UserWithoutPassword> {
-    const hashedPassword = await bcrypt.hash(password, 10);
+    let userPassword: string;
+    let observations: string | undefined;
+
+    // Gera senha aleatória se não fornecida
+    if (!password) {
+      // Gera senha de 6 dígitos numéricos aleatórios
+      const tempPassword = Array.from({ length: 6 }, () =>
+        Math.floor(Math.random() * 10),
+      ).join('');
+      userPassword = tempPassword;
+      observations = `Senha temporária gerada: ${tempPassword}`;
+    } else {
+      userPassword = password;
+    }
+
+    const hashedPassword = await bcrypt.hash(userPassword, 10);
     const userType = type || 'PLAYER';
 
     const user = await this.usersService.create({
@@ -59,6 +74,22 @@ export class AuthService {
       password: hashedPassword,
       name,
       type: userType,
+      observations,
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _, ...result } = user;
+    return result as UserWithoutPassword;
+  }
+
+  async updatePassword(
+    userId: number,
+    newPassword: string,
+  ): Promise<UserWithoutPassword> {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    const user = await this.usersService.update(userId, {
+      password: hashedPassword,
     });
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

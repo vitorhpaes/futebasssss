@@ -63,4 +63,12 @@ export class CreateUserDto {
   @IsEnum(Position)
   @IsOptional()
   position?: Position;
+
+  @ApiProperty({
+    description: 'Observações sobre o usuário',
+    example: 'Senha temporária gerada: abc123',
+  })
+  @IsString()
+  @IsOptional()
+  observations?: string;
 }

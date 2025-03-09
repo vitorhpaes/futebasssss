@@ -57,4 +57,11 @@ export const confirmPasswordResetSchema = z.object({
   path: ["confirmPassword"],
 });
 
-export type ConfirmPasswordReset = z.infer<typeof confirmPasswordResetSchema>; 
+export type ConfirmPasswordReset = z.infer<typeof confirmPasswordResetSchema>;
+
+// Interface para alteração de senha
+export const changePasswordSchema = z.object({
+  password: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres'),
+});
+
+export type ChangePassword = z.infer<typeof changePasswordSchema>; 

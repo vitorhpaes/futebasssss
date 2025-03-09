@@ -5,7 +5,8 @@ import {
   LoginCredentials, 
   LoginResponse, 
   loginResponseSchema,
-  ApiError
+  ApiError,
+  ChangePassword 
 } from './auth.interfaces';
 
 /**
@@ -21,7 +22,7 @@ export const useLoginMutation = () => {
     { credentials: Omit<LoginCredentials, 'role'> & { role: UserRole }, redirectPath?: string }
   >({
     mutationFn: async ({ credentials, redirectPath }) => {
-      const { email, password, role: _ } = credentials;
+      const { email, password } = credentials;
       
       // O backend espera apenas email e password no login
       const response = await api.post<LoginResponse>('/auth/login', { 
@@ -68,13 +69,28 @@ export const useLogoutMutation = () => {
  * Mutation para registrar um novo usuário
  */
 export const useRegisterMutation = () => {
-  return useMutation<any, ApiError, { email: string; password: string; name?: string; type?: 'PLAYER' | 'ADMIN' }>({
+  return useMutation<unknown, ApiError, { email: string; password: string; name?: string; type?: 'PLAYER' | 'ADMIN' }>({
     mutationFn: async ({ email, password, name, type }) => {
       const response = await api.post('/auth/register', {
         email,
         password,
         name,
         type: type || 'PLAYER'
+      });
+      
+      return response.data;
+    }
+  });
+};
+
+/**
+ * Mutation para alterar a senha do usuário autenticado
+ */
+export const useChangePasswordMutation = () => {
+  return useMutation<unknown, ApiError, ChangePassword>({
+    mutationFn: async ({ password }) => {
+      const response = await api.patch('/auth/change-password', {
+        password,
       });
       
       return response.data;

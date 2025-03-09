@@ -252,6 +252,43 @@
         ]
       }
     },
+    "/auth/change-password": {
+      "patch": {
+        "operationId": "AuthController_changePassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Senha alterada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserEntity"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Alterar senha do usuário autenticado",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/sessions": {
       "post": {
         "operationId": "SessionsController_create",
@@ -1512,6 +1549,12 @@
               "FORWARD"
             ],
             "nullable": true
+          },
+          "observations": {
+            "type": "string",
+            "description": "Observações sobre o usuário",
+            "example": "Senha temporária gerada: abc123",
+            "nullable": true
           }
         },
         "required": [
@@ -1522,7 +1565,8 @@
           "createdAt",
           "updatedAt",
           "phone",
-          "position"
+          "position",
+          "observations"
         ]
       },
       "UpdateUserDto": {
@@ -1589,7 +1633,7 @@
           },
           "password": {
             "type": "string",
-            "description": "Senha do usuário",
+            "description": "Senha do usuário. Se não informada, uma senha temporária será gerada automaticamente",
             "example": "senha123"
           },
           "type": {
@@ -1606,8 +1650,20 @@
         "required": [
           "email",
           "name",
-          "password",
           "type"
+        ]
+      },
+      "ChangePasswordDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "description": "Nova senha do usuário",
+            "example": "nova-senha123"
+          }
+        },
+        "required": [
+          "password"
         ]
       },
       "CreateSessionDto": {

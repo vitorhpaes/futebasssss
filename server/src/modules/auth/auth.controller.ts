@@ -7,6 +7,8 @@ import {
   Get,
   UnauthorizedException,
   HttpCode,
+  Patch,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -16,9 +18,11 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiBody,
 } from '@nestjs/swagger';
 import { UserEntity } from '../users/entities/user.entity';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 type UserWithoutPassword = {
   id: number;
@@ -88,5 +92,29 @@ export class AuthController {
   })
   getProfile(@Request() req: { user: UserWithoutPassword }) {
     return req.user;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('change-password')
+  @HttpCode(200)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Alterar senha do usuário autenticado' })
+  @ApiResponse({
+    status: 200,
+    description: 'Senha alterada com sucesso',
+    type: UserEntity,
+  })
+  @ApiBody({ type: ChangePasswordDto })
+  async changePassword(
+    @Request() req: { user: UserWithoutPassword },
+    @Body() body: { password: string },
+  ) {
+    if (!body.password || body.password.length < 6) {
+      throw new BadRequestException(
+        'Senha inválida. A senha deve ter pelo menos 6 caracteres.',
+      );
+    }
+
+    return this.authService.updatePassword(req.user.id, body.password);
   }
 }

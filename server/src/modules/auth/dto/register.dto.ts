@@ -27,13 +27,15 @@ export class RegisterDto {
   name?: string;
 
   @ApiProperty({
-    description: 'Senha do usuário',
+    description:
+      'Senha do usuário. Se não informada, uma senha temporária será gerada automaticamente',
     example: 'senha123',
+    required: false,
   })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @MinLength(6)
-  password: string;
+  password?: string;
 
   @ApiProperty({
     description: 'Tipo de usuário',
