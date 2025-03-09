@@ -4,6 +4,7 @@ import styled, { css } from 'styled-components';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../context/authStore';
 import { useTheme } from '../../theme/ThemeProvider';
+import { useState } from 'react';
 
 const NavContainer = styled.header`
   background-color: ${({ theme }) => theme.colors.background.paper};
@@ -20,6 +21,10 @@ const NavInner = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: ${({ theme }) => theme.spacing[3]} ${({ theme }) => theme.spacing[4]};
+  
+  @media (max-width: 768px) {
+    padding: ${({ theme }) => theme.spacing[2]} ${({ theme }) => theme.spacing[3]};
+  }
 `;
 
 const LogoLink = styled(Link)`
@@ -28,6 +33,11 @@ const LogoLink = styled(Link)`
   color: ${({ theme }) => theme.colors.primary.main};
   text-decoration: none;
   margin-right: ${({ theme }) => theme.spacing[6]};
+  
+  @media (max-width: 768px) {
+    margin-right: ${({ theme }) => theme.spacing[2]};
+    font-size: 1.3rem;
+  }
 `;
 
 const NavMenuRoot = styled(NavigationMenu.Root)`
@@ -36,6 +46,10 @@ const NavMenuRoot = styled(NavigationMenu.Root)`
   align-items: center;
   z-index: 1;
   flex: 1;
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const NavList = styled(NavigationMenu.List)`
@@ -81,12 +95,20 @@ const NavLink = styled(NavigationMenu.Link)<NavLinkProps>`
 const UserSection = styled.div`
   display: flex;
   align-items: center;
+  
+  @media (max-width: 768px) {
+    margin-left: auto;
+  }
 `;
 
 const UserName = styled.span`
   margin-right: ${({ theme }) => theme.spacing[3]};
   font-weight: 500;
   color: ${({ theme }) => theme.colors.text.primary};
+  
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const ThemeToggle = styled.button`
@@ -104,6 +126,10 @@ const ThemeToggle = styled.button`
   
   &:hover {
     background-color: ${({ theme }) => theme.colors.background.default};
+  }
+  
+  @media (max-width: 768px) {
+    margin-right: ${({ theme }) => theme.spacing[2]};
   }
 `;
 
@@ -168,10 +194,114 @@ const SeparatorItem = styled(DropdownMenu.Separator)`
   margin: ${({ theme }) => theme.spacing[1]} 0;
 `;
 
+// Componentes para menu móvel
+const MobileMenuButton = styled.button`
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: ${({ theme }) => theme.colors.text.primary};
+  padding: ${({ theme }) => theme.spacing[1]};
+  margin-right: ${({ theme }) => theme.spacing[2]};
+  
+  @media (max-width: 768px) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+`;
+
+interface MobileMenuContainerProps {
+  $isOpen: boolean;
+}
+
+const MobileMenuContainer = styled.div<MobileMenuContainerProps>`
+  display: none;
+  
+  @media (max-width: 768px) {
+    display: block;
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: ${({ theme }) => theme.colors.background.paper};
+    z-index: 99;
+    transform: translateX(${({ $isOpen }) => ($isOpen ? '0' : '100%')});
+    transition: transform 0.3s ease;
+    padding: ${({ theme }) => theme.spacing[4]};
+    overflow-y: auto;
+  }
+`;
+
+const MobileNavList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+`;
+
+const MobileNavItem = styled.li`
+  margin-bottom: ${({ theme }) => theme.spacing[4]};
+`;
+
+interface MobileNavLinkProps {
+  $active?: boolean;
+}
+
+const MobileNavLink = styled(Link)<MobileNavLinkProps>`
+  display: block;
+  padding: ${({ theme }) => `${theme.spacing[3]} ${theme.spacing[4]}`};
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
+  color: ${({ theme, $active }) => 
+    $active ? theme.colors.primary.main : theme.colors.text.primary};
+  font-size: 1.1rem;
+  font-weight: ${({ $active }) => ($active ? '600' : '400')};
+  text-decoration: none;
+  transition: all 0.2s ease;
+  ${({ $active, theme }) => 
+    $active && 
+    css`
+      background-color: ${theme.colors.primary.main}10;
+      border-left: 4px solid ${theme.colors.primary.main};
+    `}
+`;
+
+const MobileUserSection = styled.div`
+  margin-top: ${({ theme }) => theme.spacing[6]};
+  padding-top: ${({ theme }) => theme.spacing[4]};
+  border-top: 1px solid ${({ theme }) => theme.colors.neutral.light};
+`;
+
+const MobileUserInfo = styled.div`
+  display: flex;
+  align-items: center;
+  margin-bottom: ${({ theme }) => theme.spacing[4]};
+`;
+
+const MobileAvatar = styled.div`
+  background-color: ${({ theme }) => theme.colors.primary.main};
+  color: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  margin-right: ${({ theme }) => theme.spacing[3]};
+`;
+
+const MobileUserName = styled.span`
+  font-weight: 600;
+  font-size: 1.1rem;
+`;
+
 const MainNavigation = () => {
   const location = useLocation();
   const { user, logout } = useAuthStore();
   const { isDarkMode, toggleTheme } = useTheme();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const isAdmin = user?.role === 'admin';
   
@@ -189,9 +319,21 @@ const MainNavigation = () => {
         { to: '/player/stats', label: 'Estatísticas' },
       ];
   
+  // Fecha o menu móvel quando um link é clicado
+  const handleMobileLinkClick = () => {
+    setMobileMenuOpen(false);
+  };
+  
   return (
     <NavContainer>
       <NavInner>
+        <MobileMenuButton 
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Menu de navegação"
+        >
+          {mobileMenuOpen ? '✕' : '☰'}
+        </MobileMenuButton>
+        
         <LogoLink to={isAdmin ? '/admin/dashboard' : '/player/dashboard'}>
           Futebasssss
         </LogoLink>
@@ -220,7 +362,7 @@ const MainNavigation = () => {
           
           <DropdownMenu.Root>
             <UserMenuTrigger>
-              {user?.name.charAt(0).toUpperCase()}
+              {user?.name?.charAt(0).toUpperCase() || 'U'}
             </UserMenuTrigger>
             
             <DropdownMenu.Portal>
@@ -239,6 +381,58 @@ const MainNavigation = () => {
             </DropdownMenu.Portal>
           </DropdownMenu.Root>
         </UserSection>
+        
+        {/* Menu móvel */}
+        <MobileMenuContainer $isOpen={mobileMenuOpen}>
+          <MobileNavList>
+            {navLinks.map((link) => (
+              <MobileNavItem key={link.to}>
+                <MobileNavLink 
+                  to={link.to}
+                  $active={location.pathname === link.to}
+                  onClick={handleMobileLinkClick}
+                >
+                  {link.label}
+                </MobileNavLink>
+              </MobileNavItem>
+            ))}
+          </MobileNavList>
+          
+          <MobileUserSection>
+            <MobileUserInfo>
+              <MobileAvatar>
+                {user?.name?.charAt(0).toUpperCase() || 'U'}
+              </MobileAvatar>
+              <MobileUserName>{user?.name || 'Usuário'}</MobileUserName>
+            </MobileUserInfo>
+            
+            <MobileNavItem>
+              <MobileNavLink to="/profile">
+                Perfil
+              </MobileNavLink>
+            </MobileNavItem>
+            
+            <MobileNavItem>
+              <MobileNavLink to="/settings">
+                Configurações
+              </MobileNavLink>
+            </MobileNavItem>
+            
+            <MobileNavItem>
+              <MobileNavLink 
+                to="#" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  logout();
+                  handleMobileLinkClick();
+                }}
+                style={{ color: '#e11d48' }}
+              >
+                Sair
+              </MobileNavLink>
+            </MobileNavItem>
+          </MobileUserSection>
+        </MobileMenuContainer>
       </NavInner>
     </NavContainer>
   );
