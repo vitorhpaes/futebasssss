@@ -1,6 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder, OpenAPIObject } from '@nestjs/swagger';
+import { ValidationPipe, BadRequestException } from '@nestjs/common';
+import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 
 // Variável para armazenar o documento Swagger
 let swaggerDocument: OpenAPIObject;
@@ -12,6 +14,31 @@ export function getSwaggerDocument(): OpenAPIObject {
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Configuração global de validação de DTOs
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, // Remove propriedades não decoradas do objeto
+      forbidNonWhitelisted: true, // Lança erro se houver propriedades não decoradas
+      transform: true, // Transforma automaticamente os payloads para os tipos esperados
+      transformOptions: {
+        enableImplicitConversion: true, // Facilita as conversões de tipos primitivos
+      },
+      exceptionFactory: (errors) => {
+        const formattedErrors = errors.reduce((acc, error) => {
+          acc[error.property] = Object.values(error.constraints).join(', ');
+          return acc;
+        }, {});
+        return new BadRequestException({
+          message: 'Erro de validação',
+          errors: formattedErrors,
+        });
+      },
+    }),
+  );
+
+  // Filtro global de exceções
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   app.enableCors({
     origin: [

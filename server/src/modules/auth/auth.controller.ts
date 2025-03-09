@@ -8,7 +8,6 @@ import {
   UnauthorizedException,
   HttpCode,
   Patch,
-  BadRequestException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -107,14 +106,11 @@ export class AuthController {
   @ApiBody({ type: ChangePasswordDto })
   async changePassword(
     @Request() req: { user: UserWithoutPassword },
-    @Body() body: { password: string },
+    @Body() changePasswordDto: ChangePasswordDto,
   ) {
-    if (!body.password || body.password.length < 6) {
-      throw new BadRequestException(
-        'Senha inválida. A senha deve ter pelo menos 6 caracteres.',
-      );
-    }
-
-    return this.authService.updatePassword(req.user.id, body.password);
+    return this.authService.updatePassword(
+      req.user.id,
+      changePasswordDto.password,
+    );
   }
 }
