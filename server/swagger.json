@@ -151,6 +151,77 @@
         ]
       }
     },
+    "/users/players": {
+      "get": {
+        "operationId": "UsersController_findPlayers",
+        "parameters": [
+          {
+            "name": "name",
+            "required": false,
+            "in": "query",
+            "description": "Filtrar por nome do jogador",
+            "schema": {
+              "example": "João",
+              "type": "string"
+            }
+          },
+          {
+            "name": "position",
+            "required": false,
+            "in": "query",
+            "description": "Filtrar por posição do jogador",
+            "schema": {
+              "example": "MIDFIELDER",
+              "type": "string",
+              "enum": [
+                "DEFENDER",
+                "MIDFIELDER",
+                "FORWARD"
+              ]
+            }
+          },
+          {
+            "name": "orderBy",
+            "required": false,
+            "in": "query",
+            "description": "Ordenar por (name, position)",
+            "schema": {
+              "example": "name",
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderDirection",
+            "required": false,
+            "in": "query",
+            "description": "Direção da ordenação (asc, desc)",
+            "schema": {
+              "example": "asc",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de jogadores retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserEntity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todos os jogadores com filtros",
+        "tags": [
+          "users"
+        ]
+      }
+    },
     "/auth/login": {
       "post": {
         "operationId": "AuthController_login",
@@ -1645,6 +1716,26 @@
               "ADMIN"
             ],
             "default": "PLAYER"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Telefone do usuário",
+            "example": "+5511999999999"
+          },
+          "position": {
+            "type": "string",
+            "description": "Posição do jogador",
+            "example": "DEFENDER",
+            "enum": [
+              "DEFENDER",
+              "MIDFIELDER",
+              "FORWARD"
+            ]
+          },
+          "observations": {
+            "type": "string",
+            "description": "Observações sobre o usuário",
+            "example": "Observações sobre o jogador"
           }
         },
         "required": [

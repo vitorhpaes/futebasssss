@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
 import { Position } from '@prisma/client';
 
-const POSITION_VALUES = ['DEFENDER', 'MIDFIELDER', 'FORWARD'];
+const POSITION_VALUES = ['GOALKEEPER', 'DEFENDER', 'MIDFIELDER', 'FORWARD'];
 
 export class UpdateUserDto {
   @ApiProperty({

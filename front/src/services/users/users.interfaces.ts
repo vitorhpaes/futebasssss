@@ -4,7 +4,7 @@ import { z } from 'zod';
 const userTypeSchema = z.enum(['PLAYER', 'ADMIN']);
 
 // Schema para posição
-const positionSchema = z.enum(['DEFENDER', 'MIDFIELDER', 'FORWARD']);
+const positionSchema = z.enum(['GOALKEEPER', 'DEFENDER', 'MIDFIELDER', 'FORWARD']);
 
 // Schema para usuário
 export const userSchema = z.object({
@@ -63,7 +63,9 @@ export const updateUserSchema = z.object({
 export const userFilterSchema = z.object({
   name: z.string().optional(),
   position: z.union([z.literal(''), positionSchema]).optional(),
-  type: z.union([z.literal(''), userTypeSchema]).optional()
+  type: z.union([z.literal(''), userTypeSchema]).optional(),
+  orderBy: z.string().optional(),
+  orderDirection: z.union([z.literal('asc'), z.literal('desc')]).optional()
 });
 
 // Tipos extraídos dos schemas

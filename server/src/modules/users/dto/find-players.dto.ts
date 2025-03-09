@@ -14,7 +14,7 @@ export class FindPlayersDto {
 
   @ApiPropertyOptional({
     description: 'Filtrar por posição do jogador',
-    enum: ['DEFENDER', 'MIDFIELDER', 'FORWARD'],
+    enum: ['GOALKEEPER', 'DEFENDER', 'MIDFIELDER', 'FORWARD'],
     example: 'MIDFIELDER',
   })
   @IsOptional()

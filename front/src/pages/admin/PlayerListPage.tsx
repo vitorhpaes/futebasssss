@@ -1,21 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import * as Dialog from '@radix-ui/react-dialog';
 import { useFormik } from 'formik';
-import { useUsers, useDeleteUserMutation } from '../../services/users/users.queries';
+import { useUsers } from '../../services/users/users.queries';
 import { UserFilterParams } from '../../services/users/users.interfaces';
 import * as S from './PlayerListPage.styles';
 import Select, { SelectOption } from '../../components/form/Select';
 
 const PlayerListPage: React.FC = () => {
   const navigate = useNavigate();
-  const [deleteUserId, setDeleteUserId] = useState<number | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [filterParams, setFilterParams] = useState<UserFilterParams>({});
   
   // Opções para os selects
   const positionOptions: SelectOption[] = [
     { value: '', label: 'Todas' },
+    { value: 'GOALKEEPER', label: 'Goleiro' },
     { value: 'DEFENDER', label: 'Zagueiro' },
     { value: 'MIDFIELDER', label: 'Meio-campo' },
     { value: 'FORWARD', label: 'Atacante' }
@@ -30,8 +28,6 @@ const PlayerListPage: React.FC = () => {
   // Obter lista de usuários com React Query
   const { data: players, isLoading, error } = useUsers(filterParams);
   
-  // Mutation para excluir usuário
-  const deleteUserMutation = useDeleteUserMutation();
 
   // Formik para gerenciar o formulário de filtro
   const formik = useFormik<UserFilterParams>({
@@ -64,27 +60,6 @@ const PlayerListPage: React.FC = () => {
     navigate(`/admin/players/edit/${id}`);
   };
 
-  const openDeleteDialog = (id: number) => {
-    setDeleteUserId(id);
-    setIsDeleteDialogOpen(true);
-  };
-
-  const closeDeleteDialog = () => {
-    setIsDeleteDialogOpen(false);
-    setDeleteUserId(null);
-  };
-
-  const confirmDelete = async () => {
-    if (deleteUserId) {
-      try {
-        await deleteUserMutation.mutateAsync(deleteUserId);
-        closeDeleteDialog();
-      } catch (error) {
-        console.error('Erro ao excluir jogador:', error);
-      }
-    }
-  };
-
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('pt-BR').format(date);
@@ -94,6 +69,7 @@ const PlayerListPage: React.FC = () => {
     if (!position) return 'Não informado';
     
     const positions = {
+      GOALKEEPER: 'Goleiro',
       DEFENDER: 'Zagueiro',
       MIDFIELDER: 'Meio-campo',
       FORWARD: 'Atacante'
@@ -214,36 +190,11 @@ const PlayerListPage: React.FC = () => {
                 <S.EditButton onClick={() => handleEditPlayer(player.id)}>
                   Editar
                 </S.EditButton>
-                <S.DeleteButton onClick={() => openDeleteDialog(player.id)}>
-                  Excluir
-                </S.DeleteButton>
               </S.CardActions>
             </S.Card>
           ))}
         </S.CardGrid>
       )}
-
-      {/* Dialog de confirmação para exclusão */}
-      <Dialog.Root open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <Dialog.Portal>
-          <S.DialogOverlay />
-          <S.DialogContent>
-            <S.DialogTitle>Confirmar exclusão</S.DialogTitle>
-            <S.DialogDescription>
-              Tem certeza que deseja excluir este jogador? Esta ação não pode ser desfeita.
-            </S.DialogDescription>
-            
-            <S.DialogActions>
-              <S.DialogCloseButton onClick={closeDeleteDialog}>
-                Cancelar
-              </S.DialogCloseButton>
-              <S.DialogConfirmButton onClick={confirmDelete} disabled={deleteUserMutation.isPending}>
-                {deleteUserMutation.isPending ? 'Excluindo...' : 'Confirmar exclusão'}
-              </S.DialogConfirmButton>
-            </S.DialogActions>
-          </S.DialogContent>
-        </Dialog.Portal>
-      </Dialog.Root>
     </S.Container>
   );
 };

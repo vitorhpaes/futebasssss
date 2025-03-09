@@ -34,6 +34,8 @@ export const useUsers = (filters?: UserFilterParams) => {
         if (filters?.name) queryParams.append('name', filters.name);
         if (filters?.position) queryParams.append('position', filters.position);
         if (filters?.type) queryParams.append('type', filters.type);
+        if (filters?.orderBy) queryParams.append('orderBy', filters.orderBy);
+        if (filters?.orderDirection) queryParams.append('orderDirection', filters.orderDirection);
         
         const query = queryParams.toString() ? `?${queryParams.toString()}` : '';
         const response = await api.get(`/users${query}`);
@@ -140,4 +142,4 @@ export const useDeleteUserMutation = () => {
       });
     }
   });
-}; 
+};

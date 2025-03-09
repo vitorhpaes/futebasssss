@@ -2,11 +2,12 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import { toFormikValidationSchema } from 'zod-formik-adapter';
-import { useCreateUserMutation } from '../../services/users/users.queries';
 import { registerUserSchema, RegisterUserDto } from '../../services/users/users.interfaces';
 import * as S from './PlayerCreatePage.styles';
 import Select, { SelectOption } from '../../components/form/Select';
 import { prepareFormSubmission } from '../../utils/payload-helper';
+import { useCreateUserMutation } from '../../services/users/users.queries';
+import { z } from 'zod';
 
 const PlayerCreatePage: React.FC = () => {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ const PlayerCreatePage: React.FC = () => {
 
   const positionOptions: SelectOption[] = [
     { value: '', label: 'Selecione uma posição' },
+    { value: 'GOALKEEPER', label: 'Goleiro' },
     { value: 'DEFENDER', label: 'Zagueiro' },
     { value: 'MIDFIELDER', label: 'Meio-campo' },
     { value: 'FORWARD', label: 'Atacante' }
@@ -47,7 +49,7 @@ const PlayerCreatePage: React.FC = () => {
       position: null,
       observations: null
     },
-    validationSchema: toFormikValidationSchema(registerUserSchema),
+    validationSchema: toFormikValidationSchema(registerUserSchema as z.ZodType<FormValues>),
     onSubmit: async (values) => {
       try {
         // Usar a utility para limpar o payload
