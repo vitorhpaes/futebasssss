@@ -16,6 +16,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
 import { FindPlayersDto } from './dto/find-players.dto';
+import { UserType, Position } from '@prisma/client';
 
 @ApiTags('users')
 @Controller('users')
@@ -31,8 +32,20 @@ export class UsersController {
     type: UserEntity,
     isArray: true,
   })
-  async findAll(): Promise<User[]> {
-    return this.usersService.findAll();
+  async findAll(
+    @Query('name') name?: string,
+    @Query('type') type?: UserType,
+    @Query('position') position?: Position,
+    @Query('orderBy') orderBy?: string,
+    @Query('orderDirection') orderDirection?: 'asc' | 'desc',
+  ): Promise<User[]> {
+    return this.usersService.findAll(
+      name,
+      type,
+      position,
+      orderBy,
+      orderDirection,
+    );
   }
 
   @Get(':id')

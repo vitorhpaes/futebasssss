@@ -7,8 +7,26 @@ import * as bcrypt from 'bcrypt';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(): Promise<User[]> {
-    return await this.prisma.user.findMany();
+  async findAll(
+    name?: string,
+    type?: UserType,
+    position?: Position,
+    orderBy?: string,
+    orderDirection: 'asc' | 'desc' = 'asc',
+  ): Promise<User[]> {
+    const validOrderFields = ['name', 'position', 'type'];
+    const orderField = validOrderFields.includes(orderBy) ? orderBy : 'name';
+
+    return await this.prisma.user.findMany({
+      where: {
+        ...(name && { name: { contains: name, mode: 'insensitive' } }),
+        ...(type && { type }),
+        ...(position && { position }),
+      },
+      orderBy: {
+        [orderField]: orderDirection,
+      },
+    });
   }
 
   async findPlayers(

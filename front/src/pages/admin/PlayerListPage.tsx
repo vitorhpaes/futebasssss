@@ -137,7 +137,13 @@ const PlayerListPage: React.FC = () => {
       {isLoading ? (
         <p>Carregando jogadores...</p>
       ) : error ? (
-        <p>Erro ao carregar jogadores</p>
+        <div>
+          <p>Erro ao carregar jogadores</p>
+          <p style={{ color: 'red', fontSize: '12px' }}>
+            {error?.message || 'Erro desconhecido'}
+          </p>
+          <button onClick={() => setFilterParams({})}>Tentar novamente</button>
+        </div>
       ) : !players || players.length === 0 ? (
         <S.EmptyState>
           <p>Nenhum jogador encontrado.</p>

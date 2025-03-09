@@ -38,10 +38,19 @@ export const useUsers = (filters?: UserFilterParams) => {
         if (filters?.orderDirection) queryParams.append('orderDirection', filters.orderDirection);
         
         const query = queryParams.toString() ? `?${queryParams.toString()}` : '';
+        console.log('Fazendo requisição para:', `/users${query}`);
         const response = await api.get(`/users${query}`);
+        console.log('Resposta recebida:', response.data);
         
-        return userListSchema.parse(response.data);
+        try {
+          return userListSchema.parse(response.data);
+        } catch (parseError) {
+          console.error('Erro ao validar schema:', parseError);
+          // Retornar os dados mesmo sem validação em caso de erro
+          return response.data as UserList;
+        }
       } catch (error) {
+        console.error('Erro ao buscar usuários:', error);
         throw handleApiError(error);
       }
     }

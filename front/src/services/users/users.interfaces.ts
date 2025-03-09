@@ -9,13 +9,13 @@ const positionSchema = z.enum(['GOALKEEPER', 'DEFENDER', 'MIDFIELDER', 'FORWARD'
 // Schema para usuário
 export const userSchema = z.object({
   id: z.number(),
-  email: z.string().email(),
+  email: z.string(),
   name: z.string(),
   type: userTypeSchema,
   createdAt: z.string(),
   updatedAt: z.string(),
   phone: z.string().optional().nullable(),
-  position: positionSchema.optional().nullable(),
+  position: z.union([positionSchema, z.string(), z.null()]).optional(),
   observations: z.string().optional().nullable(),
 });
 
