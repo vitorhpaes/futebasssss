@@ -21,7 +21,7 @@ export const useLoginMutation = () => {
     { credentials: Omit<LoginCredentials, 'role'> & { role: UserRole }, redirectPath?: string }
   >({
     mutationFn: async ({ credentials, redirectPath }) => {
-      const { email, password, role } = credentials;
+      const { email, password, role: _ } = credentials;
       
       // O backend espera apenas email e password no login
       const response = await api.post<LoginResponse>('/auth/login', { 

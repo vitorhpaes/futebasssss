@@ -5,6 +5,8 @@ import {
   UseGuards,
   Request,
   Get,
+  UnauthorizedException,
+  HttpCode,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -33,6 +35,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Autenticar usuário' })
   @ApiResponse({
     status: 200,
@@ -51,12 +54,13 @@ export class AuthController {
       loginDto.password,
     );
     if (!user) {
-      return { message: 'Credenciais inválidas' };
+      throw new UnauthorizedException('Credenciais inválidas');
     }
     return this.authService.login(user);
   }
 
   @Post('register')
+  @HttpCode(201)
   @ApiOperation({ summary: 'Registrar novo usuário' })
   @ApiResponse({
     status: 201,
@@ -74,6 +78,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
+  @HttpCode(200)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Obter perfil do usuário autenticado' })
   @ApiResponse({

@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  HttpCode,
 } from '@nestjs/common';
 import { GameResultsService } from './game-results.service';
 import { CreateGameResultDto } from './dto/create-game-result.dto';
@@ -32,6 +33,7 @@ export class GameResultsController {
   constructor(private readonly gameResultsService: GameResultsService) {}
 
   @Post()
+  @HttpCode(201)
   @ApiOperation({ summary: 'Criar um resultado de jogo' })
   @ApiResponse({
     status: 201,
@@ -45,6 +47,7 @@ export class GameResultsController {
   }
 
   @Get()
+  @HttpCode(200)
   @ApiOperation({ summary: 'Listar todos os resultados de jogos' })
   @ApiResponse({
     status: 200,
@@ -56,6 +59,7 @@ export class GameResultsController {
   }
 
   @Get(':id')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Obter um resultado de jogo pelo ID' })
   @ApiParam({ name: 'id', description: 'ID do resultado de jogo' })
   @ApiResponse({
@@ -69,6 +73,7 @@ export class GameResultsController {
   }
 
   @Get('session/:sessionId')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Obter um resultado de jogo pelo ID da sessão' })
   @ApiParam({ name: 'sessionId', description: 'ID da sessão' })
   @ApiResponse({
@@ -84,6 +89,7 @@ export class GameResultsController {
   }
 
   @Patch(':id')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Atualizar um resultado de jogo' })
   @ApiParam({ name: 'id', description: 'ID do resultado de jogo' })
   @ApiResponse({
@@ -100,6 +106,7 @@ export class GameResultsController {
   }
 
   @Delete(':id')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Remover um resultado de jogo' })
   @ApiParam({ name: 'id', description: 'ID do resultado de jogo' })
   @ApiResponse({

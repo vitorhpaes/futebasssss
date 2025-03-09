@@ -6,6 +6,8 @@ import {
   Delete,
   ParseIntPipe,
   Body,
+  NotFoundException,
+  HttpCode,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from '@prisma/client';
@@ -19,6 +21,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
+  @HttpCode(200)
   @ApiOperation({ summary: 'Listar todos os usuários' })
   @ApiResponse({
     status: 200,
@@ -31,6 +34,7 @@ export class UsersController {
   }
 
   @Get(':id')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Buscar um usuário pelo ID' })
   @ApiParam({ name: 'id', description: 'ID do usuário' })
   @ApiResponse({
@@ -39,11 +43,16 @@ export class UsersController {
     type: UserEntity,
   })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<User | null> {
-    return this.usersService.findOne(id);
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<User> {
+    const user = await this.usersService.findOne(id);
+    if (!user) {
+      throw new NotFoundException(`Usuário com ID ${id} não encontrado`);
+    }
+    return user;
   }
 
   @Patch(':id')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Atualizar um usuário existente' })
   @ApiParam({ name: 'id', description: 'ID do usuário' })
   @ApiResponse({
@@ -56,10 +65,20 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<User> {
-    return this.usersService.update(id, updateUserDto);
+    try {
+      return await this.usersService.update(id, updateUserDto);
+    } catch (error) {
+      // Verificar se o usuário existe antes de tentar atualizar
+      const user = await this.usersService.findOne(id);
+      if (!user) {
+        throw new NotFoundException(`Usuário com ID ${id} não encontrado`);
+      }
+      throw error;
+    }
   }
 
   @Delete(':id')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Remover um usuário' })
   @ApiParam({ name: 'id', description: 'ID do usuário' })
   @ApiResponse({
@@ -69,6 +88,11 @@ export class UsersController {
   })
   @ApiResponse({ status: 404, description: 'Usuário não encontrado' })
   async remove(@Param('id', ParseIntPipe) id: number): Promise<User> {
+    // Verificar se o usuário existe antes de tentar remover
+    const user = await this.usersService.findOne(id);
+    if (!user) {
+      throw new NotFoundException(`Usuário com ID ${id} não encontrado`);
+    }
     return this.usersService.remove(id);
   }
 }

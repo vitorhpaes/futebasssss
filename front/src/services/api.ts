@@ -4,7 +4,7 @@ import { apiErrorSchema, ApiError } from './auth/auth.interfaces';
 
 // Configuração base para o cliente Axios
 const config: AxiosRequestConfig = {
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  baseURL: '/api', // Usando o proxy do Vite em vez de acessar diretamente
   timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 30000,
   headers: {
     'Content-Type': 'application/json',
@@ -18,13 +18,13 @@ const api: AxiosInstance = axios.create(config);
 // Handler genérico de erros para padronizar o tratamento
 export const handleApiError = (error: unknown): ApiError => {
   if (axios.isAxiosError(error)) {
-    const axiosError = error as AxiosError<any>;
+    const axiosError = error as AxiosError<unknown>;
     
     // Para erros de CORS ou conexão
     if (!axiosError.response) {
       return {
         statusCode: 0,
-        message: 'Erro de conexão com o servidor. Verifique sua conexão ou se o servidor está rodando.',
+        message: 'Erro de conexão com o servidor. Verifique sua conexão.',
         error: 'Network Error'
       };
     }

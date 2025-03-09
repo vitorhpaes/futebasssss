@@ -8,6 +8,8 @@ import {
   Delete,
   ParseIntPipe,
   Query,
+  HttpCode,
+  NotFoundException,
 } from '@nestjs/common';
 import { TeamsService } from './teams.service';
 import { CreateTeamDto } from './dto/create-team.dto';
@@ -44,6 +46,7 @@ export class TeamsController {
   constructor(private readonly teamsService: TeamsService) {}
 
   @Post()
+  @HttpCode(201)
   @ApiOperation({ summary: 'Criar um novo time' })
   @ApiResponse({
     status: 201,
@@ -55,6 +58,7 @@ export class TeamsController {
   }
 
   @Get()
+  @HttpCode(200)
   @ApiOperation({ summary: 'Listar todos os times' })
   @ApiResponse({
     status: 200,
@@ -66,6 +70,7 @@ export class TeamsController {
   }
 
   @Get(':id')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Obter um time pelo ID' })
   @ApiParam({ name: 'id', description: 'ID do time' })
   @ApiResponse({
@@ -74,11 +79,16 @@ export class TeamsController {
     type: TeamEntity,
   })
   @ApiResponse({ status: 404, description: 'Time não encontrado' })
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<Team | null> {
-    return this.teamsService.findOne(id);
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<Team> {
+    const team = await this.teamsService.findOne(id);
+    if (!team) {
+      throw new NotFoundException(`Time com ID ${id} não encontrado`);
+    }
+    return team;
   }
 
   @Get(':id/players')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Listar jogadores de um time' })
   @ApiParam({ name: 'id', description: 'ID do time' })
   @ApiQuery({
@@ -97,6 +107,12 @@ export class TeamsController {
     @Param('id', ParseIntPipe) id: number,
     @Query('sessionId') sessionId?: string,
   ): Promise<any[]> {
+    // Verificar se o time existe
+    const team = await this.teamsService.findOne(id);
+    if (!team) {
+      throw new NotFoundException(`Time com ID ${id} não encontrado`);
+    }
+
     return this.teamsService.getTeamPlayers(
       id,
       sessionId ? parseInt(sessionId, 10) : undefined,
@@ -104,6 +120,7 @@ export class TeamsController {
   }
 
   @Patch(':id')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Atualizar um time existente' })
   @ApiParam({ name: 'id', description: 'ID do time' })
   @ApiResponse({
@@ -116,10 +133,17 @@ export class TeamsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateTeamDto: UpdateTeamDto,
   ): Promise<Team> {
+    // Verificar se o time existe
+    const team = await this.teamsService.findOne(id);
+    if (!team) {
+      throw new NotFoundException(`Time com ID ${id} não encontrado`);
+    }
+
     return this.teamsService.update(id, updateTeamDto);
   }
 
   @Delete(':id')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Remover um time' })
   @ApiParam({ name: 'id', description: 'ID do time' })
   @ApiResponse({
@@ -129,6 +153,12 @@ export class TeamsController {
   })
   @ApiResponse({ status: 404, description: 'Time não encontrado' })
   async remove(@Param('id', ParseIntPipe) id: number): Promise<Team> {
+    // Verificar se o time existe
+    const team = await this.teamsService.findOne(id);
+    if (!team) {
+      throw new NotFoundException(`Time com ID ${id} não encontrado`);
+    }
+
     return this.teamsService.remove(id);
   }
 }
