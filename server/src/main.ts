@@ -1,6 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { SwaggerModule, DocumentBuilder, OpenAPIObject } from '@nestjs/swagger';
+
+// Variável para armazenar o documento Swagger
+let swaggerDocument: OpenAPIObject;
+
+// Função para obter o documento Swagger (será usada pelo script no package.json)
+export function getSwaggerDocument(): OpenAPIObject {
+  return swaggerDocument;
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -29,9 +37,9 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
+  swaggerDocument = SwaggerModule.createDocument(app, config);
 
-  SwaggerModule.setup('swagger', app, document);
+  SwaggerModule.setup('swagger', app, swaggerDocument);
 
   await app.listen(process.env.PORT ?? 3000);
 }

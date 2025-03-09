@@ -1,0 +1,1906 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "App"
+        ]
+      }
+    },
+    "/users": {
+      "get": {
+        "operationId": "UsersController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de usuários retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserEntity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todos os usuários",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "operationId": "UsersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do usuário",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuário encontrado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          }
+        },
+        "summary": "Buscar um usuário pelo ID",
+        "tags": [
+          "users"
+        ]
+      },
+      "patch": {
+        "operationId": "UsersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do usuário",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usuário atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          }
+        },
+        "summary": "Atualizar um usuário existente",
+        "tags": [
+          "users"
+        ]
+      },
+      "delete": {
+        "operationId": "UsersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do usuário",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuário removido com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          }
+        },
+        "summary": "Remover um usuário",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usuário autenticado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "access_token": {
+                      "type": "string"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/UserEntity"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciais inválidas"
+          }
+        },
+        "summary": "Autenticar usuário",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "operationId": "AuthController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuário registrado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserEntity"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Registrar novo usuário",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/auth/profile": {
+      "get": {
+        "operationId": "AuthController_getProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Perfil do usuário retornado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserEntity"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obter perfil do usuário autenticado",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/sessions": {
+      "post": {
+        "operationId": "SessionsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSessionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Sessão criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionEntity"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Criar uma nova sessão de jogo",
+        "tags": [
+          "sessions"
+        ]
+      },
+      "get": {
+        "operationId": "SessionsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de sessões",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SessionEntity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todas as sessões de jogo",
+        "tags": [
+          "sessions"
+        ]
+      }
+    },
+    "/sessions/upcoming": {
+      "get": {
+        "operationId": "SessionsController_findUpcoming",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de sessões futuras",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SessionEntity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar sessões de jogo futuras",
+        "tags": [
+          "sessions"
+        ]
+      }
+    },
+    "/sessions/past": {
+      "get": {
+        "operationId": "SessionsController_findPast",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de sessões passadas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SessionEntity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar sessões de jogo passadas",
+        "tags": [
+          "sessions"
+        ]
+      }
+    },
+    "/sessions/{id}": {
+      "get": {
+        "operationId": "SessionsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da sessão",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dados da sessão",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sessão não encontrada"
+          }
+        },
+        "summary": "Obter uma sessão de jogo pelo ID",
+        "tags": [
+          "sessions"
+        ]
+      },
+      "patch": {
+        "operationId": "SessionsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da sessão",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSessionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sessão atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sessão não encontrada"
+          }
+        },
+        "summary": "Atualizar uma sessão existente",
+        "tags": [
+          "sessions"
+        ]
+      },
+      "delete": {
+        "operationId": "SessionsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da sessão",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sessão removida com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Sessão não encontrada"
+          }
+        },
+        "summary": "Remover uma sessão",
+        "tags": [
+          "sessions"
+        ]
+      }
+    },
+    "/teams": {
+      "post": {
+        "operationId": "TeamsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTeamDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Time criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamEntity"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Criar um novo time",
+        "tags": [
+          "teams"
+        ]
+      },
+      "get": {
+        "operationId": "TeamsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de times",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TeamEntity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todos os times",
+        "tags": [
+          "teams"
+        ]
+      }
+    },
+    "/teams/{id}": {
+      "get": {
+        "operationId": "TeamsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do time",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dados do time",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Time não encontrado"
+          }
+        },
+        "summary": "Obter um time pelo ID",
+        "tags": [
+          "teams"
+        ]
+      },
+      "patch": {
+        "operationId": "TeamsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do time",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTeamDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Time atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Time não encontrado"
+          }
+        },
+        "summary": "Atualizar um time existente",
+        "tags": [
+          "teams"
+        ]
+      },
+      "delete": {
+        "operationId": "TeamsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do time",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time removido com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Time não encontrado"
+          }
+        },
+        "summary": "Remover um time",
+        "tags": [
+          "teams"
+        ]
+      }
+    },
+    "/teams/{id}/players": {
+      "get": {
+        "operationId": "TeamsController_getTeamPlayers",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do time",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": false,
+            "in": "query",
+            "description": "Filtrar por sessão",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de jogadores do time",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TeamPlayerDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Time não encontrado"
+          }
+        },
+        "summary": "Listar jogadores de um time",
+        "tags": [
+          "teams"
+        ]
+      }
+    },
+    "/player-sessions": {
+      "post": {
+        "operationId": "PlayerSessionsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlayerSessionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Associação criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerSessionEntity"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Criar uma nova associação entre jogador e sessão",
+        "tags": [
+          "player-sessions"
+        ]
+      },
+      "get": {
+        "operationId": "PlayerSessionsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de associações",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlayerSessionEntity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todas as associações entre jogadores e sessões",
+        "tags": [
+          "player-sessions"
+        ]
+      }
+    },
+    "/player-sessions/session/{sessionId}": {
+      "get": {
+        "operationId": "PlayerSessionsController_findBySessionId",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "description": "ID da sessão",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de associações para a sessão",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlayerSessionEntity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar associações por sessão",
+        "tags": [
+          "player-sessions"
+        ]
+      }
+    },
+    "/player-sessions/user/{userId}": {
+      "get": {
+        "operationId": "PlayerSessionsController_findByUserId",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "ID do usuário",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de associações para o usuário",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlayerSessionEntity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar associações por usuário",
+        "tags": [
+          "player-sessions"
+        ]
+      }
+    },
+    "/player-sessions/{id}": {
+      "get": {
+        "operationId": "PlayerSessionsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da associação",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dados da associação",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerSessionEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Associação não encontrada"
+          }
+        },
+        "summary": "Obter uma associação pelo ID",
+        "tags": [
+          "player-sessions"
+        ]
+      },
+      "patch": {
+        "operationId": "PlayerSessionsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da associação",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePlayerSessionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Associação atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerSessionEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Associação não encontrada"
+          }
+        },
+        "summary": "Atualizar uma associação existente",
+        "tags": [
+          "player-sessions"
+        ]
+      },
+      "delete": {
+        "operationId": "PlayerSessionsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da associação",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Associação removida com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerSessionEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Associação não encontrada"
+          }
+        },
+        "summary": "Remover uma associação",
+        "tags": [
+          "player-sessions"
+        ]
+      }
+    },
+    "/player-sessions/confirm": {
+      "post": {
+        "operationId": "PlayerSessionsController_confirmPresence",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Presença confirmada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerSessionEntity"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Confirmar presença de um jogador em uma sessão",
+        "tags": [
+          "player-sessions"
+        ]
+      }
+    },
+    "/player-sessions/{id}/stats": {
+      "patch": {
+        "operationId": "PlayerSessionsController_updateStats",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID da associação",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "goals",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "assists",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estatísticas atualizadas com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerSessionEntity"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Atualizar estatísticas de um jogador em uma sessão",
+        "tags": [
+          "player-sessions"
+        ]
+      }
+    },
+    "/game-results": {
+      "post": {
+        "operationId": "GameResultsController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGameResultDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Resultado de jogo criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameResultEntity"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Criar um resultado de jogo",
+        "tags": [
+          "game-results"
+        ]
+      },
+      "get": {
+        "operationId": "GameResultsController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de resultados de jogos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GameResultEntity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todos os resultados de jogos",
+        "tags": [
+          "game-results"
+        ]
+      }
+    },
+    "/game-results/{id}": {
+      "get": {
+        "operationId": "GameResultsController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do resultado de jogo",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado de jogo encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameResultEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resultado de jogo não encontrado"
+          }
+        },
+        "summary": "Obter um resultado de jogo pelo ID",
+        "tags": [
+          "game-results"
+        ]
+      },
+      "patch": {
+        "operationId": "GameResultsController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do resultado de jogo",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGameResultDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Resultado de jogo atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameResultEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resultado de jogo não encontrado"
+          }
+        },
+        "summary": "Atualizar um resultado de jogo",
+        "tags": [
+          "game-results"
+        ]
+      },
+      "delete": {
+        "operationId": "GameResultsController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do resultado de jogo",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado de jogo removido com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameResultEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resultado de jogo não encontrado"
+          }
+        },
+        "summary": "Remover um resultado de jogo",
+        "tags": [
+          "game-results"
+        ]
+      }
+    },
+    "/game-results/session/{sessionId}": {
+      "get": {
+        "operationId": "GameResultsController_findBySessionId",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "description": "ID da sessão",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultado de jogo encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GameResultEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resultado de jogo não encontrado"
+          }
+        },
+        "summary": "Obter um resultado de jogo pelo ID da sessão",
+        "tags": [
+          "game-results"
+        ]
+      }
+    },
+    "/player-favorites": {
+      "post": {
+        "operationId": "PlayerFavoritesController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlayerFavoriteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Jogador favoritado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerFavoriteEntity"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Favoritar um jogador",
+        "tags": [
+          "player-favorites"
+        ]
+      },
+      "get": {
+        "operationId": "PlayerFavoritesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Lista de favoritos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlayerFavoriteEntity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todos os favoritos",
+        "tags": [
+          "player-favorites"
+        ]
+      }
+    },
+    "/player-favorites/session/{sessionId}": {
+      "get": {
+        "operationId": "PlayerFavoritesController_findBySessionId",
+        "parameters": [
+          {
+            "name": "sessionId",
+            "required": true,
+            "in": "path",
+            "description": "ID da sessão",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de favoritos da sessão",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlayerFavoriteEntity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar favoritos por sessão",
+        "tags": [
+          "player-favorites"
+        ]
+      }
+    },
+    "/player-favorites/voter/{voterId}": {
+      "get": {
+        "operationId": "PlayerFavoritesController_findByVoterId",
+        "parameters": [
+          {
+            "name": "voterId",
+            "required": true,
+            "in": "path",
+            "description": "ID do votante",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de favoritos do votante",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlayerFavoriteEntity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar favoritos por votante",
+        "tags": [
+          "player-favorites"
+        ]
+      }
+    },
+    "/player-favorites/favorite/{favoriteId}": {
+      "get": {
+        "operationId": "PlayerFavoritesController_findByFavoriteId",
+        "parameters": [
+          {
+            "name": "favoriteId",
+            "required": true,
+            "in": "path",
+            "description": "ID do jogador favoritado",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de onde o jogador foi favoritado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlayerFavoriteEntity"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar onde o jogador foi favoritado",
+        "tags": [
+          "player-favorites"
+        ]
+      }
+    },
+    "/player-favorites/most-favorited": {
+      "get": {
+        "operationId": "PlayerFavoritesController_getMostFavoritedPlayers",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Limite de resultados",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de jogadores mais favoritados",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MostFavoritedPlayerDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar jogadores mais favoritados",
+        "tags": [
+          "player-favorites"
+        ]
+      }
+    },
+    "/player-favorites/{id}": {
+      "delete": {
+        "operationId": "PlayerFavoritesController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do favorito",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Favorito removido com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerFavoriteEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Favorito não encontrado"
+          }
+        },
+        "summary": "Remover um favorito",
+        "tags": [
+          "player-favorites"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Futebasssss API",
+    "description": "API para o sistema Futebasssss",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "users",
+      "description": ""
+    }
+  ],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "UserEntity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "ID do usuário",
+            "example": 1
+          },
+          "email": {
+            "type": "string",
+            "description": "Email do usuário",
+            "example": "usuario@exemplo.com"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nome do usuário",
+            "example": "Nome do Usuário"
+          },
+          "type": {
+            "type": "string",
+            "description": "Tipo de usuário",
+            "example": "PLAYER",
+            "enum": [
+              "PLAYER",
+              "ADMIN"
+            ]
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de criação do usuário",
+            "example": "2023-01-01T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de atualização do usuário",
+            "example": "2023-01-01T00:00:00.000Z"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Telefone do usuário",
+            "example": "+5511999999999"
+          },
+          "position": {
+            "type": "string",
+            "description": "Posição do jogador",
+            "example": "DEFENDER",
+            "enum": [
+              "DEFENDER",
+              "MIDFIELDER",
+              "FORWARD"
+            ],
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "name",
+          "type",
+          "createdAt",
+          "updatedAt",
+          "phone",
+          "position"
+        ]
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email do usuário",
+            "example": "usuario@exemplo.com"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nome do usuário",
+            "example": "Nome do Usuário"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Telefone do usuário",
+            "example": "+5511999999999"
+          },
+          "position": {
+            "type": "string",
+            "description": "Posição do jogador",
+            "example": "DEFENDER",
+            "enum": [
+              "DEFENDER",
+              "MIDFIELDER",
+              "FORWARD"
+            ]
+          }
+        }
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email do usuário",
+            "example": "usuario@exemplo.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "Senha do usuário",
+            "example": "senha123"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "RegisterDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email do usuário",
+            "example": "usuario@exemplo.com"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nome do usuário",
+            "example": "Nome do Usuário"
+          },
+          "password": {
+            "type": "string",
+            "description": "Senha do usuário",
+            "example": "senha123"
+          },
+          "type": {
+            "type": "string",
+            "description": "Tipo de usuário",
+            "example": "PLAYER",
+            "enum": [
+              "PLAYER",
+              "ADMIN"
+            ],
+            "default": "PLAYER"
+          }
+        },
+        "required": [
+          "email",
+          "name",
+          "password",
+          "type"
+        ]
+      },
+      "CreateSessionDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "Data e hora da sessão de jogo",
+            "example": "2023-05-04T19:00:00Z"
+          },
+          "location": {
+            "type": "string",
+            "description": "Local da sessão de jogo",
+            "example": "Campo do Parque"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status da sessão",
+            "example": "SCHEDULED",
+            "enum": [
+              "SCHEDULED",
+              "COMPLETED",
+              "CANCELED"
+            ],
+            "default": "SCHEDULED"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Observações sobre a sessão",
+            "example": "Trazer chuteiras para grama natural"
+          }
+        },
+        "required": [
+          "date",
+          "location",
+          "status"
+        ]
+      },
+      "SessionEntity": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateSessionDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "Data e hora da sessão de jogo",
+            "example": "2023-05-04T19:00:00Z"
+          },
+          "location": {
+            "type": "string",
+            "description": "Local da sessão de jogo",
+            "example": "Campo do Parque"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status da sessão",
+            "example": "COMPLETED",
+            "enum": [
+              "SCHEDULED",
+              "COMPLETED",
+              "CANCELED"
+            ]
+          },
+          "notes": {
+            "type": "string",
+            "description": "Observações sobre a sessão",
+            "example": "Trazer chuteiras para grama natural"
+          }
+        }
+      },
+      "CreateTeamDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nome do time",
+            "example": "Time A"
+          },
+          "color": {
+            "type": "string",
+            "description": "Cor do time/uniforme",
+            "example": "Azul"
+          }
+        },
+        "required": [
+          "name",
+          "color"
+        ]
+      },
+      "TeamEntity": {
+        "type": "object",
+        "properties": {}
+      },
+      "TeamPlayerDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateTeamDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nome do time",
+            "example": "Time A"
+          },
+          "color": {
+            "type": "string",
+            "description": "Cor do time/uniforme",
+            "example": "Azul"
+          }
+        }
+      },
+      "CreatePlayerSessionDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "number",
+            "description": "ID do usuário/jogador",
+            "example": 1
+          },
+          "sessionId": {
+            "type": "number",
+            "description": "ID da sessão",
+            "example": 1
+          },
+          "teamId": {
+            "type": "number",
+            "description": "ID do time",
+            "example": 1
+          },
+          "confirmed": {
+            "type": "boolean",
+            "description": "Confirmação de presença",
+            "example": true,
+            "default": false
+          },
+          "goals": {
+            "type": "number",
+            "description": "Número de gols marcados",
+            "example": 2,
+            "default": 0
+          },
+          "assists": {
+            "type": "number",
+            "description": "Número de assistências",
+            "example": 1,
+            "default": 0
+          }
+        },
+        "required": [
+          "userId",
+          "sessionId",
+          "teamId",
+          "confirmed",
+          "goals",
+          "assists"
+        ]
+      },
+      "PlayerSessionEntity": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdatePlayerSessionDto": {
+        "type": "object",
+        "properties": {
+          "teamId": {
+            "type": "number",
+            "description": "ID do time",
+            "example": 1
+          },
+          "confirmed": {
+            "type": "boolean",
+            "description": "Confirmação de presença",
+            "example": true
+          },
+          "goals": {
+            "type": "number",
+            "description": "Número de gols marcados",
+            "example": 2
+          },
+          "assists": {
+            "type": "number",
+            "description": "Número de assistências",
+            "example": 1
+          }
+        }
+      },
+      "CreateGameResultDto": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "number",
+            "description": "ID da sessão de jogo",
+            "example": 1
+          },
+          "teamAId": {
+            "type": "number",
+            "description": "ID do time A",
+            "example": 1
+          },
+          "teamBId": {
+            "type": "number",
+            "description": "ID do time B",
+            "example": 2
+          },
+          "scoreA": {
+            "type": "number",
+            "description": "Pontuação do time A",
+            "example": 3
+          },
+          "scoreB": {
+            "type": "number",
+            "description": "Pontuação do time B",
+            "example": 2
+          },
+          "winnerId": {
+            "type": "number",
+            "description": "ID do time vencedor (calculado automaticamente se não fornecido)",
+            "example": 1
+          }
+        },
+        "required": [
+          "sessionId",
+          "teamAId",
+          "teamBId",
+          "scoreA",
+          "scoreB"
+        ]
+      },
+      "GameResultEntity": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateGameResultDto": {
+        "type": "object",
+        "properties": {
+          "scoreA": {
+            "type": "number",
+            "description": "Pontuação do time A",
+            "example": 3
+          },
+          "scoreB": {
+            "type": "number",
+            "description": "Pontuação do time B",
+            "example": 2
+          },
+          "winnerId": {
+            "type": "number",
+            "description": "ID do time vencedor (calculado automaticamente se não fornecido)",
+            "example": 1
+          }
+        }
+      },
+      "CreatePlayerFavoriteDto": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "number",
+            "description": "ID da sessão de jogo",
+            "example": 1
+          },
+          "voterId": {
+            "type": "number",
+            "description": "ID do jogador que está votando",
+            "example": 2
+          },
+          "favoriteId": {
+            "type": "number",
+            "description": "ID do jogador favorito",
+            "example": 3
+          },
+          "teamId": {
+            "type": "number",
+            "description": "ID do time do jogador favorito",
+            "example": 1
+          }
+        },
+        "required": [
+          "sessionId",
+          "voterId",
+          "favoriteId"
+        ]
+      },
+      "PlayerFavoriteEntity": {
+        "type": "object",
+        "properties": {}
+      },
+      "MostFavoritedPlayerDto": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}
