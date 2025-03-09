@@ -9,6 +9,7 @@ const config: AxiosRequestConfig = {
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Importante para CORS com credenciais
 };
 
 // Criando a instância do Axios
@@ -18,6 +19,15 @@ const api: AxiosInstance = axios.create(config);
 export const handleApiError = (error: unknown): ApiError => {
   if (axios.isAxiosError(error)) {
     const axiosError = error as AxiosError<any>;
+    
+    // Para erros de CORS ou conexão
+    if (!axiosError.response) {
+      return {
+        statusCode: 0,
+        message: 'Erro de conexão com o servidor. Verifique sua conexão ou se o servidor está rodando.',
+        error: 'Network Error'
+      };
+    }
     
     // Tenta validar a resposta de erro usando o schema
     try {

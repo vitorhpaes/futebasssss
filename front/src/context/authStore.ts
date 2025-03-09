@@ -84,7 +84,7 @@ export const useAuthStore = create<AuthState>()(
           // Trata erros da API
           const apiError = error as ApiError;
           set({ 
-            error: apiError.message || 'Erro ao fazer login. Tente novamente.', 
+            error: apiError.message as string || 'Erro ao fazer login. Tente novamente.', 
             isLoading: false 
           });
           throw apiError;
@@ -106,7 +106,7 @@ export const useAuthStore = create<AuthState>()(
       }
     }),
     {
-      name: 'auth-storage', // nome para o localStorage
+      name: 'futebasssss-auth-storage', // nome para o localStorage
       partialize: (state) => ({ 
         user: state.user, 
         token: state.token, 

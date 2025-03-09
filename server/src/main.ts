@@ -5,6 +5,16 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Configuração de CORS
+  app.enableCors({
+    origin: ['http://localhost:5000', 'http://localhost:5173'], // Origens permitidas
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    credentials: true,
+  });
+
+  // Configurar prefixo global para todas as rotas
+  app.setGlobalPrefix('api');
+
   // Configuração do Swagger
   const config = new DocumentBuilder()
     .setTitle('Futebasssss API')
