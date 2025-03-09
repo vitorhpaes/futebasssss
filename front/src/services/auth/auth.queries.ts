@@ -18,23 +18,30 @@ export const useLoginMutation = () => {
   return useMutation<
     LoginResponse,
     ApiError,
-    { credentials: LoginCredentials, redirectPath?: string }
+    { credentials: Omit<LoginCredentials, 'role'> & { role: UserRole }, redirectPath?: string }
   >({
     mutationFn: async ({ credentials, redirectPath }) => {
       const { email, password, role } = credentials;
       
-      // Faz a requisição à API
+      // O backend espera apenas email e password no login
       const response = await api.post<LoginResponse>('/auth/login', { 
         email, 
-        password,
-        role 
+        password
       });
       
       // Valida a resposta usando o schema
       const validatedData = loginResponseSchema.parse(response.data);
       
+      // Convertendo tipo de usuário do backend para o formato do frontend
+      const userRole: UserRole = validatedData.user.type === 'ADMIN' ? 'admin' : 'player';
+      
       // Atualiza o estado global com os dados do usuário e token
-      await storeLogin(email, password, role as UserRole, redirectPath);
+      await storeLogin(
+        email, 
+        password, 
+        userRole, 
+        redirectPath
+      );
       
       return validatedData;
     }
@@ -43,19 +50,34 @@ export const useLoginMutation = () => {
 
 /**
  * Mutation para fazer logout de usuário
+ * Nota: O backend parece não ter um endpoint específico para logout.
+ * Neste caso, apenas limpamos o estado local.
  */
 export const useLogoutMutation = () => {
   const { logout } = useAuthStore();
 
   return useMutation<void, ApiError>({
     mutationFn: async () => {
-      try {
-        // Tenta fazer logout no servidor (invalidar token)
-        await api.post('/auth/logout');
-      } finally {
-        // Independente da resposta, limpa o estado local
-        logout();
-      }
+      // O backend não tem um endpoint de logout explícito, então apenas limpamos o estado local
+      logout();
+    }
+  });
+};
+
+/**
+ * Mutation para registrar um novo usuário
+ */
+export const useRegisterMutation = () => {
+  return useMutation<any, ApiError, { email: string; password: string; name?: string; type?: 'PLAYER' | 'ADMIN' }>({
+    mutationFn: async ({ email, password, name, type }) => {
+      const response = await api.post('/auth/register', {
+        email,
+        password,
+        name,
+        type: type || 'PLAYER'
+      });
+      
+      return response.data;
     }
   });
 };
@@ -75,7 +97,7 @@ export const useLogin = () => {
   ) => {
     try {
       // Cria o objeto de credenciais
-      const credentials: LoginCredentials = {
+      const credentials = {
         email,
         password,
         role

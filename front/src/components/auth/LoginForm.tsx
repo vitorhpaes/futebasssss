@@ -3,8 +3,13 @@ import * as Form from '@radix-ui/react-form';
 import styled from 'styled-components';
 import { UserRole } from '../../context/authStore';
 import { useLogin } from '../../services/auth/auth.queries';
-import { loginCredentialsSchema } from '../../services/auth/auth.interfaces';
 import { z } from 'zod';
+
+// Schema customizado apenas para o formulário, sem o campo role que não é enviado ao backend
+const formLoginSchema = z.object({
+  email: z.string().email('E-mail inválido'),
+  password: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres'),
+});
 
 const StyledForm = styled(Form.Root)`
   width: 100%;
@@ -87,15 +92,15 @@ export default function LoginForm({ role, redirectPath }: LoginFormProps) {
 
   const validateForm = (): boolean => {
     try {
-      loginCredentialsSchema.parse({ email, password, role });
+      formLoginSchema.parse({ email, password });
       setValidationErrors({});
       return true;
     } catch (error) {
       if (error instanceof z.ZodError) {
         const errors: Record<string, string> = {};
         error.errors.forEach((err) => {
-          if (err.path) {
-            errors[err.path[0]] = err.message;
+          if (err.path.length > 0) {
+            errors[err.path[0] as string] = err.message;
           }
         });
         setValidationErrors(errors);

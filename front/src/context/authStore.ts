@@ -3,11 +3,25 @@ import { persist } from 'zustand/middleware';
 import api from '../services/api';
 import { ApiError } from '../services/auth/auth.interfaces';
 
+// Tipo de usuário no frontend (camelCase para padronização)
 export type UserRole = 'admin' | 'player';
+
+// Tipo de usuário no backend (enum em UPPERCASE)
+export type BackendUserType = 'ADMIN' | 'PLAYER';
+
+// Mapeia tipo do backend para o frontend
+export const mapBackendTypeToUserRole = (type: BackendUserType): UserRole => {
+  return type === 'ADMIN' ? 'admin' : 'player';
+};
+
+// Mapeia tipo do frontend para o backend
+export const mapUserRoleToBackendType = (role: UserRole): BackendUserType => {
+  return role === 'admin' ? 'ADMIN' : 'PLAYER';
+};
 
 export interface User {
   id: number;
-  name: string;
+  name: string | null;
   email: string;
   role: UserRole;
 }
@@ -38,23 +52,33 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ isLoading: true, error: null });
           
-          // Faz a requisição para a API
+          // Faz a requisição para a API (sem enviar role/type)
           const response = await api.post('/auth/login', {
             email,
-            password,
-            role
+            password
           });
           
           // Extrai os dados da resposta
-          const { user, token } = response.data;
+          const { user: backendUser, access_token } = response.data;
+          
+          // Converte o tipo do usuário para o formato do frontend
+          const userRole = mapBackendTypeToUserRole(backendUser.type);
+          
+          // Monta o objeto de usuário para o frontend
+          const user: User = {
+            id: backendUser.id,
+            name: backendUser.name,
+            email: backendUser.email,
+            role: userRole,
+          };
           
           // Atualiza o estado
           set({ 
             user,
-            token,
+            token: access_token,
             isAuthenticated: true, 
             isLoading: false,
-            redirectPath: redirectPath || (role === 'admin' ? '/admin/dashboard' : '/player/dashboard')
+            redirectPath: redirectPath || (userRole === 'admin' ? '/admin/dashboard' : '/player/dashboard')
           });
         } catch (error) {
           // Trata erros da API
@@ -68,12 +92,7 @@ export const useAuthStore = create<AuthState>()(
       },
       
       logout: () => {
-        // Faz a chamada para logout na API
-        api.post('/auth/logout').catch(() => {
-          // Ignora erros ao fazer logout na API
-        });
-        
-        // Limpa o estado local independentemente da resposta da API
+        // Limpa o estado local
         set({ 
           user: null, 
           token: null, 
