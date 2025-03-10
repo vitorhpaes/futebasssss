@@ -5,6 +5,8 @@ import AdminDashboardPage from '../pages/admin/DashboardPage';
 import PlayerListPage from '../pages/admin/PlayerListPage';
 import PlayerCreatePage from '../pages/admin/PlayerCreatePage';
 import PlayerDashboardPage from '../pages/player/DashboardPage';
+import MatchListPage from '../pages/admin/MatchListPage';
+import MatchCreatePage from '../pages/admin/MatchCreatePage';
 import ProtectedRoute from './ProtectedRoute';
 import { useAuthStore } from '../context/authStore';
 import AuthenticatedLayout from '../components/layout/AuthenticatedLayout';
@@ -37,12 +39,12 @@ const AppRoutes = () => {
         >
           <Route element={<AuthenticatedLayout />}>
             <Route path="dashboard" element={<AdminDashboardPage />} />
-            <Route path="teams" element={<div>Página de Times (em construção)</div>} />
             {/* Rotas de gerenciamento de jogadores */}
             <Route path="players" element={<PlayerListPage />} />
             <Route path="players/create" element={<PlayerCreatePage />} />
             <Route path="players/edit/:id" element={<PlayerEditPage />} />
-            <Route path="matches" element={<div>Página de Partidas (em construção)</div>} />
+            <Route path="matches" element={<MatchListPage />} />
+            <Route path="matches/create" element={<MatchCreatePage />} />
           </Route>
         </Route>
 

@@ -90,7 +90,6 @@ const MainNavigation = () => {
   const navLinks = isAdmin
     ? [
         { to: '/admin/dashboard', label: 'Dashboard' },
-        { to: '/admin/teams', label: 'Times' },
         { to: '/admin/players', label: 'Jogadores' },
         { to: '/admin/matches', label: 'Partidas' },
       ]
