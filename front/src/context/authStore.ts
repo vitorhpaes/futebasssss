@@ -2,21 +2,22 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import api from '../services/api';
 import { ApiError } from '../services/auth/auth.interfaces';
+import { UserType } from '@futebass-ia/constants';
 
 // Tipo de usuário no frontend (camelCase para padronização)
 export type UserRole = 'admin' | 'player';
 
-// Tipo de usuário no backend (enum em UPPERCASE)
-export type BackendUserType = 'ADMIN' | 'PLAYER';
+// Usando o enumerador do pacote de constantes para o tipo de usuário no backend
+export type BackendUserType = UserType;
 
 // Mapeia tipo do backend para o frontend
 export const mapBackendTypeToUserRole = (type: BackendUserType): UserRole => {
-  return type === 'ADMIN' ? 'admin' : 'player';
+  return type === UserType.ADMIN ? 'admin' : 'player';
 };
 
 // Mapeia tipo do frontend para o backend
 export const mapUserRoleToBackendType = (role: UserRole): BackendUserType => {
-  return role === 'admin' ? 'ADMIN' : 'PLAYER';
+  return role === 'admin' ? UserType.ADMIN : UserType.PLAYER;
 };
 
 export interface User {

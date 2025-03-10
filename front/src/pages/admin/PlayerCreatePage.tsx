@@ -4,49 +4,48 @@ import { useFormik } from 'formik';
 import { toFormikValidationSchema } from 'zod-formik-adapter';
 import { registerUserSchema, RegisterUserDto } from '../../services/users/users.interfaces';
 import * as S from './PlayerCreatePage.styles';
-import Select, { SelectOption } from '../../components/form/Select';
+import Select from '../../components/form/Select';
 import { prepareFormSubmission } from '../../utils/payload-helper';
 import { useCreateUserMutation } from '../../services/users/users.queries';
 import { z } from 'zod';
+import { 
+  UserType,
+  USER_TYPE_OPTIONS,
+  POSITION_OPTIONS,
+  Option
+} from '@futebass-ia/constants';
 
 const PlayerCreatePage: React.FC = () => {
   const navigate = useNavigate();
   const createUserMutation = useCreateUserMutation();
 
-  // Opções para os selects
-  const typeOptions: SelectOption[] = [
-    { value: 'PLAYER', label: 'Jogador' },
-    { value: 'ADMIN', label: 'Administrador' }
-  ];
-
-  const positionOptions: SelectOption[] = [
-    { value: '', label: 'Selecione uma posição' },
-    { value: 'GOALKEEPER', label: 'Goleiro' },
-    { value: 'DEFENDER', label: 'Zagueiro' },
-    { value: 'MIDFIELDER', label: 'Meio-campo' },
-    { value: 'FORWARD', label: 'Atacante' }
-  ];
+  // Opções para os selects usando as constantes compartilhadas
+  const typeOptions = USER_TYPE_OPTIONS;
+  
+  // Adicionando opção vazia para posição
+  const emptyPositionOption: Option<string> = { value: '', label: 'Selecione uma posição' };
+  const positionOptions = [emptyPositionOption, ...POSITION_OPTIONS];
 
   // Definir interface customizada para evitar problemas de tipo
   interface FormValues {
     email: string;
     name: string;
     password: string;
-    type: 'PLAYER' | 'ADMIN';
+    type: string; // Usando string para compatibilidade com o formulário
     phone: string;
-    position: string | null;
+    position: string | null; // Permitir null e string para compatibilidade
     observations: string | null;
   }
-
+  
   // Usar o schema do serviço para validação
   const formik = useFormik<FormValues>({
     initialValues: {
       email: '',
       name: '',
       password: '',
-      type: 'PLAYER',
+      type: UserType.PLAYER, // Usando o enum diretamente
       phone: '',
-      position: null,
+      position: '', // Inicializando como string vazia
       observations: null
     },
     validationSchema: toFormikValidationSchema(registerUserSchema as z.ZodType<FormValues>),
@@ -64,26 +63,31 @@ const PlayerCreatePage: React.FC = () => {
         navigate('/admin/players');
       } catch (error) {
         console.error('Erro ao cadastrar jogador:', error);
-        alert('Ocorreu um erro ao cadastrar o jogador. Por favor, tente novamente.');
+        alert('Erro ao cadastrar jogador. Verifique os dados e tente novamente.');
       }
-    }
+    },
   });
 
   const handleCancel = () => {
     navigate('/admin/players');
   };
 
+  // Exibir tela de carregamento
+  if (createUserMutation.isPending) {
+    return <div>Carregando...</div>;
+  }
+
   return (
     <S.Container>
       <S.Header>
-        <S.Title>Cadastrar Novo Jogador</S.Title>
+        <S.Title>Cadastrar Jogador</S.Title>
       </S.Header>
-
+      
       <S.FormContainer>
         <S.StyledForm onSubmit={formik.handleSubmit}>
           <S.FormRow>
             <S.FormGroup name="name" serverInvalid={!!formik.errors.name && formik.touched.name}>
-              <S.FormLabel>Nome *</S.FormLabel>
+              <S.FormLabel>Nome</S.FormLabel>
               <S.FormInput
                 id="name"
                 name="name"
@@ -96,9 +100,9 @@ const PlayerCreatePage: React.FC = () => {
                 <S.FormMessage>{formik.errors.name}</S.FormMessage>
               )}
             </S.FormGroup>
-
+          
             <S.FormGroup name="email" serverInvalid={!!formik.errors.email && formik.touched.email}>
-              <S.FormLabel>Email *</S.FormLabel>
+              <S.FormLabel>Email</S.FormLabel>
               <S.FormInput
                 id="email"
                 name="email"
@@ -112,10 +116,10 @@ const PlayerCreatePage: React.FC = () => {
               )}
             </S.FormGroup>
           </S.FormRow>
-
+          
           <S.FormRow>
             <S.FormGroup name="password" serverInvalid={!!formik.errors.password && formik.touched.password}>
-              <S.FormLabel>Senha (opcional)</S.FormLabel>
+              <S.FormLabel>Senha</S.FormLabel>
               <S.FormInput
                 id="password"
                 name="password"
@@ -124,60 +128,51 @@ const PlayerCreatePage: React.FC = () => {
                 onBlur={formik.handleBlur}
                 value={formik.values.password}
               />
-              <S.FormHint>
-                Deixe em branco para gerar uma senha automática.
-              </S.FormHint>
               {formik.touched.password && formik.errors.password && (
                 <S.FormMessage>{formik.errors.password}</S.FormMessage>
               )}
             </S.FormGroup>
-
+          
             <S.FormGroup name="phone" serverInvalid={!!formik.errors.phone && formik.touched.phone}>
               <S.FormLabel>Telefone</S.FormLabel>
               <S.FormInput
                 id="phone"
                 name="phone"
-                type="text"
+                type="tel"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                value={formik.values.phone || ''}
+                value={formik.values.phone}
               />
               {formik.touched.phone && formik.errors.phone && (
                 <S.FormMessage>{formik.errors.phone}</S.FormMessage>
               )}
             </S.FormGroup>
           </S.FormRow>
-
+          
           <S.FormRow>
             <S.FormGroup name="type" serverInvalid={!!formik.errors.type && formik.touched.type}>
-              <S.FormLabel>Tipo *</S.FormLabel>
+              <S.FormLabel>Tipo</S.FormLabel>
               <div style={{ marginTop: 2 }}>
                 <Select
                   name="type"
                   options={typeOptions}
+                  onValueChange={(value) => formik.setFieldValue('type', value)}
                   value={formik.values.type}
-                  onValueChange={(value) => {
-                    formik.setFieldValue('type', value);
-                  }}
-                  required
                 />
               </div>
               {formik.touched.type && formik.errors.type && (
                 <S.FormMessage>{formik.errors.type}</S.FormMessage>
               )}
             </S.FormGroup>
-
+          
             <S.FormGroup name="position" serverInvalid={!!formik.errors.position && formik.touched.position}>
               <S.FormLabel>Posição</S.FormLabel>
               <div style={{ marginTop: 2 }}>
                 <Select
                   name="position"
                   options={positionOptions}
+                  onValueChange={(value) => formik.setFieldValue('position', value)}
                   value={formik.values.position || ''}
-                  onValueChange={(value) => {
-                    formik.setFieldValue('position', value || null);
-                  }}
-                  placeholder="Selecione uma posição"
                 />
               </div>
               {formik.touched.position && formik.errors.position && (
@@ -185,7 +180,7 @@ const PlayerCreatePage: React.FC = () => {
               )}
             </S.FormGroup>
           </S.FormRow>
-
+          
           <S.FormGroup name="observations" serverInvalid={!!formik.errors.observations && formik.touched.observations}>
             <S.FormLabel>Observações</S.FormLabel>
             <S.FormTextArea
@@ -193,19 +188,19 @@ const PlayerCreatePage: React.FC = () => {
               name="observations"
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              value={formik.values.observations === null ? '' : formik.values.observations}
+              value={formik.values.observations || ''}
             />
             {formik.touched.observations && formik.errors.observations && (
               <S.FormMessage>{formik.errors.observations}</S.FormMessage>
             )}
           </S.FormGroup>
-
+          
           <S.ButtonGroup>
             <S.CancelButton type="button" onClick={handleCancel}>
               Cancelar
             </S.CancelButton>
             <S.SubmitButton type="submit" disabled={formik.isSubmitting || createUserMutation.isPending}>
-              {formik.isSubmitting || createUserMutation.isPending ? 'Cadastrando...' : 'Cadastrar'}
+              {createUserMutation.isPending ? 'Cadastrando...' : 'Cadastrar'}
             </S.SubmitButton>
           </S.ButtonGroup>
         </S.StyledForm>

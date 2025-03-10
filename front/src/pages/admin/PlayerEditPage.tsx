@@ -4,10 +4,16 @@ import { useFormik } from 'formik';
 import { toFormikValidationSchema } from 'zod-formik-adapter';
 import { updateUserSchema, UpdateUserDto } from '../../services/users/users.interfaces';
 import * as S from './PlayerCreatePage.styles';
-import Select, { SelectOption } from '../../components/form/Select';
+import Select from '../../components/form/Select';
 import { prepareFormSubmission } from '../../utils/payload-helper';
 import { useUpdateUserMutation, useUser } from '../../services/users/users.queries';
 import { z } from 'zod';
+import { 
+  UserType,
+  USER_TYPE_OPTIONS,
+  POSITION_OPTIONS,
+  Option
+} from '@futebass-ia/constants';
 
 const PlayerEditPage: React.FC = () => {
   const navigate = useNavigate();
@@ -18,83 +24,62 @@ const PlayerEditPage: React.FC = () => {
   const { data: user, isLoading: isLoadingUser, error: userError } = useUser(userId);
   const updateUserMutation = useUpdateUserMutation();
 
-  // Opções para os selects
-  const typeOptions: SelectOption[] = [
-    { value: 'PLAYER', label: 'Jogador' },
-    { value: 'ADMIN', label: 'Administrador' }
-  ];
-
-  const positionOptions: SelectOption[] = [
-    { value: '', label: 'Selecione uma posição' },
-    { value: 'GOALKEEPER', label: 'Goleiro' },
-    { value: 'DEFENDER', label: 'Zagueiro' },
-    { value: 'MIDFIELDER', label: 'Meio-campo' },
-    { value: 'FORWARD', label: 'Atacante' }
-  ];
+  // Opções para os selects usando as constantes compartilhadas
+  const typeOptions = USER_TYPE_OPTIONS;
+  
+  // Adicionando opção vazia para posição
+  const emptyPositionOption: Option<string> = { value: '', label: 'Selecione uma posição' };
+  const positionOptions = [emptyPositionOption, ...POSITION_OPTIONS];
 
   // Definir interface customizada para evitar problemas de tipo
   interface FormValues {
     email?: string;
     name?: string;
-    type: 'PLAYER' | 'ADMIN'; // Mantido para o formulário, mas não faz parte do schema de atualização
+    type: string; // Usando string para compatibilidade com o formulário
     phone?: string | null;
     position?: string | null;
     observations?: string | null;
   }
-
-  // Usar o schema do serviço para validação
+  
   const formik = useFormik<FormValues>({
     initialValues: {
-      email: '',
-      name: '',
-      type: 'PLAYER',
-      phone: null,
-      position: null,
-      observations: null
+      email: user?.email || '',
+      name: user?.name || '',
+      type: user?.type || UserType.PLAYER,
+      phone: user?.phone || '',
+      position: user?.position || '', // Garantindo que não seja null
+      observations: user?.observations || '',
     },
-    validationSchema: toFormikValidationSchema(updateUserSchema as unknown as z.ZodType<Omit<FormValues, 'type'>>),
+    enableReinitialize: true, // Importante para atualizar o formulário quando os dados do usuário forem carregados
+    validationSchema: toFormikValidationSchema(updateUserSchema as unknown as z.ZodType<FormValues>), // Convertendo para unknown primeiro para evitar erro de tipo
     onSubmit: async (values) => {
       try {
-        // Criar um objeto com apenas os campos permitidos no schema de atualização
-        const updateData = {
-          email: values.email,
-          name: values.name,
-          phone: values.phone,
-          position: values.position,
-          observations: values.observations
-        };
-        
-        // Usar a utility para limpar o payload
-        const cleanPayload = prepareFormSubmission<UpdateUserDto>(updateData as UpdateUserDto, {
+        // Limpar o payload antes de enviar
+        const cleanPayload = prepareFormSubmission<UpdateUserDto>(values as UpdateUserDto, {
           emptyStringsToNull: true,
-          removeNull: false, // Manter campos nulos para que o backend possa lidar com eles apropriadamente
+          removeNull: false,
+          alwaysInclude: ['type'] // Garantir que o tipo seja sempre incluído
         });
         
-        await updateUserMutation.mutateAsync({ 
-          id: userId, 
-          data: cleanPayload as UpdateUserDto 
+        await updateUserMutation.mutateAsync({
+          id: userId,
+          data: cleanPayload as UpdateUserDto
         });
+        
         alert('Jogador atualizado com sucesso!');
         navigate('/admin/players');
       } catch (error) {
         console.error('Erro ao atualizar jogador:', error);
-        alert('Ocorreu um erro ao atualizar o jogador. Por favor, tente novamente.');
+        alert('Erro ao atualizar jogador. Verifique os dados e tente novamente.');
       }
     },
-    enableReinitialize: true
   });
 
-  // Atualizar o formulário quando os dados do usuário forem carregados
+  // Log para debug
   useEffect(() => {
     if (user) {
-      formik.setValues({
-        email: user.email || '',
-        name: user.name || '',
-        type: user.type || 'PLAYER',
-        phone: user.phone || null,
-        position: user.position || null,
-        observations: user.observations || null
-      });
+      console.log('Dados do usuário carregados:', user);
+      console.log('Valor da posição:', user.position);
     }
   }, [user]);
 
@@ -107,11 +92,12 @@ const PlayerEditPage: React.FC = () => {
   }
 
   if (userError) {
-    return <div>Erro ao carregar dados do jogador. Por favor, tente novamente.</div>;
-  }
-
-  if (!user) {
-    return <div>Jogador não encontrado.</div>;
+    // Conversão segura do erro
+    const errorMessage = typeof userError === 'object' && userError !== null && 'message' in userError
+      ? String(userError.message)
+      : 'Erro desconhecido';
+    
+    return <div>Erro ao carregar dados do jogador: {errorMessage}</div>;
   }
 
   return (
@@ -119,48 +105,80 @@ const PlayerEditPage: React.FC = () => {
       <S.Header>
         <S.Title>Editar Jogador</S.Title>
       </S.Header>
-
+      
       <S.FormContainer>
         <S.StyledForm onSubmit={formik.handleSubmit}>
           <S.FormRow>
             <S.FormGroup name="name" serverInvalid={!!formik.errors.name && formik.touched.name}>
-              <S.FormLabel>Nome *</S.FormLabel>
+              <S.FormLabel>Nome</S.FormLabel>
               <S.FormInput
                 id="name"
                 name="name"
                 type="text"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                value={formik.values.name}
+                value={formik.values.name || ''}
               />
               {formik.touched.name && formik.errors.name && (
                 <S.FormMessage>{formik.errors.name}</S.FormMessage>
               )}
             </S.FormGroup>
-
+          
             <S.FormGroup name="email" serverInvalid={!!formik.errors.email && formik.touched.email}>
-              <S.FormLabel>Email *</S.FormLabel>
+              <S.FormLabel>Email</S.FormLabel>
               <S.FormInput
                 id="email"
                 name="email"
                 type="email"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
-                value={formik.values.email}
+                value={formik.values.email || ''}
               />
               {formik.touched.email && formik.errors.email && (
                 <S.FormMessage>{formik.errors.email}</S.FormMessage>
               )}
             </S.FormGroup>
           </S.FormRow>
-
+          
+          <S.FormRow>
+            <S.FormGroup name="type" serverInvalid={!!formik.errors.type && formik.touched.type}>
+              <S.FormLabel>Tipo</S.FormLabel>
+              <div style={{ marginTop: 2 }}>
+                <Select
+                  name="type"
+                  options={typeOptions}
+                  onValueChange={(value) => formik.setFieldValue('type', value)}
+                  value={formik.values.type || ''}
+                />
+              </div>
+              {formik.touched.type && formik.errors.type && (
+                <S.FormMessage>{formik.errors.type}</S.FormMessage>
+              )}
+            </S.FormGroup>
+          
+            <S.FormGroup name="position" serverInvalid={!!formik.errors.position && formik.touched.position}>
+              <S.FormLabel>Posição</S.FormLabel>
+              <div style={{ marginTop: 2 }}>
+                <Select
+                  name="position"
+                  options={positionOptions}
+                  onValueChange={(value) => formik.setFieldValue('position', value)}
+                  value={formik.values.position || ''}
+                />
+              </div>
+              {formik.touched.position && formik.errors.position && (
+                <S.FormMessage>{formik.errors.position}</S.FormMessage>
+              )}
+            </S.FormGroup>
+          </S.FormRow>
+          
           <S.FormRow>
             <S.FormGroup name="phone" serverInvalid={!!formik.errors.phone && formik.touched.phone}>
               <S.FormLabel>Telefone</S.FormLabel>
               <S.FormInput
                 id="phone"
                 name="phone"
-                type="text"
+                type="tel"
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.phone || ''}
@@ -169,46 +187,10 @@ const PlayerEditPage: React.FC = () => {
                 <S.FormMessage>{formik.errors.phone}</S.FormMessage>
               )}
             </S.FormGroup>
-
-            <S.FormGroup name="type" serverInvalid={false}>
-              <S.FormLabel>Tipo</S.FormLabel>
-              <div style={{ marginTop: 2 }}>
-                <Select
-                  name="type"
-                  options={typeOptions}
-                  value={formik.values.type}
-                  onValueChange={(value) => {
-                    formik.setFieldValue('type', value);
-                  }}
-                  disabled
-                />
-              </div>
-              <S.FormHint>
-                O tipo de usuário não pode ser alterado.
-              </S.FormHint>
-            </S.FormGroup>
+          
+            <div style={{ width: '100%' }}></div> {/* Espaçador */}
           </S.FormRow>
-
-          <S.FormRow>
-            <S.FormGroup name="position" serverInvalid={!!formik.errors.position && formik.touched.position}>
-              <S.FormLabel>Posição</S.FormLabel>
-              <div style={{ marginTop: 2 }}>
-                <Select
-                  name="position"
-                  options={positionOptions}
-                  value={formik.values.position || ''}
-                  onValueChange={(value) => {
-                    formik.setFieldValue('position', value || null);
-                  }}
-                  placeholder="Selecione uma posição"
-                />
-              </div>
-              {formik.touched.position && formik.errors.position && (
-                <S.FormMessage>{formik.errors.position}</S.FormMessage>
-              )}
-            </S.FormGroup>
-          </S.FormRow>
-
+          
           <S.FormGroup name="observations" serverInvalid={!!formik.errors.observations && formik.touched.observations}>
             <S.FormLabel>Observações</S.FormLabel>
             <S.FormTextArea
@@ -216,19 +198,19 @@ const PlayerEditPage: React.FC = () => {
               name="observations"
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              value={formik.values.observations === null ? '' : formik.values.observations}
+              value={formik.values.observations || ''}
             />
             {formik.touched.observations && formik.errors.observations && (
               <S.FormMessage>{formik.errors.observations}</S.FormMessage>
             )}
           </S.FormGroup>
-
+          
           <S.ButtonGroup>
             <S.CancelButton type="button" onClick={handleCancel}>
               Cancelar
             </S.CancelButton>
             <S.SubmitButton type="submit" disabled={formik.isSubmitting || updateUserMutation.isPending}>
-              {formik.isSubmitting || updateUserMutation.isPending ? 'Salvando...' : 'Salvar'}
+              {updateUserMutation.isPending ? 'Salvando...' : 'Salvar Alterações'}
             </S.SubmitButton>
           </S.ButtonGroup>
         </S.StyledForm>

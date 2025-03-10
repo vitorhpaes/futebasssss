@@ -1,10 +1,11 @@
 import { z } from 'zod';
+import { Position, UserType } from '@futebass-ia/constants';
 
-// Schema para tipo de usuário
-const userTypeSchema = z.enum(['PLAYER', 'ADMIN']);
+// Schema para tipo de usuário baseado nos enumeradores do pacote de constantes
+const userTypeSchema = z.nativeEnum(UserType);
 
-// Schema para posição
-const positionSchema = z.enum(['GOALKEEPER', 'DEFENDER', 'MIDFIELDER', 'FORWARD']);
+// Schema para posição baseado nos enumeradores do pacote de constantes  
+const positionSchema = z.nativeEnum(Position);
 
 // Schema para usuário
 export const userSchema = z.object({
@@ -30,24 +31,23 @@ export const registerUserSchema = z.object({
     .trim(),
   name: z.string()
     .nonempty('Nome é obrigatório')
-    .min(3, 'Nome deve ter pelo menos 3 caracteres')
+    .min(3, 'Nome deve ter no mínimo 3 caracteres')
+    .max(100, 'Nome deve ter no máximo 100 caracteres')
     .trim(),
   password: z.string()
+    .nonempty('Senha é obrigatória')
+    .min(6, 'Senha deve ter no mínimo 6 caracteres')
+    .max(100, 'Senha deve ter no máximo 100 caracteres')
     .optional()
     .transform(val => val === '' ? undefined : val),
-  type: userTypeSchema.default('PLAYER'),
+  type: z.nativeEnum(UserType).default(UserType.PLAYER),
   phone: z.string()
     .optional()
     .transform(val => val === '' ? null : val),
-  position: positionSchema
-    .nullable()
-    .optional()
-    // @ts-expect-error O valor pode vir como string vazia do formulário
-    .transform(val => val === '' ? null : val),
+  position: z.union([positionSchema, z.string(), z.null()]).optional(),
   observations: z.string()
-    .nullable()
     .optional()
-    .transform(val => val === '' ? null : val)
+    .transform(val => val === '' ? null : val),
 });
 
 // Schema para atualização de usuário

@@ -1,34 +1,29 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import { useUsers } from '../../services/users/users.queries';
 import { UserFilterParams } from '../../services/users/users.interfaces';
 import * as S from './PlayerListPage.styles';
-import Select, { SelectOption } from '../../components/form/Select';
+import Select from '../../components/form/Select';
+import {
+  USER_TYPE_OPTIONS,
+  POSITION_OPTIONS,
+  Option
+} from '@futebass-ia/constants';
 
 const PlayerListPage: React.FC = () => {
   const navigate = useNavigate();
-  const [filterParams, setFilterParams] = useState<UserFilterParams>({});
   
-  // Opções para os selects
-  const positionOptions: SelectOption[] = [
-    { value: '', label: 'Todas' },
-    { value: 'GOALKEEPER', label: 'Goleiro' },
-    { value: 'DEFENDER', label: 'Zagueiro' },
-    { value: 'MIDFIELDER', label: 'Meio-campo' },
-    { value: 'FORWARD', label: 'Atacante' }
-  ];
+  // Opções para os selects usando as constantes compartilhadas
+  
+  // Adicionando opção 'Todas' para posição
+  const allPositionsOption: Option<string> = { value: '', label: 'Todas' };
+  const positionOptions = [allPositionsOption, ...POSITION_OPTIONS];
 
-  const typeOptions: SelectOption[] = [
-    { value: '', label: 'Todos' },
-    { value: 'PLAYER', label: 'Jogador' },
-    { value: 'ADMIN', label: 'Administrador' }
-  ];
+  // Adicionando opção 'Todos' para tipo
+  const allTypesOption: Option<string> = { value: '', label: 'Todos' };
+  const typeOptions = [allTypesOption, ...USER_TYPE_OPTIONS];
   
-  // Obter lista de usuários com React Query
-  const { data: players, isLoading, error } = useUsers(filterParams);
-  
-
   // Formik para gerenciar o formulário de filtro
   const formik = useFormik<UserFilterParams>({
     initialValues: {
@@ -43,13 +38,31 @@ const PlayerListPage: React.FC = () => {
       if (values.position) filters.position = values.position;
       if (values.type) filters.type = values.type;
       
-      setFilterParams(filters);
+      // Fazer a requisição com os filtros aplicados
+      // Não precisa fazer nada específico aqui pois o useUsers
+      // reagirá automaticamente à mudança em filterParams
     }
   });
+  
+  // Obter lista de usuários com React Query
+  const { data: players, isLoading, error } = useUsers(formik.values);
+  
+  // Obter a label a partir do valor da posição
+  const getPositionLabel = (position: string | null | undefined) => {
+    if (!position) return '-';
+    const option = positionOptions.find(opt => opt.value === position);
+    return option ? option.label : position;
+  };
+  
+  // Obter a label a partir do valor do tipo
+  const getTypeLabel = (type: string | null | undefined) => {
+    if (!type) return '-';
+    const option = typeOptions.find(opt => opt.value === type);
+    return option ? option.label : type;
+  };
 
   const handleClearFilters = () => {
     formik.resetForm();
-    setFilterParams({});
   };
 
   const handleCreatePlayer = () => {
@@ -62,27 +75,14 @@ const PlayerListPage: React.FC = () => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('pt-BR').format(date);
-  };
-
-  const getPositionLabel = (position: string | null | undefined) => {
-    if (!position) return 'Não informado';
-    
-    const positions = {
-      GOALKEEPER: 'Goleiro',
-      DEFENDER: 'Zagueiro',
-      MIDFIELDER: 'Meio-campo',
-      FORWARD: 'Atacante'
-    };
-    
-    return positions[position as keyof typeof positions] || position;
+    return date.toLocaleDateString('pt-BR');
   };
 
   return (
     <S.Container>
       <S.Header>
-        <S.Title>Gerenciamento de Jogadores</S.Title>
-        <S.Button onClick={handleCreatePlayer}>+ Adicionar Jogador</S.Button>
+        <S.Title>Jogadores</S.Title>
+        <S.Button onClick={handleCreatePlayer}>Adicionar Jogador</S.Button>
       </S.Header>
 
       <S.FilterContainer>
@@ -106,8 +106,9 @@ const PlayerListPage: React.FC = () => {
                 <Select
                   name="position"
                   options={positionOptions}
-                  value={formik.values.position}
+                  value={formik.values.position || ''}
                   onValueChange={(value) => formik.setFieldValue('position', value)}
+                  placeholder="Todas"
                 />
               </div>
             </S.FormField>
@@ -118,8 +119,9 @@ const PlayerListPage: React.FC = () => {
                 <Select
                   name="type"
                   options={typeOptions}
-                  value={formik.values.type}
+                  value={formik.values.type || ''}
                   onValueChange={(value) => formik.setFieldValue('type', value)}
+                  placeholder="Todos"
                 />
               </div>
             </S.FormField>
@@ -135,26 +137,16 @@ const PlayerListPage: React.FC = () => {
       </S.FilterContainer>
 
       {isLoading ? (
-        <p>Carregando jogadores...</p>
+        <div>Carregando jogadores...</div>
       ) : error ? (
-        <div>
-          <p>Erro ao carregar jogadores</p>
-          <p style={{ color: 'red', fontSize: '12px' }}>
-            {error?.message || 'Erro desconhecido'}
-          </p>
-          <button onClick={() => setFilterParams({})}>Tentar novamente</button>
-        </div>
-      ) : !players || players.length === 0 ? (
-        <S.EmptyState>
-          <p>Nenhum jogador encontrado.</p>
-        </S.EmptyState>
-      ) : (
+        <div>Erro ao carregar jogadores. Por favor, tente novamente.</div>
+      ) : players && players.length > 0 ? (
         <S.CardGrid>
           {players.map((player) => (
             <S.Card key={player.id}>
               <S.CardHeader>
                 <S.PlayerName>{player.name}</S.PlayerName>
-                <S.Badge $type={player.type}>
+                <S.Badge $type={player.type === 'ADMIN' ? 'ADMIN' : 'PLAYER'}>
                   {player.type === 'ADMIN' ? 'Admin' : 'Jogador'}
                 </S.Badge>
               </S.CardHeader>
@@ -166,30 +158,19 @@ const PlayerListPage: React.FC = () => {
                 </S.CardField>
                 
                 <S.CardField>
-                  <S.FieldLabel>Telefone</S.FieldLabel>
-                  <S.FieldValue>{player.phone || 'Não informado'}</S.FieldValue>
+                  <S.FieldLabel>Posição</S.FieldLabel>
+                  <S.FieldValue>{getPositionLabel(player.position)}</S.FieldValue>
                 </S.CardField>
-                
-                {player.position && (
-                  <S.CardField>
-                    <S.FieldLabel>Posição</S.FieldLabel>
-                    <S.FieldValue>
-                      {getPositionLabel(player.position)}
-                    </S.FieldValue>
-                  </S.CardField>
-                )}
                 
                 <S.CardField>
-                  <S.FieldLabel>Criado em</S.FieldLabel>
-                  <S.FieldValue>{formatDate(player.createdAt)}</S.FieldValue>
+                  <S.FieldLabel>Tipo</S.FieldLabel>
+                  <S.FieldValue>{getTypeLabel(player.type)}</S.FieldValue>
                 </S.CardField>
                 
-                {player.observations && (
-                  <S.CardField>
-                    <S.FieldLabel>Observações</S.FieldLabel>
-                    <S.FieldValue>{player.observations}</S.FieldValue>
-                  </S.CardField>
-                )}
+                <S.CardField>
+                  <S.FieldLabel>Data de Cadastro</S.FieldLabel>
+                  <S.FieldValue>{formatDate(player.createdAt)}</S.FieldValue>
+                </S.CardField>
               </S.CardContent>
               
               <S.CardActions>
@@ -200,6 +181,8 @@ const PlayerListPage: React.FC = () => {
             </S.Card>
           ))}
         </S.CardGrid>
+      ) : (
+        <S.EmptyState>Nenhum jogador encontrado</S.EmptyState>
       )}
     </S.Container>
   );
