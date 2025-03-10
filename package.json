@@ -4,7 +4,8 @@
   "private": true,
   "workspaces": [
     "server",
-    "front"
+    "front",
+    "constants"
   ],
   "devDependencies": {
     "@commitlint/cli": "^19.7.1",
