@@ -1,44 +1,55 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Position } from '@prisma/client';
+import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
+import { TransformTrimAndEmptyToNull } from 'src/common/transformers/global-transformers';
 
-const POSITION_VALUES = ['GOALKEEPER', 'DEFENDER', 'MIDFIELDER', 'FORWARD'];
+import { TransformTrim } from 'src/common/transformers/global-transformers';
+import { POSITION_VALUES } from 'src/modules/users/dto/create-user.dto';
 
 export class UpdateUserDto {
-  @ApiProperty({
-    description: 'Email do usuário',
+  @ApiPropertyOptional({
     example: 'usuario@exemplo.com',
-    required: false,
+    description: 'Email do usuário',
   })
-  @IsEmail()
   @IsOptional()
+  @IsEmail({}, { message: 'Email inválido' })
+  @TransformTrim()
   email?: string;
 
-  @ApiProperty({
-    description: 'Nome do usuário',
+  @ApiPropertyOptional({
     example: 'Nome do Usuário',
-    required: false,
+    description: 'Nome do usuário',
   })
-  @IsString()
   @IsOptional()
+  @IsString({ message: 'Nome deve ser uma string' })
+  @TransformTrim()
   name?: string;
 
-  @ApiProperty({
-    description: 'Telefone do usuário',
+  @ApiPropertyOptional({
     example: '+5511999999999',
-    required: false,
+    description: 'Telefone do usuário',
   })
-  @IsString()
   @IsOptional()
+  @IsString({ message: 'Telefone deve ser uma string' })
+  @TransformTrimAndEmptyToNull()
   phone?: string;
 
   @ApiProperty({
     description: 'Posição do jogador',
     example: 'DEFENDER',
     enum: POSITION_VALUES,
-    required: false,
   })
   @IsEnum(Position)
   @IsOptional()
   position?: Position;
+
+  @ApiPropertyOptional({
+    example: 'Observações sobre o jogador',
+    description: 'Observações sobre o usuário',
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString({ message: 'Observações devem ser uma string' })
+  @TransformTrimAndEmptyToNull()
+  observations?: string;
 }

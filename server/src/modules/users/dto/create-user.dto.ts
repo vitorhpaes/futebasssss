@@ -9,7 +9,12 @@ import {
   MinLength,
 } from 'class-validator';
 
-const POSITION_VALUES = ['GOALKEEPER', 'DEFENDER', 'MIDFIELDER', 'FORWARD'];
+export const POSITION_VALUES = [
+  'GOALKEEPER',
+  'DEFENDER',
+  'MIDFIELDER',
+  'FORWARD',
+];
 
 export class CreateUserDto {
   @ApiProperty({

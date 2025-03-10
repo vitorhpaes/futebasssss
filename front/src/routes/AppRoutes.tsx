@@ -8,6 +8,8 @@ import PlayerDashboardPage from '../pages/player/DashboardPage';
 import ProtectedRoute from './ProtectedRoute';
 import { useAuthStore } from '../context/authStore';
 import AuthenticatedLayout from '../components/layout/AuthenticatedLayout';
+import PlayerEditPage from '../pages/admin/PlayerEditPage';
+
 
 const AppRoutes = () => {
   const { isAuthenticated, user, redirectPath } = useAuthStore();
@@ -39,6 +41,7 @@ const AppRoutes = () => {
             {/* Rotas de gerenciamento de jogadores */}
             <Route path="players" element={<PlayerListPage />} />
             <Route path="players/create" element={<PlayerCreatePage />} />
+            <Route path="players/edit/:id" element={<PlayerEditPage />} />
             <Route path="matches" element={<div>Página de Partidas (em construção)</div>} />
           </Route>
         </Route>
