@@ -2,29 +2,12 @@ import React from 'react';
 import styled from 'styled-components';
 import { SessionStatus, sessionStatusMap } from '@futebass-ia/constants';
 import { formatDateTime } from '../../utils/date-utils';
-import { FiMapPin, FiCalendar, FiClock, FiUsers, FiEdit, FiFileText, FiInfo } from 'react-icons/fi';
-
-// Interface para os times
-export interface TeamData {
-  id: number;
-  name: string;
-  color?: string;
-}
-
-// Interface para a partida
-export interface MatchData {
-  id: number;
-  date: string;
-  location: string;
-  status: SessionStatus;
-  notes?: string | null;
-  teamA?: TeamData;
-  teamB?: TeamData;
-}
+import { FiMapPin, FiCalendar, FiClock, FiEdit, FiFileText, FiInfo } from 'react-icons/fi';
+import { Match } from '../../services/matches/matches.interfaces';
 
 // Props para o componente
 export interface MatchCardProps {
-  match: MatchData;
+  match: Match;
   onEdit?: (id: number) => void;
 }
 
@@ -222,11 +205,10 @@ const EditButton = styled.button`
 const MatchCard: React.FC<MatchCardProps> = ({ match, onEdit }) => {
   // Obter o status em texto mais amigável
   const getStatusLabel = (status: SessionStatus): string => {
-    return sessionStatusMap.get(status) || status;
+    return sessionStatusMap.get(status) || String(status);
   };
 
   // Extrair a data e hora para exibição
-  const dateTime = new Date(match.date);
   const date = formatDateTime(match.date, 'DD/MM/YYYY');
   const time = formatDateTime(match.date, 'HH:mm');
 

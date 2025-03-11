@@ -1,26 +1,16 @@
 import React from 'react';
 import styled from 'styled-components';
 import { getPositionLabel, getUserTypeLabel } from '../../utils/user-helpers';
-import { UserType, Position } from '@futebass-ia/constants';
 import { formatDate } from '../../utils/date-utils';
 import { FiUser, FiEdit, FiMail, FiCalendar } from 'react-icons/fi';
+import { User } from '../../services/users/users.interfaces';
 
 // Tipos de visualização
 export type ViewMode = 'full' | 'compact';
 
-// Interface para o jogador
-export interface PlayerData {
-  id: number;
-  name: string;
-  email: string;
-  type: string;
-  position?: string | null;
-  createdAt: string;
-}
-
 // Props para o componente
 export interface PlayerCardProps {
-  player: PlayerData;
+  player: User;
   viewMode?: ViewMode;
   onEdit?: (id: number) => void;
 }
