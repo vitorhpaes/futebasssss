@@ -1,0 +1,12 @@
+---
+description: Layout preferences using radix
+globs: 
+alwaysApply: false
+---
+
+# Layout library preferences
+
+- Always prefer using a radix-ui component, even when you have to install it as a library 
+- Avoid using specific styling, prefer to use a radix component and think a little more about writing new styles
+- Always respect system theme
+- Write beautiful and easier usable layouts

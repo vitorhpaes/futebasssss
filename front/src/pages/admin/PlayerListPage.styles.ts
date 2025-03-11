@@ -32,7 +32,7 @@ export const Button = styled.button`
   color: white;
   border: none;
   padding: 10px 20px;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
   font-weight: 500;
   transition: background-color 0.2s;
@@ -42,12 +42,54 @@ export const Button = styled.button`
   }
 `;
 
+export const FilterWrapper = styled.div`
+  position: relative;
+  z-index: 100;
+`;
+
 export const FilterContainer = styled.div`
-  background-color: ${({ theme }) => theme.colors.background.default};
-  padding: 16px;
-  border-radius: 8px;
-  margin-bottom: 24px;
-  box-shadow: ${({ theme }) => theme.shadows.small};
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background-color: ${({ theme }) => theme.colors.background.paper};
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: ${({ theme }) => theme.shadows.medium};
+  width: 500px;
+  max-width: calc(100vw - 40px);
+  z-index: 10;
+  
+  @media (max-width: 768px) {
+    left: 0;
+    right: auto;
+    width: 100%;
+  }
+  
+  &:before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 20px;
+    width: 12px;
+    height: 12px;
+    background-color: ${({ theme }) => theme.colors.background.paper};
+    transform: rotate(45deg);
+    
+    @media (max-width: 768px) {
+      right: auto;
+      left: 20px;
+    }
+  }
+`;
+
+export const Overlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: 5;
 `;
 
 export const StyledForm = styled(Form.Root)`
@@ -58,6 +100,10 @@ export const FilterFormLayout = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 export const FormField = styled(Form.Field)`
@@ -70,32 +116,37 @@ export const FormLabel = styled(Form.Label)`
   font-weight: 500;
   font-size: 14px;
   color: ${({ theme }) => theme.colors.text.primary};
+  display: flex;
+  align-items: center;
+  gap: 8px;
 `;
 
 export const FormInput = styled.input`
   padding: 10px;
   border: 1px solid ${({ theme }) => theme.colors.neutral.light};
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 14px;
+  transition: all 0.2s;
 
   &:focus {
     outline: none;
     border-color: ${({ theme }) => theme.colors.primary.main};
-    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary.light};
+    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary.light}40;
   }
 `;
 
 export const FormSelect = styled.select`
   padding: 10px;
   border: 1px solid ${({ theme }) => theme.colors.neutral.light};
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 14px;
   background-color: white;
+  transition: all 0.2s;
 
   &:focus {
     outline: none;
     border-color: ${({ theme }) => theme.colors.primary.main};
-    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary.light};
+    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary.light}40;
   }
 `;
 
@@ -103,14 +154,62 @@ export const FilterActions = styled.div`
   display: flex;
   align-items: flex-end;
   gap: 10px;
+  margin-top: 16px;
+  justify-content: flex-end;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 `;
 
-export const SecondaryButton = styled(Button)`
-  background-color: ${({ theme }) => theme.colors.neutral.main};
+export const FilterButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  
+  &:focus {
+    outline: none;
+  }
+`;
+
+export const PrimaryButton = styled(FilterButton)`
+  background-color: ${({ theme }) => theme.colors.primary.main};
+  color: white;
   
   &:hover {
-    background-color: ${({ theme }) => theme.colors.neutral.dark};
+    background-color: ${({ theme }) => theme.colors.primary.dark};
   }
+`;
+
+export const SecondaryButton = styled(FilterButton)`
+  background-color: ${({ theme }) => theme.colors.background.default};
+  color: ${({ theme }) => theme.colors.text.primary};
+  border: 1px solid ${({ theme }) => theme.colors.neutral.light};
+  
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.neutral.light};
+  }
+`;
+
+export const FilterHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+`;
+
+export const FilterTitle = styled.h3`
+  margin: 0;
+  font-size: 16px;
+  color: ${({ theme }) => theme.colors.text.primary};
 `;
 
 export const CardGrid = styled.div`
@@ -212,6 +311,27 @@ export const EmptyState = styled.div`
   text-align: center;
   padding: 40px;
   color: ${({ theme }) => theme.colors.text.secondary};
+`;
+
+export const LoadingContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+`;
+
+export const Spinner = styled.div`
+  width: 32px;
+  height: 32px;
+  border: 3px solid ${({ theme }) => theme.colors.background.default};
+  border-top: 3px solid ${({ theme }) => theme.colors.primary.main};
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 `;
 
 // Dialog de confirmação

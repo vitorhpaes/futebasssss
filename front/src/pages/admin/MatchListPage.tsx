@@ -1,15 +1,17 @@
-import { useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMatches } from '../../services/matches/matches.queries';
-import { FiPlus, FiFilter, FiX } from 'react-icons/fi';
+import { FiPlus, FiFilter, FiX, FiCalendar, FiMapPin, FiTag } from 'react-icons/fi';
 import Alert from '../../components/ui/Alert';
 import * as S from './MatchListPage.styles';
 import MatchCard from '../../components/cards/MatchCard';
-import * as Collapsible from '@radix-ui/react-collapsible';
 import styled from 'styled-components';
+import { useFormik } from 'formik';
+import Select from '../../components/form/Select';
+import { SessionStatus, SESSION_STATUS_OPTIONS } from '@futebass-ia/constants';
 
-// Estilos adicionais para componentes Radix
-const CollapsibleTrigger = styled(Collapsible.Trigger)`
+// Estilos para o botão de filtro
+const FilterTrigger = styled.button`
   display: flex;
   align-items: center;
   gap: 8px;
@@ -27,51 +29,68 @@ const CollapsibleTrigger = styled(Collapsible.Trigger)`
   }
 `;
 
-const CardGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-  padding: 16px 0;
-`;
-
-const FilterContainer = styled.div`
-  background-color: ${({ theme }) => theme.colors.background.paper};
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 24px;
-  box-shadow: ${({ theme }) => theme.shadows.small};
-`;
-
-const SecondaryButton = styled.button`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background-color: ${({ theme }) => theme.colors.background.default};
-  color: ${({ theme }) => theme.colors.text.primary};
-  border: none;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
-  font-size: 14px;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.neutral.light};
-  }
-`;
+// Interface para os filtros
+interface MatchFilterParams {
+  location?: string;
+  status?: SessionStatus;
+  date?: string;
+}
 
 // Componente para a página de listagem de partidas
 const MatchListPage = () => {
   const navigate = useNavigate();
-  // Estado para filtros, se necessário no futuro
-  const [filter] = useState({});
+  const filterRef = useRef<HTMLDivElement>(null);
   
   // Estado para controlar a visibilidade dos filtros
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   
+  // Opções para o select de status
+  const allStatusOption = { value: '', label: 'Todos' };
+  const statusOptions = [allStatusOption, ...SESSION_STATUS_OPTIONS];
+  
+  // Formik para gerenciar o formulário de filtro
+  const formik = useFormik<MatchFilterParams>({
+    initialValues: {
+      location: '',
+      status: undefined,
+      date: ''
+    },
+    onSubmit: (values) => {
+      // Remover valores vazios para não enviá-los como parâmetros
+      const filters: MatchFilterParams = {};
+      if (values.location) filters.location = values.location;
+      if (values.status) filters.status = values.status;
+      if (values.date) filters.date = values.date;
+      
+      // Fechar o filtro após submeter
+      setIsFilterOpen(false);
+    }
+  });
+  
+  // Função para fechar o filtro quando clicar fora dele
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+        setIsFilterOpen(false);
+      }
+    };
+
+    if (isFilterOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isFilterOpen]);
+  
   // Usar o hook de query para buscar partidas
-  const { data: matches, isLoading, error } = useMatches(filter);
+  const { data: matches, isLoading, error } = useMatches(formik.values);
+
+  // Função para limpar filtros
+  const handleClearFilters = () => {
+    formik.resetForm();
+  };
 
   // Função para manipular a edição de uma partida
   const handleEditMatch = (id: number) => {
@@ -83,24 +102,87 @@ const MatchListPage = () => {
       <S.Header>
         <S.Title>Partidas</S.Title>
         <div style={{ display: 'flex', gap: '12px' }}>
-          <Collapsible.Root open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-            <CollapsibleTrigger>
+          <S.FilterWrapper ref={filterRef}>
+            <FilterTrigger onClick={() => setIsFilterOpen(!isFilterOpen)}>
               <FiFilter size={16} />
-              {isFilterOpen ? 'Ocultar Filtros' : 'Filtros'}
-            </CollapsibleTrigger>
+              {isFilterOpen ? 'Ocultar Filtros' : 'Mostrar Filtros'}
+            </FilterTrigger>
             
-            <Collapsible.Content>
-              <FilterContainer>
-                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                  <SecondaryButton onClick={() => setIsFilterOpen(false)}>
-                    <FiX size={14} />
-                    Fechar
-                  </SecondaryButton>
-                </div>
-                {/* Implementar filtros no futuro */}
-              </FilterContainer>
-            </Collapsible.Content>
-          </Collapsible.Root>
+            {isFilterOpen && (
+              <>
+                <S.Overlay onClick={() => setIsFilterOpen(false)} />
+                <S.FilterContainer>
+                  <S.FilterHeader>
+                    <S.FilterTitle>Filtrar Partidas</S.FilterTitle>
+                    <S.SecondaryButton onClick={() => setIsFilterOpen(false)}>
+                      <FiX size={14} />
+                      Fechar
+                    </S.SecondaryButton>
+                  </S.FilterHeader>
+                  
+                  <S.StyledForm onSubmit={formik.handleSubmit}>
+                    <S.FilterFormLayout>
+                      <S.FormField name="location">
+                        <S.FormLabel>
+                          <FiMapPin size={14} />
+                          Local
+                        </S.FormLabel>
+                        <S.FormInput
+                          id="location"
+                          name="location"
+                          type="text"
+                          onChange={formik.handleChange}
+                          value={formik.values.location || ''}
+                          placeholder="Filtrar por local"
+                        />
+                      </S.FormField>
+                      
+                      <S.FormField name="status">
+                        <S.FormLabel>
+                          <FiTag size={14} />
+                          Status
+                        </S.FormLabel>
+                        <div style={{ marginTop: 2 }}>
+                          <Select
+                            name="status"
+                            options={statusOptions}
+                            value={formik.values.status || ''}
+                            onValueChange={(value) => formik.setFieldValue('status', value)}
+                            placeholder="Todos"
+                          />
+                        </div>
+                      </S.FormField>
+                      
+                      <S.FormField name="date">
+                        <S.FormLabel>
+                          <FiCalendar size={14} />
+                          Data
+                        </S.FormLabel>
+                        <S.FormInput
+                          id="date"
+                          name="date"
+                          type="date"
+                          onChange={formik.handleChange}
+                          value={formik.values.date || ''}
+                        />
+                      </S.FormField>
+                    </S.FilterFormLayout>
+                    
+                    <S.FilterActions>
+                      <S.SecondaryButton type="button" onClick={handleClearFilters}>
+                        <FiX size={14} />
+                        Limpar Filtros
+                      </S.SecondaryButton>
+                      <S.PrimaryButton type="submit">
+                        <FiFilter size={14} />
+                        Aplicar Filtros
+                      </S.PrimaryButton>
+                    </S.FilterActions>
+                  </S.StyledForm>
+                </S.FilterContainer>
+              </>
+            )}
+          </S.FilterWrapper>
           
           <Link to="/admin/matches/create">
             <S.Button>
@@ -127,7 +209,7 @@ const MatchListPage = () => {
           message="Clique em 'Criar Nova Partida' para adicionar a primeira."
         />
       ) : (
-        <CardGrid>
+        <S.CardGrid>
           {matches && matches.map((match) => (
             <MatchCard
               key={match.id}
@@ -135,7 +217,7 @@ const MatchListPage = () => {
               onEdit={handleEditMatch}
             />
           ))}
-        </CardGrid>
+        </S.CardGrid>
       )}
     </S.Container>
   );

@@ -1,0 +1,12 @@
+---
+description: Way to create services and to use react-query
+globs: 
+alwaysApply: false
+---
+
+# System services
+
+- Always check server [swagger.json](mdc:server/swagger.json) to make sure that you are writing the correct query or mutation
+- Always search on codebase to be sure that you aren't rewriting a query
+- Search on codebase to make sure that you are writing services layer in the same way that each other
+- Avoid creating multiple-fetch mutations

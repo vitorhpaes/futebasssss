@@ -1,0 +1,13 @@
+---
+description: Rules to create reusable and break compoentns
+globs: 
+alwaysApply: false
+---
+
+# Reusable components
+
+- Always think if the component or page that you are writing should be a separate component to be reusable in the future
+- Avoid creating large components or pages, break it into smaller components and prefer to keep each component logic and queries inside itself
+- Try to use system codebase interfaces, types and enums to create components interfaces
+- Always search on codebase to make sure that you aren't rewriting an existing component
+- You can break components to make more reusable parts if necessary

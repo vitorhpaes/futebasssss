@@ -1,0 +1,12 @@
+---
+description: Git rules
+globs: 
+alwaysApply: false
+---
+
+# Git rules
+
+- [commitlint.config.js](mdc:commitlint.config.js)
+- Never commit automatically
+- Write a commit message suggestion always that finish a prompt
+- When user ask to create a new branch with the changes, use feature, fix, release, docs, hotfix prefixes and a short name after "/", like "feature/user-management" and automatically create a pull request with parent branch
