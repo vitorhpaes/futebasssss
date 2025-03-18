@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiArrowLeft, FiMapPin, FiCalendar, FiClock, FiCheckCircle, FiCoffee, FiFilter, FiX, FiSearch } from 'react-icons/fi';
+import { FiArrowLeft, FiMapPin, FiCalendar, FiClock, FiCheckCircle, FiCoffee, FiFilter, FiX, FiSearch, FiUsers, FiUserCheck, FiUser } from 'react-icons/fi';
 import { useMatch } from '../../services/matches/matches.queries';
-import { usePlayersWithSessionData, useConfirmPlayerMutation } from '../../services/player-sessions/player-sessions.queries';
+import { usePlayersWithSessionData, useConfirmPlayerMutation, useUpdatePlayerSessionMutation } from '../../services/player-sessions/player-sessions.queries';
 import { PlayerSession } from '../../services/player-sessions/player-sessions.interfaces';
 import { formatDateTime } from '../../utils/date-utils';
 import { Position, sessionStatusMap, POSITION_OPTIONS } from '@futebass-ia/constants';
@@ -12,11 +12,13 @@ import { useToast } from '../../components/ui/Toast';
 import Select from '../../components/form/Select';
 import { useFormik, FormikProps } from 'formik';
 
+// Tipo de aba
+type TabType = 'all' | 'confirmed' | 'resenha';
+
 // Adicionar tipos ao componente FilterForm
 interface FilterFormProps {
   formik: FormikProps<FilterParams>;
   positionOptions: Array<{ value: string; label: string }>;
-  statusOptions: Array<{ value: string; label: string }>;
   onClear: () => void;
   closeFilter: () => void;
 }
@@ -25,7 +27,6 @@ interface FilterFormProps {
 const FilterForm = ({
   formik,
   positionOptions,
-  statusOptions,
   onClear,
   closeFilter
 }: FilterFormProps) => (
@@ -91,20 +92,6 @@ const FilterForm = ({
           placeholder="Todas"
         />
       </div>
-      
-      <div>
-        <label htmlFor="status" style={{ fontSize: '14px', marginBottom: '4px', display: 'block', color: '#666' }}>
-          <FiCheckCircle size={14} style={{ marginRight: '4px' }} />
-          Status
-        </label>
-        <Select
-          name="status"
-          options={statusOptions}
-          value={formik.values.status}
-          onValueChange={(value) => formik.setFieldValue('status', value)}
-          placeholder="Todos"
-        />
-      </div>
     </div>
   </S.MatchInfo>
 );
@@ -112,8 +99,142 @@ const FilterForm = ({
 interface FilterParams {
   name: string;
   position: Position | '';
-  status: 'all' | 'confirmed' | 'resenha' | 'pending';
 }
+
+// Componente para exibir detalhes do jogador
+const PlayerItem = ({ 
+  ps, 
+  handleConfirmPlayer, 
+  handleTogglePlayerStatus,
+  confirmPlayerMutation 
+}: { 
+  ps: PlayerSession; 
+  handleConfirmPlayer: (userId: number, willPlay: boolean) => void;
+  handleTogglePlayerStatus: (userId: number, willPlay: boolean) => void;
+  confirmPlayerMutation: any;
+}) => {
+  const isConfirmed = ps.confirmed;
+  const isResenha = ps.confirmed && !ps.willPlay;
+
+  return (
+    <S.PlayerItem key={ps.userId} $resenha={isResenha}>
+      <S.PlayerInfo>
+        <S.PlayerAvatar $resenha={isResenha}>
+          {ps.user?.name?.charAt(0).toUpperCase() || ''}
+        </S.PlayerAvatar>
+        <div>
+          <S.PlayerName>{ps.user?.name || 'Sem nome'}</S.PlayerName>
+          <S.PlayerPosition>
+            {ps.user?.position || 'Sem posição'}
+          </S.PlayerPosition>
+        </div>
+      </S.PlayerInfo>
+      <S.ActionSection>
+        {(isConfirmed) ? (
+          // Se já está confirmado, mostrar status e botão para alternar
+          <>
+            <S.PlayerStatus 
+              $confirmed={isConfirmed} 
+              $resenha={isResenha}
+            >
+              {isResenha ? 'Resenha' : 'Confirmado'}
+            </S.PlayerStatus>
+            
+            {/* Botão para alternar entre jogo e resenha */}
+            {isResenha ? (
+              <S.ConfirmButton 
+                onClick={() => handleTogglePlayerStatus(ps.userId, true)}
+                disabled={confirmPlayerMutation.isPending}
+                style={{ 
+                  marginLeft: '8px',
+                  fontSize: '12px',
+                  padding: '4px 8px'
+                }}
+              >
+                <FiCheckCircle size={12} />
+                Jogar
+              </S.ConfirmButton>
+            ) : (
+              <S.ResenhaButton 
+                onClick={() => handleTogglePlayerStatus(ps.userId, false)}
+                disabled={confirmPlayerMutation.isPending}
+                style={{ 
+                  marginLeft: '8px',
+                  fontSize: '12px',
+                  padding: '4px 8px'
+                }}
+              >
+                <FiCoffee size={12} />
+                Resenha
+              </S.ResenhaButton>
+            )}
+          </>
+        ) : (
+          // Se não está confirmado, mostrar botões de confirmação
+          <S.PlayerActions>
+            <S.ConfirmButton 
+              onClick={() => handleConfirmPlayer(ps.userId, true)}
+              disabled={confirmPlayerMutation.isPending}
+              style={confirmPlayerMutation.isPending ? { cursor: 'wait', opacity: 0.7 } : {}}
+            >
+              <FiCheckCircle size={14} />
+              {confirmPlayerMutation.isPending ? 'Processando...' : 'Confirmado'}
+            </S.ConfirmButton>
+            <S.ResenhaButton 
+              onClick={() => handleConfirmPlayer(ps.userId, false)}
+              disabled={confirmPlayerMutation.isPending}
+              style={confirmPlayerMutation.isPending ? { cursor: 'wait', opacity: 0.7 } : {}}
+            >
+              <FiCoffee size={14} />
+              {confirmPlayerMutation.isPending ? 'Processando...' : 'Resenha'}
+            </S.ResenhaButton>
+          </S.PlayerActions>
+        )}
+      </S.ActionSection>
+    </S.PlayerItem>
+  );
+};
+
+// Interface para o componente Team
+interface TeamProps {
+  team: any;
+  players: PlayerSession[];
+  handleAddToTeam: (userId: number, teamId: number) => void;
+}
+
+// Componente para exibir um time com os jogadores
+const TeamComponent = ({ team, players, handleAddToTeam }: TeamProps) => {
+  return (
+    <S.TeamContainer>
+      <S.TeamHeader $color={team?.color}>
+        <span>{team?.name || 'Time'}</span>
+        <span>{players.length} jogadores</span>
+      </S.TeamHeader>
+      
+      <S.TeamPlayerList>
+        {players.length > 0 ? (
+          players.map(player => (
+            <S.TeamPlayerItem key={player.userId}>
+              <S.PlayerInfo>
+                <S.PlayerAvatar>
+                  {player.user?.name?.charAt(0).toUpperCase() || ''}
+                </S.PlayerAvatar>
+                <div>
+                  <S.PlayerName>{player.user?.name || 'Sem nome'}</S.PlayerName>
+                  <S.PlayerPosition>{player.user?.position || 'Sem posição'}</S.PlayerPosition>
+                </div>
+              </S.PlayerInfo>
+            </S.TeamPlayerItem>
+          ))
+        ) : (
+          <S.EmptyTeamMessage>
+            Arraste jogadores para este time
+          </S.EmptyTeamMessage>
+        )}
+      </S.TeamPlayerList>
+    </S.TeamContainer>
+  );
+};
 
 const MatchManagePage = () => {
   const { id } = useParams<{ id: string }>();
@@ -122,6 +243,7 @@ const MatchManagePage = () => {
   const matchId = id ? parseInt(id, 10) : 0;
   const filterRef = useRef<HTMLDivElement>(null);
   
+  const [activeTab, setActiveTab] = useState<TabType>('all');
   const [filteredPlayers, setFilteredPlayers] = useState<PlayerSession[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   
@@ -141,25 +263,17 @@ const MatchManagePage = () => {
   
   // Mutation para confirmar presença
   const confirmPlayerMutation = useConfirmPlayerMutation();
+  const updatePlayerMutation = useUpdatePlayerSessionMutation();
 
   // Opções para o select de posição
   const allPositionsOption = { value: '', label: 'Todas' };
   const positionOptions = [allPositionsOption, ...POSITION_OPTIONS];
 
-  // Opções para o select de status
-  const statusOptions = [
-    { value: 'all', label: 'Todos' },
-    { value: 'confirmed', label: 'Confirmados' },
-    { value: 'resenha', label: 'Resenha' },
-    { value: 'pending', label: 'Pendentes' }
-  ];
-
   // Formik para gerenciar o formulário de filtro
   const formik = useFormik<FilterParams>({
     initialValues: {
       name: '',
-      position: '',
-      status: 'all'
+      position: ''
     },
     onSubmit: () => {
       // Fechar o filtro após submeter
@@ -191,6 +305,76 @@ const MatchManagePage = () => {
         }
       }
     );
+  };
+
+  // Função para alternar entre jogo e resenha
+  const handleTogglePlayerStatus = (userId: number, willPlay = true) => {
+    // Buscar a sessão do jogador
+    const playerSession = allPlayersWithSessionData?.find(ps => ps.userId === userId);
+    
+    if (playerSession && playerSession.id) {
+      updatePlayerMutation.mutate(
+        { 
+          sessionId: matchId, 
+          userId, 
+          data: {
+            willPlay
+          }
+        },
+        {
+          onSuccess: () => {
+            showToast(
+              willPlay 
+                ? `Jogador movido para lista de jogo!` 
+                : `Jogador movido para resenha!`,
+              'success',
+              3000
+            );
+          },
+          onError: (error) => {
+            showToast(
+              `Erro ao atualizar: ${error.message || 'Tente novamente mais tarde.'}`,
+              'error',
+              5000
+            );
+          }
+        }
+      );
+    }
+  };
+
+  // Função para adicionar jogador a um time
+  const handleAddToTeam = (userId: number, teamId: number) => {
+    // Buscar a sessão do jogador
+    const playerSession = allPlayersWithSessionData?.find(ps => ps.userId === userId);
+    
+    if (playerSession && playerSession.id) {
+      updatePlayerMutation.mutate(
+        { 
+          sessionId: matchId, 
+          userId, 
+          data: {
+            teamId
+          }
+        },
+        {
+          onSuccess: () => {
+            showToast(
+              `Jogador adicionado ao time com sucesso!`,
+              'success',
+              3000
+            );
+          },
+          onError: (error) => {
+            showToast(
+              `Erro ao adicionar ao time: ${error.message || 'Tente novamente mais tarde.'}`,
+              'error',
+              5000
+            );
+          }
+        }
+      );
+    }
   };
 
   // Voltar para a lista de partidas
@@ -229,40 +413,35 @@ const MatchManagePage = () => {
     };
   }, [isFilterOpen]);
 
-  // Filtrar jogadores baseado nos filtros
+  // Filtrar jogadores baseado nos filtros e na aba ativa
   useEffect(() => {
-    if (allPlayersWithSessionData) {
-      let filtered = [...allPlayersWithSessionData];
-      
-      // Filtrar por nome
-      if (formik.values.name) {
-        const searchName = formik.values.name.toLowerCase();
-        filtered = filtered.filter(p => 
-          p.user?.name?.toLowerCase().includes(searchName) || false
-        );
-      }
-      
-      // Filtrar por posição
-      if (formik.values.position) {
-        filtered = filtered.filter(p => 
-          p.user?.position === formik.values.position
-        );
-      }
-      
-      // Filtrar por status
-      if (formik.values.status !== 'all') {
-        if (formik.values.status === 'confirmed') {
-          filtered = filtered.filter(p => p.confirmed && p.willPlay);
-        } else if (formik.values.status === 'resenha') {
-          filtered = filtered.filter(p => p.confirmed && !p.willPlay);
-        } else if (formik.values.status === 'pending') {
-          filtered = filtered.filter(p => !p.confirmed);
-        }
-      }
-      
-      setFilteredPlayers(filtered);
+    if (!allPlayersWithSessionData) return;
+    
+    // Primeiro filtramos por aba
+    let filtered = [...allPlayersWithSessionData];
+    
+    if (activeTab === 'confirmed') {
+      filtered = filtered.filter(p => p.confirmed && p.willPlay);
+    } else if (activeTab === 'resenha') {
+      filtered = filtered.filter(p => p.confirmed && !p.willPlay);
     }
-  }, [allPlayersWithSessionData, formik.values]);
+    
+    // Depois aplicamos os filtros de busca
+    if (formik.values.name) {
+      const searchName = formik.values.name.toLowerCase();
+      filtered = filtered.filter(p => 
+        p.user?.name?.toLowerCase().includes(searchName) || false
+      );
+    }
+    
+    if (formik.values.position) {
+      filtered = filtered.filter(p => 
+        p.user?.position === formik.values.position
+      );
+    }
+    
+    setFilteredPlayers(filtered);
+  }, [allPlayersWithSessionData, formik.values, activeTab]);
 
   // Se estiver carregando, mostrar spinner
   if (isLoadingMatch || isLoadingPlayers) {
@@ -302,9 +481,14 @@ const MatchManagePage = () => {
   }
 
   // Contadores para estatísticas
-  const confirmedCount = filteredPlayers.filter(p => p.confirmed && p.willPlay).length;
-  const resenhaCount = filteredPlayers.filter(p => p.confirmed && !p.willPlay).length;
-  const pendingCount = filteredPlayers.filter(p => !p.confirmed).length;
+  const confirmedCount = allPlayersWithSessionData?.filter(p => p.confirmed && p.willPlay).length || 0;
+  const resenhaCount = allPlayersWithSessionData?.filter(p => p.confirmed && !p.willPlay).length || 0;
+  const pendingCount = allPlayersWithSessionData?.filter(p => !p.confirmed).length || 0;
+
+  // Jogadores por time para a aba de confirmados
+  const teamAPlayers = filteredPlayers.filter(p => p.teamId === match.teamA?.id);
+  const teamBPlayers = filteredPlayers.filter(p => p.teamId === match.teamB?.id);
+  const unassignedPlayers = filteredPlayers.filter(p => !p.teamId);
 
   return (
     <S.Container>
@@ -316,10 +500,6 @@ const MatchManagePage = () => {
           </S.ConfirmButton>
           <S.Title>Gerenciar Partida</S.Title>
         </div>
-        <S.ConfirmButton onClick={() => setIsFilterOpen(!isFilterOpen)}>
-          <FiFilter size={16} />
-          {isFilterOpen ? 'Ocultar Filtros' : 'Filtrar Jogadores'}
-        </S.ConfirmButton>
       </S.Header>
 
       <S.MatchInfo>
@@ -344,19 +524,21 @@ const MatchManagePage = () => {
           </S.MatchDetail>
         </S.MatchDetails>
 
-        <S.TeamsContainer>
-          <S.TeamBlock>
-            <S.TeamName>{match.teamA?.name || 'Time A'}</S.TeamName>
-            <S.TeamColor $color={match.teamA?.color} />
-          </S.TeamBlock>
-          
-          <S.VersusText>VS</S.VersusText>
-          
-          <S.TeamBlock>
-            <S.TeamName>{match.teamB?.name || 'Time B'}</S.TeamName>
-            <S.TeamColor $color={match.teamB?.color} />
-          </S.TeamBlock>
-        </S.TeamsContainer>
+        {activeTab !== 'confirmed' && (
+          <S.TeamsContainer>
+            <S.TeamBlock>
+              <S.TeamName>{match.teamA?.name || 'Time A'}</S.TeamName>
+              <S.TeamColor $color={match.teamA?.color} />
+            </S.TeamBlock>
+            
+            <S.VersusText>VS</S.VersusText>
+            
+            <S.TeamBlock>
+              <S.TeamName>{match.teamB?.name || 'Time B'}</S.TeamName>
+              <S.TeamColor $color={match.teamB?.color} />
+            </S.TeamBlock>
+          </S.TeamsContainer>
+        )}
 
         {/* Estatísticas resumidas */}
         <div style={{ 
@@ -382,85 +564,176 @@ const MatchManagePage = () => {
         </div>
       </S.MatchInfo>
 
-      {isFilterOpen && (
-        <div ref={filterRef} style={{ marginBottom: '16px' }}>
-          <FilterForm
-            formik={formik}
-            positionOptions={positionOptions}
-            statusOptions={statusOptions}
-            onClear={handleClearFilters}
-            closeFilter={handleCloseFilter}
-          />
-        </div>
+      {/* Abas de navegação */}
+      <S.TabsContainer>
+        <S.Tab 
+          $active={activeTab === 'all'} 
+          onClick={() => setActiveTab('all')}
+        >
+          <FiUsers size={16} />
+          Todos
+        </S.Tab>
+        <S.Tab 
+          $active={activeTab === 'confirmed'} 
+          onClick={() => setActiveTab('confirmed')}
+        >
+          <FiUserCheck size={16} />
+          Confirmados para Jogo
+        </S.Tab>
+        <S.Tab 
+          $active={activeTab === 'resenha'} 
+          onClick={() => setActiveTab('resenha')}
+        >
+          <FiCoffee size={16} />
+          Resenha
+        </S.Tab>
+      </S.TabsContainer>
+
+      {/* Filtro e lista de jogadores - Apenas para aba 'Todos' e 'Resenha' */}
+      {(activeTab === 'all' || activeTab === 'resenha') && (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <S.SectionTitle>
+              {activeTab === 'all' ? 'Jogadores' : 'Jogadores na Resenha'} 
+              {filteredPlayers.length > 0 && (
+                <span style={{ fontWeight: 'normal', fontSize: '14px', marginLeft: '8px' }}>
+                  ({filteredPlayers.length} encontrados)
+                </span>
+              )}
+            </S.SectionTitle>
+            
+            <S.ConfirmButton onClick={() => setIsFilterOpen(!isFilterOpen)}>
+              <FiFilter size={16} />
+              {isFilterOpen ? 'Ocultar Filtros' : 'Filtrar'}
+            </S.ConfirmButton>
+          </div>
+
+          {isFilterOpen && (
+            <div ref={filterRef} style={{ marginBottom: '16px' }}>
+              <FilterForm
+                formik={formik}
+                positionOptions={positionOptions}
+                onClear={handleClearFilters}
+                closeFilter={handleCloseFilter}
+              />
+            </div>
+          )}
+
+          {filteredPlayers && filteredPlayers.length > 0 ? (
+            <S.PlayerList>
+              {filteredPlayers.map((ps) => (
+                <PlayerItem 
+                  key={ps.userId}
+                  ps={ps} 
+                  handleConfirmPlayer={handleConfirmPlayer}
+                  handleTogglePlayerStatus={handleTogglePlayerStatus}
+                  confirmPlayerMutation={confirmPlayerMutation}
+                />
+              ))}
+            </S.PlayerList>
+          ) : (
+            <Alert
+              type="info"
+              title="Nenhum jogador encontrado"
+              message="Nenhum jogador disponível com os filtros selecionados."
+            />
+          )}
+        </>
       )}
 
-      <S.SectionTitle>
-        Jogadores 
-        {filteredPlayers.length > 0 && (
-          <span style={{ fontWeight: 'normal', fontSize: '14px', marginLeft: '8px' }}>
-            ({filteredPlayers.length} encontrados)
-          </span>
-        )}
-      </S.SectionTitle>
-
-      {filteredPlayers && filteredPlayers.length > 0 ? (
-        <S.PlayerList>
-          {filteredPlayers.map((ps) => {
-            const isConfirmed = ps.confirmed;
-            const isResenha = ps.confirmed && !ps.willPlay;
+      {/* Gerenciamento de times - Apenas para aba 'Confirmados' */}
+      {activeTab === 'confirmed' && (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <S.SectionTitle>
+              Distribuição de Times 
+              {filteredPlayers.length > 0 && (
+                <span style={{ fontWeight: 'normal', fontSize: '14px', marginLeft: '8px' }}>
+                  ({filteredPlayers.length} jogadores confirmados)
+                </span>
+              )}
+            </S.SectionTitle>
             
-            return (
-              <S.PlayerItem key={ps.userId}>
-                <S.PlayerInfo>
-                  <S.PlayerAvatar>
-                    {ps.user?.name?.charAt(0).toUpperCase() || ''}
-                  </S.PlayerAvatar>
-                  <div>
-                    <S.PlayerName>{ps.user?.name || 'Sem nome'}</S.PlayerName>
-                    <S.PlayerPosition>
-                      {ps.user?.position || 'Sem posição'}
-                    </S.PlayerPosition>
-                  </div>
-                </S.PlayerInfo>
-                <S.ActionSection>
-                  {(isConfirmed) ? (
-                    <S.PlayerStatus 
-                      $confirmed={isConfirmed} 
-                      $resenha={isResenha}
-                    >
-                      {isResenha ? 'Resenha' : 'Confirmado'}
-                    </S.PlayerStatus>
-                  ) : (
-                    <S.PlayerActions>
-                      <S.ConfirmButton 
-                        onClick={() => handleConfirmPlayer(ps.userId, true)}
-                        disabled={confirmPlayerMutation.isPending}
-                        style={confirmPlayerMutation.isPending ? { cursor: 'wait', opacity: 0.7 } : {}}
-                      >
-                        <FiCheckCircle size={14} />
-                        {confirmPlayerMutation.isPending ? 'Processando...' : 'Confirmado'}
-                      </S.ConfirmButton>
-                      <S.ResenhaButton 
-                        onClick={() => handleConfirmPlayer(ps.userId, false)}
-                        disabled={confirmPlayerMutation.isPending}
-                        style={confirmPlayerMutation.isPending ? { cursor: 'wait', opacity: 0.7 } : {}}
-                      >
-                        <FiCoffee size={14} />
-                        {confirmPlayerMutation.isPending ? 'Processando...' : 'Resenha'}
-                      </S.ResenhaButton>
-                    </S.PlayerActions>
-                  )}
-                </S.ActionSection>
-              </S.PlayerItem>
-            );
-          })}
-        </S.PlayerList>
-      ) : (
-        <Alert
-          type="info"
-          title="Nenhum jogador encontrado"
-          message="Nenhum jogador disponível com os filtros selecionados."
-        />
+            <S.ConfirmButton onClick={() => setIsFilterOpen(!isFilterOpen)}>
+              <FiFilter size={16} />
+              {isFilterOpen ? 'Ocultar Filtros' : 'Filtrar'}
+            </S.ConfirmButton>
+          </div>
+
+          {isFilterOpen && (
+            <div ref={filterRef} style={{ marginBottom: '16px' }}>
+              <FilterForm
+                formik={formik}
+                positionOptions={positionOptions}
+                onClear={handleClearFilters}
+                closeFilter={handleCloseFilter}
+              />
+            </div>
+          )}
+
+          {filteredPlayers && filteredPlayers.length > 0 ? (
+            <div>
+              {/* Times */}
+              <S.TeamsGrid>
+                <TeamComponent 
+                  team={match.teamA} 
+                  players={teamAPlayers}
+                  handleAddToTeam={handleAddToTeam}
+                />
+                <TeamComponent 
+                  team={match.teamB} 
+                  players={teamBPlayers}
+                  handleAddToTeam={handleAddToTeam}
+                />
+              </S.TeamsGrid>
+              
+              {/* Jogadores não atribuídos a times */}
+              {unassignedPlayers.length > 0 && (
+                <>
+                  <S.SectionTitle style={{ marginTop: '32px', marginBottom: '16px' }}>
+                    Jogadores sem time ({unassignedPlayers.length})
+                  </S.SectionTitle>
+                  
+                  <S.UnassignedPlayersContainer>
+                    {unassignedPlayers.map(player => (
+                      <S.UnassignedPlayer key={player.userId}>
+                        <S.PlayerInfo>
+                          <S.PlayerAvatar>
+                            {player.user?.name?.charAt(0).toUpperCase() || ''}
+                          </S.PlayerAvatar>
+                          <div>
+                            <S.PlayerName>{player.user?.name || 'Sem nome'}</S.PlayerName>
+                            <S.PlayerPosition>{player.user?.position || 'Sem posição'}</S.PlayerPosition>
+                          </div>
+                        </S.PlayerInfo>
+                        <S.PlayerActions>
+                          <S.ConfirmButton 
+                            onClick={() => handleAddToTeam(player.userId, match.teamA?.id || 0)}
+                            disabled={!match.teamA?.id}
+                          >
+                            Time A
+                          </S.ConfirmButton>
+                          <S.ResenhaButton 
+                            onClick={() => handleAddToTeam(player.userId, match.teamB?.id || 0)}
+                            disabled={!match.teamB?.id}
+                          >
+                            Time B
+                          </S.ResenhaButton>
+                        </S.PlayerActions>
+                      </S.UnassignedPlayer>
+                    ))}
+                  </S.UnassignedPlayersContainer>
+                </>
+              )}
+            </div>
+          ) : (
+            <Alert
+              type="info"
+              title="Nenhum jogador confirmado"
+              message="Nenhum jogador foi confirmado para o jogo ainda."
+            />
+          )}
+        </>
       )}
     </S.Container>
   );

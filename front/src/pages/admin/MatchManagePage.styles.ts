@@ -150,12 +150,13 @@ export const PlayerList = styled.div`
   box-shadow: ${({ theme }) => theme.shadows.small};
 `;
 
-export const PlayerItem = styled.div`
+export const PlayerItem = styled.div<{ $resenha?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 1rem;
   border-bottom: 1px solid ${({ theme }) => theme.colors.neutral.light};
+  background-color: ${({ $resenha, theme }) => $resenha ? `${theme.colors.accent.light}10` : 'transparent'};
   &:last-child {
     border-bottom: none;
   }
@@ -167,15 +168,15 @@ export const PlayerInfo = styled.div`
   gap: 1rem;
 `;
 
-export const PlayerAvatar = styled.div`
+export const PlayerAvatar = styled.div<{ $resenha?: boolean }>`
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: ${({ theme }) => theme.colors.primary.light};
+  background: ${({ theme, $resenha }) => $resenha ? theme.colors.accent.light : theme.colors.primary.light};
   display: flex;
   align-items: center;
   justify-content: center;
-  color: ${({ theme }) => theme.colors.primary.dark};
+  color: ${({ theme, $resenha }) => $resenha ? theme.colors.accent.dark : theme.colors.primary.dark};
   font-weight: 600;
   font-size: 16px;
 `;
@@ -266,16 +267,16 @@ export const PlayerStatus = styled.div<{ $confirmed?: boolean; $resenha?: boolea
   font-weight: 500;
   
   ${({ $confirmed, $resenha, theme }) => {
+    if ($confirmed && $resenha) {
+      return `
+        background-color: ${theme.colors.accent.light}20;
+        color: ${theme.colors.accent.dark};
+      `;
+    }
     if ($confirmed) {
       return `
         background-color: ${theme.colors.primary.light}20;
         color: ${theme.colors.primary.dark};
-      `;
-    }
-    if ($resenha) {
-      return `
-        background-color: ${theme.colors.accent.light}20;
-        color: ${theme.colors.accent.dark};
       `;
     }
     return `
@@ -288,4 +289,94 @@ export const PlayerStatus = styled.div<{ $confirmed?: boolean; $resenha?: boolea
 export const ActionSection = styled.div`
   display: flex;
   align-items: center;
+`;
+
+// Novos componentes para o sistema de abas
+export const TabsContainer = styled.div`
+  display: flex;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral.light};
+  margin-bottom: 24px;
+  overflow-x: auto;
+`;
+
+export const Tab = styled.div<{ $active?: boolean }>`
+  padding: 12px 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: ${({ $active }) => ($active ? '600' : '400')};
+  color: ${({ $active, theme }) => ($active ? theme.colors.primary.main : theme.colors.text.secondary)};
+  border-bottom: 2px solid ${({ $active, theme }) => ($active ? theme.colors.primary.main : 'transparent')};
+  
+  &:hover {
+    color: ${({ theme }) => theme.colors.primary.main};
+    background-color: ${({ theme }) => theme.colors.background.default};
+  }
+`;
+
+// Componentes para gerenciamento de times
+export const TeamsGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 16px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const TeamContainer = styled.div`
+  background: ${({ theme }) => theme.colors.background.paper};
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: ${({ theme }) => theme.shadows.small};
+`;
+
+export const TeamHeader = styled.div<{ $color?: string }>`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: ${({ $color, theme }) => $color ? `${$color}20` : theme.colors.background.default};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral.light};
+  font-weight: 600;
+`;
+
+export const TeamPlayerList = styled.div`
+  max-height: 400px;
+  overflow-y: auto;
+`;
+
+export const TeamPlayerItem = styled.div`
+  padding: 12px 16px;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral.light};
+  
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+export const UnassignedPlayersContainer = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+`;
+
+export const UnassignedPlayer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: ${({ theme }) => theme.colors.background.paper};
+  border-radius: 8px;
+  box-shadow: ${({ theme }) => theme.shadows.small};
+`;
+
+export const EmptyTeamMessage = styled.div`
+  padding: 24px;
+  text-align: center;
+  color: ${({ theme }) => theme.colors.text.secondary};
+  font-style: italic;
 `; 
