@@ -94,7 +94,7 @@ const MatchListPage = () => {
 
   // Função para manipular a edição de uma partida
   const handleEditMatch = (id: number) => {
-    navigate(`/admin/matches/edit/${id}`);
+    navigate(`/admin/matches/manage/${id}`);
   };
 
   return (

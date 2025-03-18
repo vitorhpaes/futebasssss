@@ -270,7 +270,7 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onEdit }) => {
         <CardActions>
           <EditButton onClick={() => onEdit(match.id)}>
             <FiEdit size={14} />
-            Editar
+            Gerenciar partida
           </EditButton>
         </CardActions>
       )}

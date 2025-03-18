@@ -11,6 +11,7 @@ import ProtectedRoute from './ProtectedRoute';
 import { useAuthStore } from '../context/authStore';
 import AuthenticatedLayout from '../components/layout/AuthenticatedLayout';
 import PlayerEditPage from '../pages/admin/PlayerEditPage';
+import MatchManagePage from '../pages/admin/MatchManagePage';
 
 
 const AppRoutes = () => {
@@ -45,6 +46,7 @@ const AppRoutes = () => {
             <Route path="players/edit/:id" element={<PlayerEditPage />} />
             <Route path="matches" element={<MatchListPage />} />
             <Route path="matches/create" element={<MatchCreatePage />} />
+            <Route path="matches/manage/:id" element={<MatchManagePage />} />
           </Route>
         </Route>
 
