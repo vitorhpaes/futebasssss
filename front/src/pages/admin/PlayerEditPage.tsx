@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useFormik } from 'formik';
 import { toFormikValidationSchema } from 'zod-formik-adapter';
@@ -19,6 +19,7 @@ const PlayerEditPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const userId = id ? parseInt(id, 10) : 0;
+  const [formInitialized, setFormInitialized] = useState(false);
 
   // Buscar dados do usuário
   const { data: user, isLoading: isLoadingUser, error: userError } = useUser(userId);
@@ -47,7 +48,7 @@ const PlayerEditPage: React.FC = () => {
       name: user?.name || '',
       type: user?.type || UserType.PLAYER,
       phone: user?.phone || '',
-      position: user?.position || '', // Garantindo que não seja null
+      position: user?.position || '',
       observations: user?.observations || '',
     },
     enableReinitialize: true, // Importante para atualizar o formulário quando os dados do usuário forem carregados
@@ -75,19 +76,31 @@ const PlayerEditPage: React.FC = () => {
     },
   });
 
-  // Log para debug
+  // Log para debug e inicialização garantida do formulário
   useEffect(() => {
     if (user) {
       console.log('Dados do usuário carregados:', user);
       console.log('Valor da posição:', user.position);
+      
+      // Garantir que o valor da posição seja definido explicitamente
+      formik.setFieldValue('position', user.position || '');
+      formik.setFieldValue('type', user.type || UserType.PLAYER);
+      
+      // Marcar formulário como inicializado
+      setFormInitialized(true);
     }
   }, [user]);
+
+  // Função para assegurar que o valor do Select seja uma string não nula
+  const getSelectValue = (value: string | null | undefined): string => {
+    return value || '';
+  };
 
   const handleCancel = () => {
     navigate('/admin/players');
   };
 
-  if (isLoadingUser) {
+  if (isLoadingUser || !formInitialized) {
     return <div>Carregando dados do jogador...</div>;
   }
 
@@ -148,7 +161,7 @@ const PlayerEditPage: React.FC = () => {
                   name="type"
                   options={typeOptions}
                   onValueChange={(value) => formik.setFieldValue('type', value)}
-                  value={formik.values.type || ''}
+                  value={getSelectValue(formik.values.type)}
                 />
               </div>
               {formik.touched.type && formik.errors.type && (
@@ -163,7 +176,7 @@ const PlayerEditPage: React.FC = () => {
                   name="position"
                   options={positionOptions}
                   onValueChange={(value) => formik.setFieldValue('position', value)}
-                  value={formik.values.position || ''}
+                  value={getSelectValue(formik.values.position)}
                 />
               </div>
               {formik.touched.position && formik.errors.position && (
