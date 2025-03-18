@@ -79,7 +79,7 @@ export const usePlayersWithSessionData = (sessionId: number) => {
           sessionId,
           teamId: null,
           confirmed: false,
-          isResenha: false,
+          willPlay: true,
           goals: 0,
           assists: 0,
           createdAt: new Date().toISOString(),
@@ -158,8 +158,8 @@ export const useUpdatePlayerSessionMutation = () => {
 export const useConfirmPlayerMutation = () => {
   const queryClient = useQueryClient();
   
-  return useMutation<PlayerSession, ApiError, { sessionId: number; userId: number; isResenha?: boolean }>({
-    mutationFn: async ({ sessionId, userId, isResenha }) => {
+  return useMutation<PlayerSession, ApiError, { sessionId: number; userId: number; willPlay?: boolean }>({
+    mutationFn: async ({ sessionId, userId, willPlay }) => {
       try {
         // Verifica se já existe uma associação
         let response;
@@ -172,7 +172,7 @@ export const useConfirmPlayerMutation = () => {
             // Se existir, atualiza
             response = await api.patch(`/player-sessions/${existing.data[0].id}`, {
               confirmed: true,
-              isResenha: isResenha || false
+              willPlay: willPlay ?? true
             });
           } else {
             throw new Error('Associação não encontrada');
@@ -183,7 +183,7 @@ export const useConfirmPlayerMutation = () => {
             userId,
             sessionId,
             confirmed: true,
-            isResenha: isResenha || false
+            willPlay: willPlay ?? true
           });
         }
         

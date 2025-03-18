@@ -50,36 +50,31 @@ export class PlayerSessionsService {
   }
 
   async create(data: CreatePlayerSessionDto): Promise<PlayerSession> {
-    const { userId, sessionId, teamId, confirmed, goals, assists } = data;
-
-    // Verificar se já existe uma associação entre este usuário e esta sessão
-    const existing = await this.prisma.playerSession.findFirst({
-      where: {
-        userId,
-        sessionId,
+    const createData: Prisma.PlayerSessionCreateInput = {
+      user: {
+        connect: { id: data.userId },
       },
-    });
+      session: {
+        connect: { id: data.sessionId },
+      },
+      confirmed: data.confirmed || false,
+      goals: data.goals || 0,
+      assists: data.assists || 0,
+      willPlay: data.willPlay ?? true,
+    };
 
-    if (existing) {
-      return await this.prisma.playerSession.update({
-        where: { id: existing.id },
-        data: {
-          teamId,
-          confirmed: confirmed ?? existing.confirmed,
-          goals: goals ?? existing.goals,
-          assists: assists ?? existing.assists,
-        },
-      });
+    if (data.teamId) {
+      createData.team = {
+        connect: { id: data.teamId },
+      };
     }
 
     return await this.prisma.playerSession.create({
-      data: {
-        userId,
-        sessionId,
-        teamId,
-        confirmed: confirmed ?? false,
-        goals: goals ?? 0,
-        assists: assists ?? 0,
+      data: createData,
+      include: {
+        user: true,
+        session: true,
+        team: true,
       },
     });
   }
@@ -96,6 +91,10 @@ export class PlayerSessionsService {
 
     if (data.confirmed !== undefined) {
       updateData.confirmed = data.confirmed;
+    }
+
+    if (data.willPlay !== undefined) {
+      updateData.willPlay = data.willPlay;
     }
 
     if (data.goals !== undefined) {

@@ -21,6 +21,16 @@ export class UpdatePlayerSessionDto {
   confirmed?: boolean;
 
   @ApiProperty({
+    description:
+      'Indica se o jogador irá jogar (true) ou apenas participar da resenha (false)',
+    example: true,
+    required: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  willPlay?: boolean;
+
+  @ApiProperty({
     description: 'Número de gols marcados',
     example: 2,
     required: false,

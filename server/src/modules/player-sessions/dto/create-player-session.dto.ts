@@ -27,10 +27,11 @@ export class CreatePlayerSessionDto {
   @ApiProperty({
     description: 'ID do time',
     example: 1,
+    required: false,
   })
   @IsNumber()
-  @IsNotEmpty()
-  teamId: number;
+  @IsOptional()
+  teamId?: number;
 
   @ApiProperty({
     description: 'Confirmação de presença',
@@ -40,6 +41,16 @@ export class CreatePlayerSessionDto {
   @IsBoolean()
   @IsOptional()
   confirmed?: boolean;
+
+  @ApiProperty({
+    description:
+      'Indica se o jogador irá jogar (true) ou apenas participar da resenha (false)',
+    example: true,
+    default: true,
+  })
+  @IsBoolean()
+  @IsOptional()
+  willPlay?: boolean;
 
   @ApiProperty({
     description: 'Número de gols marcados',

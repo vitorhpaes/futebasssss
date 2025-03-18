@@ -153,19 +153,18 @@ export const PlayerList = styled.div`
 export const PlayerItem = styled.div`
   display: flex;
   align-items: center;
-  padding: 16px;
+  justify-content: space-between;
+  padding: 1rem;
   border-bottom: 1px solid ${({ theme }) => theme.colors.neutral.light};
-  
   &:last-child {
     border-bottom: none;
   }
 `;
 
 export const PlayerInfo = styled.div`
-  flex: 1;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 1rem;
 `;
 
 export const PlayerAvatar = styled.div`
@@ -284,4 +283,9 @@ export const PlayerStatus = styled.div<{ $confirmed?: boolean; $resenha?: boolea
       color: ${theme.colors.text.secondary};
     `;
   }}
+`;
+
+export const ActionSection = styled.div`
+  display: flex;
+  align-items: center;
 `; 

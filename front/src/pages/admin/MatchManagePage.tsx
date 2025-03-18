@@ -168,15 +168,15 @@ const MatchManagePage = () => {
   });
 
   // Função para confirmar presença do jogador
-  const handleConfirmPlayer = (userId: number, isResenha = false) => {
+  const handleConfirmPlayer = (userId: number, willPlay = true) => {
     confirmPlayerMutation.mutate(
-      { sessionId: matchId, userId, isResenha },
+      { sessionId: matchId, userId, willPlay },
       {
         onSuccess: () => {
           showToast(
-            isResenha 
-              ? `Jogador marcado como resenha com sucesso!` 
-              : `Presença do jogador confirmada com sucesso!`,
+            willPlay 
+              ? `Presença do jogador confirmada com sucesso!` 
+              : `Jogador marcado como resenha com sucesso!`,
             'success',
             3000
           );
@@ -252,9 +252,9 @@ const MatchManagePage = () => {
       // Filtrar por status
       if (formik.values.status !== 'all') {
         if (formik.values.status === 'confirmed') {
-          filtered = filtered.filter(p => p.confirmed && !p.isResenha);
+          filtered = filtered.filter(p => p.confirmed && p.willPlay);
         } else if (formik.values.status === 'resenha') {
-          filtered = filtered.filter(p => p.confirmed && p.isResenha);
+          filtered = filtered.filter(p => p.confirmed && !p.willPlay);
         } else if (formik.values.status === 'pending') {
           filtered = filtered.filter(p => !p.confirmed);
         }
@@ -302,8 +302,8 @@ const MatchManagePage = () => {
   }
 
   // Contadores para estatísticas
-  const confirmedCount = filteredPlayers.filter(p => p.confirmed && !p.isResenha).length;
-  const resenhaCount = filteredPlayers.filter(p => p.confirmed && p.isResenha).length;
+  const confirmedCount = filteredPlayers.filter(p => p.confirmed && p.willPlay).length;
+  const resenhaCount = filteredPlayers.filter(p => p.confirmed && !p.willPlay).length;
   const pendingCount = filteredPlayers.filter(p => !p.confirmed).length;
 
   return (
@@ -406,48 +406,51 @@ const MatchManagePage = () => {
       {filteredPlayers && filteredPlayers.length > 0 ? (
         <S.PlayerList>
           {filteredPlayers.map((ps) => {
-            const isConfirmed = ps.confirmed && !ps.isResenha;
-            const isResenha = ps.confirmed && ps.isResenha;
+            const isConfirmed = ps.confirmed;
+            const isResenha = ps.confirmed && !ps.willPlay;
             
             return (
-              <S.PlayerItem key={ps.user.id}>
+              <S.PlayerItem key={ps.userId}>
                 <S.PlayerInfo>
                   <S.PlayerAvatar>
-                    {ps.user.name.charAt(0).toUpperCase()}
+                    {ps.user?.name?.charAt(0).toUpperCase() || ''}
                   </S.PlayerAvatar>
                   <div>
-                    <S.PlayerName>{ps.user.name}</S.PlayerName>
-                    <S.PlayerPosition>{ps.user.position || 'Posição não definida'}</S.PlayerPosition>
+                    <S.PlayerName>{ps.user?.name || 'Sem nome'}</S.PlayerName>
+                    <S.PlayerPosition>
+                      {ps.user?.position || 'Sem posição'}
+                    </S.PlayerPosition>
                   </div>
                 </S.PlayerInfo>
-                
-                {(isConfirmed || isResenha) ? (
-                  <S.PlayerStatus 
-                    $confirmed={isConfirmed} 
-                    $resenha={isResenha}
-                  >
-                    {isConfirmed ? 'Confirmado' : 'Resenha'}
-                  </S.PlayerStatus>
-                ) : (
-                  <S.PlayerActions>
-                    <S.ConfirmButton 
-                      onClick={() => handleConfirmPlayer(ps.user.id)}
-                      disabled={confirmPlayerMutation.isPending}
-                      style={confirmPlayerMutation.isPending ? { cursor: 'wait', opacity: 0.7 } : {}}
+                <S.ActionSection>
+                  {(isConfirmed) ? (
+                    <S.PlayerStatus 
+                      $confirmed={isConfirmed} 
+                      $resenha={isResenha}
                     >
-                      <FiCheckCircle size={14} />
-                      {confirmPlayerMutation.isPending ? 'Processando...' : 'Confirmado'}
-                    </S.ConfirmButton>
-                    <S.ResenhaButton 
-                      onClick={() => handleConfirmPlayer(ps.user.id, true)}
-                      disabled={confirmPlayerMutation.isPending}
-                      style={confirmPlayerMutation.isPending ? { cursor: 'wait', opacity: 0.7 } : {}}
-                    >
-                      <FiCoffee size={14} />
-                      {confirmPlayerMutation.isPending ? 'Processando...' : 'Resenha'}
-                    </S.ResenhaButton>
-                  </S.PlayerActions>
-                )}
+                      {isResenha ? 'Resenha' : 'Confirmado'}
+                    </S.PlayerStatus>
+                  ) : (
+                    <S.PlayerActions>
+                      <S.ConfirmButton 
+                        onClick={() => handleConfirmPlayer(ps.userId, true)}
+                        disabled={confirmPlayerMutation.isPending}
+                        style={confirmPlayerMutation.isPending ? { cursor: 'wait', opacity: 0.7 } : {}}
+                      >
+                        <FiCheckCircle size={14} />
+                        {confirmPlayerMutation.isPending ? 'Processando...' : 'Confirmado'}
+                      </S.ConfirmButton>
+                      <S.ResenhaButton 
+                        onClick={() => handleConfirmPlayer(ps.userId, false)}
+                        disabled={confirmPlayerMutation.isPending}
+                        style={confirmPlayerMutation.isPending ? { cursor: 'wait', opacity: 0.7 } : {}}
+                      >
+                        <FiCoffee size={14} />
+                        {confirmPlayerMutation.isPending ? 'Processando...' : 'Resenha'}
+                      </S.ResenhaButton>
+                    </S.PlayerActions>
+                  )}
+                </S.ActionSection>
               </S.PlayerItem>
             );
           })}

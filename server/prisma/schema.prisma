@@ -88,6 +88,7 @@ model Team {
 model PlayerSession {
   id        Int      @id @default(autoincrement())
   confirmed Boolean  @default(false)
+  willPlay  Boolean  @default(true)
   goals     Int      @default(0)
   assists   Int      @default(0)
   createdAt DateTime @default(now()) @map("created_at")
@@ -98,8 +99,8 @@ model PlayerSession {
   userId    Int      @map("user_id")
   session   Session  @relation(fields: [sessionId], references: [id])
   sessionId Int      @map("session_id")
-  team      Team     @relation(fields: [teamId], references: [id])
-  teamId    Int      @map("team_id")
+  team      Team?    @relation(fields: [teamId], references: [id])
+  teamId    Int?     @map("team_id")
 
   @@unique([userId, sessionId])
   @@map("player_sessions")

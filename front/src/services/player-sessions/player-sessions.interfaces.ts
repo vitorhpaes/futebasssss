@@ -5,19 +5,19 @@ export const playerSessionSchema = z.object({
   id: z.number(),
   userId: z.number(),
   sessionId: z.number(),
-  teamId: z.number().optional().nullable(),
+  teamId: z.number().nullable(),
   confirmed: z.boolean(),
-  isResenha: z.boolean().optional().default(false),
-  goals: z.number().optional().default(0),
-  assists: z.number().optional().default(0),
+  willPlay: z.boolean(),
+  goals: z.number(),
+  assists: z.number(),
   createdAt: z.string(),
   updatedAt: z.string(),
   user: z.object({
     id: z.number(),
     name: z.string(),
     email: z.string(),
-    position: z.string().optional().nullable()
-  })
+    position: z.string().nullable()
+  }).optional()
 });
 
 // Lista de jogadores em partida
@@ -25,9 +25,11 @@ export const playerSessionListSchema = z.array(playerSessionSchema);
 
 // Esquema para criar ou atualizar um jogador em partida
 export const updatePlayerSessionSchema = z.object({
+  teamId: z.number().optional(),
   confirmed: z.boolean().optional(),
-  isResenha: z.boolean().optional(),
-  teamId: z.number().optional().nullable()
+  willPlay: z.boolean().optional(),
+  goals: z.number().optional(),
+  assists: z.number().optional(),
 });
 
 // Tipos inferidos dos schemas
