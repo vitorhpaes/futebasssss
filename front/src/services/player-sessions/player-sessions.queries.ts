@@ -111,6 +111,8 @@ export const useUpdatePlayerSessionMutation = () => {
   return useMutation<PlayerSession, ApiError, { sessionId: number; userId: number; data: UpdatePlayerSessionDto }>({
     mutationFn: async ({ sessionId, userId, data }) => {
       try {
+        console.log('⚽ Iniciando atualização de jogador com dados:', { sessionId, userId, data });
+        
         // Primeiro, buscamos a sessão específica deste jogador nesta partida
         const response = await api.get(`/player-sessions/session/${sessionId}`);
         const sessions = response.data as PlayerSessionList;
@@ -119,11 +121,11 @@ export const useUpdatePlayerSessionMutation = () => {
         let result;
         if (playerSession) {
           // Se encontrar o registro existente, atualiza
-          console.log(`Atualizando sessão existente ID: ${playerSession.id}`);
+          console.log(`⚽ Atualizando sessão existente ID: ${playerSession.id}`, { teamId: data.teamId, ...data });
           result = await api.patch(`/player-sessions/${playerSession.id}`, data);
         } else {
           // Se não encontrar, cria um novo com os dados
-          console.log('Criando nova sessão');
+          console.log('⚽ Criando nova sessão', { userId, sessionId, ...data });
           result = await api.post(`/player-sessions`, {
             userId,
             sessionId,
@@ -131,19 +133,22 @@ export const useUpdatePlayerSessionMutation = () => {
           });
         }
         
+        console.log('⚽ Mutation bem-sucedida com variáveis:', { sessionId, userId, data });
+        
         try {
           return playerSessionSchema.parse(result.data);
         } catch (parseError) {
-          console.error('Erro ao validar schema:', parseError);
+          console.error('⚠️ Erro ao validar schema:', parseError);
           return result.data as PlayerSession;
         }
       } catch (error) {
-        console.error('Erro ao atualizar jogador:', error);
+        console.error('⚠️ Erro ao atualizar jogador:', error);
         throw handleApiError(error);
       }
     },
     onSuccess: (_, variables) => {
       // Invalidar queries para forçar o recarregamento dos dados
+      console.log('✅ Mutation bem-sucedida:', variables);
       queryClient.invalidateQueries({ 
         queryKey: PLAYER_SESSIONS_QUERY_KEYS.listBySession(variables.sessionId) 
       });
