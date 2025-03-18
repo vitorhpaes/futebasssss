@@ -103,7 +103,7 @@ export const usePlayersWithSessionData = (sessionId: number) => {
 };
 
 /**
- * Hook para confirmar a presença de um jogador (ou marcar como resenha)
+ * Hook para atualizar um jogador em uma partida
  */
 export const useUpdatePlayerSessionMutation = () => {
   const queryClient = useQueryClient();
@@ -111,22 +111,20 @@ export const useUpdatePlayerSessionMutation = () => {
   return useMutation<PlayerSession, ApiError, { sessionId: number; userId: number; data: UpdatePlayerSessionDto }>({
     mutationFn: async ({ sessionId, userId, data }) => {
       try {
-        // Verifica se já existe uma associação
-        let response;
+        // Primeiro, buscamos a sessão específica deste jogador nesta partida
+        const response = await api.get(`/player-sessions/session/${sessionId}`);
+        const sessions = response.data as PlayerSessionList;
+        const playerSession = sessions.find(ps => ps.userId === userId);
         
-        try {
-          // Tenta buscar associação existente
-          await api.get(`/player-sessions?userId=${userId}&sessionId=${sessionId}`);
-          
-          // Se existir, atualiza
-          response = await api.patch(`/player-sessions`, {
-            userId,
-            sessionId,
-            ...data
-          });
-        } catch {
-          // Se não existir, cria
-          response = await api.post(`/player-sessions`, {
+        let result;
+        if (playerSession) {
+          // Se encontrar o registro existente, atualiza
+          console.log(`Atualizando sessão existente ID: ${playerSession.id}`);
+          result = await api.patch(`/player-sessions/${playerSession.id}`, data);
+        } else {
+          // Se não encontrar, cria um novo com os dados
+          console.log('Criando nova sessão');
+          result = await api.post(`/player-sessions`, {
             userId,
             sessionId,
             ...data
@@ -134,12 +132,13 @@ export const useUpdatePlayerSessionMutation = () => {
         }
         
         try {
-          return playerSessionSchema.parse(response.data);
+          return playerSessionSchema.parse(result.data);
         } catch (parseError) {
           console.error('Erro ao validar schema:', parseError);
-          return response.data as PlayerSession;
+          return result.data as PlayerSession;
         }
       } catch (error) {
+        console.error('Erro ao atualizar jogador:', error);
         throw handleApiError(error);
       }
     },

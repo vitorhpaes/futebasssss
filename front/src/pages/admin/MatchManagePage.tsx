@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiArrowLeft, FiMapPin, FiCalendar, FiClock, FiCheckCircle, FiCoffee, FiFilter, FiX, FiSearch, FiUsers, FiUserCheck, FiUser } from 'react-icons/fi';
+import { FiArrowLeft, FiMapPin, FiCalendar, FiClock, FiCheckCircle, FiCoffee, FiFilter, FiX, FiSearch, FiUsers, FiUserCheck } from 'react-icons/fi';
 import { useMatch } from '../../services/matches/matches.queries';
 import { usePlayersWithSessionData, useConfirmPlayerMutation, useUpdatePlayerSessionMutation } from '../../services/player-sessions/player-sessions.queries';
 import { PlayerSession } from '../../services/player-sessions/player-sessions.interfaces';
@@ -111,7 +111,7 @@ const PlayerItem = ({
   ps: PlayerSession; 
   handleConfirmPlayer: (userId: number, willPlay: boolean) => void;
   handleTogglePlayerStatus: (userId: number, willPlay: boolean) => void;
-  confirmPlayerMutation: any;
+  confirmPlayerMutation: { isPending: boolean };
 }) => {
   const isConfirmed = ps.confirmed;
   const isResenha = ps.confirmed && !ps.willPlay;
@@ -195,15 +195,22 @@ const PlayerItem = ({
   );
 };
 
+// Interface para o tipo de equipe na partida
+interface MatchTeam {
+  id?: number;
+  name?: string;
+  color?: string;
+}
+
 // Interface para o componente Team
 interface TeamProps {
-  team: any;
+  team: MatchTeam | null | undefined;
   players: PlayerSession[];
-  handleAddToTeam: (userId: number, teamId: number) => void;
+  handleAddToTeam?: (userId: number, teamId: number) => void;
 }
 
 // Componente para exibir um time com os jogadores
-const TeamComponent = ({ team, players, handleAddToTeam }: TeamProps) => {
+const TeamComponent = ({ team, players }: TeamProps) => {
   return (
     <S.TeamContainer>
       <S.TeamHeader $color={team?.color}>
@@ -228,7 +235,7 @@ const TeamComponent = ({ team, players, handleAddToTeam }: TeamProps) => {
           ))
         ) : (
           <S.EmptyTeamMessage>
-            Arraste jogadores para este time
+            Adicione jogadores a este time
           </S.EmptyTeamMessage>
         )}
       </S.TeamPlayerList>
@@ -332,6 +339,7 @@ const MatchManagePage = () => {
             );
           },
           onError: (error) => {
+            console.error('Erro ao atualizar:', error);
             showToast(
               `Erro ao atualizar: ${error.message || 'Tente novamente mais tarde.'}`,
               'error',
@@ -709,13 +717,11 @@ const MatchManagePage = () => {
                         <S.PlayerActions>
                           <S.ConfirmButton 
                             onClick={() => handleAddToTeam(player.userId, match.teamA?.id || 0)}
-                            disabled={!match.teamA?.id}
                           >
                             Time A
                           </S.ConfirmButton>
                           <S.ResenhaButton 
                             onClick={() => handleAddToTeam(player.userId, match.teamB?.id || 0)}
-                            disabled={!match.teamB?.id}
                           >
                             Time B
                           </S.ResenhaButton>
