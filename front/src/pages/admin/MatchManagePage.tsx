@@ -352,17 +352,33 @@ const MatchManagePage = () => {
   };
 
   // Função para adicionar jogador a um time
-  const handleAddToTeam = (userId: number, teamId: number) => {
+  const handleAddToTeam = (userId: number, teamId: number | undefined) => {
+    console.log('⚽ Tentando adicionar jogador ao time:', { userId, teamId });
+    
+    // Verificar se o teamId é undefined ou zero
+    if (teamId === undefined || teamId <= 0) {
+      showToast(
+        `Erro: ID do time inválido ou não definido (${teamId})`,
+        'error',
+        3000
+      );
+      return;
+    }
+
     // Buscar a sessão do jogador
     const playerSession = allPlayersWithSessionData?.find(ps => ps.userId === userId);
     
     if (playerSession && playerSession.id) {
+      // Garantir que o teamId é um número
+      const validTeamId = Number(teamId);
+      console.log('⚽ Enviando atualização com teamId:', validTeamId);
+      
       updatePlayerMutation.mutate(
         { 
           sessionId: matchId, 
           userId, 
           data: {
-            teamId
+            teamId: validTeamId
           }
         },
         {
@@ -374,6 +390,7 @@ const MatchManagePage = () => {
             );
           },
           onError: (error) => {
+            console.error('⚠️ Erro ao adicionar ao time:', error);
             showToast(
               `Erro ao adicionar ao time: ${error.message || 'Tente novamente mais tarde.'}`,
               'error',
@@ -716,12 +733,14 @@ const MatchManagePage = () => {
                         </S.PlayerInfo>
                         <S.PlayerActions>
                           <S.ConfirmButton 
-                            onClick={() => handleAddToTeam(player.userId, match.teamA?.id || 0)}
+                            onClick={() => handleAddToTeam(player.userId, match.teamA?.id)}
+                            disabled={!match.teamA?.id}
                           >
                             Time A
                           </S.ConfirmButton>
                           <S.ResenhaButton 
-                            onClick={() => handleAddToTeam(player.userId, match.teamB?.id || 0)}
+                            onClick={() => handleAddToTeam(player.userId, match.teamB?.id)}
+                            disabled={!match.teamB?.id}
                           >
                             Time B
                           </S.ResenhaButton>
