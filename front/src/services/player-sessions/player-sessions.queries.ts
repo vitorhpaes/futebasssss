@@ -161,37 +161,38 @@ export const useConfirmPlayerMutation = () => {
   return useMutation<PlayerSession, ApiError, { sessionId: number; userId: number; willPlay?: boolean }>({
     mutationFn: async ({ sessionId, userId, willPlay }) => {
       try {
-        // Verifica se já existe uma associação
-        let response;
+        // Verifica se já existe uma associação específica para este jogador nesta sessão
+        const response = await api.get(`/player-sessions/session/${sessionId}`);
+        const sessions = response.data as PlayerSessionList;
         
-        try {
-          // Tenta buscar associação existente
-          const existing = await api.get(`/player-sessions?userId=${userId}&sessionId=${sessionId}`);
-          
-          if (existing.data && existing.data.length > 0) {
-            // Se existir, atualiza
-            response = await api.patch(`/player-sessions/${existing.data[0].id}`, {
-              confirmed: true,
-              willPlay: willPlay ?? true
-            });
-          } else {
-            throw new Error('Associação não encontrada');
-          }
-        } catch {
-          // Se não existir, cria
-          response = await api.post(`/player-sessions`, {
+        // Buscar a sessão específica deste jogador nesta partida
+        const playerSessionExists = sessions.find(ps => ps.userId === userId);
+        
+        let result;
+        
+        if (playerSessionExists) {
+          // Se existir, atualizamos apenas o status de willPlay (para alternar entre jogo e resenha)
+          result = await api.patch(`/player-sessions/${playerSessionExists.id}`, {
+            confirmed: true,
+            willPlay: willPlay ?? true
+          });
+          console.log('Atualizando sessão existente', playerSessionExists.id);
+        } else {
+          // Se não existir, criamos uma nova associação para este jogador
+          result = await api.post(`/player-sessions`, {
             userId,
             sessionId,
             confirmed: true,
             willPlay: willPlay ?? true
           });
+          console.log('Criando nova sessão para jogador', userId);
         }
         
         try {
-          return playerSessionSchema.parse(response.data);
+          return playerSessionSchema.parse(result.data);
         } catch (parseError) {
           console.error('Erro ao validar schema:', parseError);
-          return response.data as PlayerSession;
+          return result.data as PlayerSession;
         }
       } catch (error) {
         console.error('Erro ao confirmar jogador:', error);

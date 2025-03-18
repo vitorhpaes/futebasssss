@@ -238,14 +238,14 @@ const MatchManagePage = () => {
       if (formik.values.name) {
         const searchName = formik.values.name.toLowerCase();
         filtered = filtered.filter(p => 
-          p.user.name.toLowerCase().includes(searchName)
+          p.user?.name?.toLowerCase().includes(searchName) || false
         );
       }
       
       // Filtrar por posição
       if (formik.values.position) {
         filtered = filtered.filter(p => 
-          p.user.position === formik.values.position
+          p.user?.position === formik.values.position
         );
       }
       
