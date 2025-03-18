@@ -1,10 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Position } from '@prisma/client';
+import { Position, UserType } from '@prisma/client';
 import { IsEmail, IsEnum, IsOptional, IsString } from 'class-validator';
 import { TransformTrimAndEmptyToNull } from 'src/common/transformers/global-transformers';
 
 import { TransformTrim } from 'src/common/transformers/global-transformers';
 import { POSITION_VALUES } from 'src/modules/users/dto/create-user.dto';
+
+// Valores possíveis para o tipo de usuário
+export const USER_TYPE_VALUES = ['PLAYER', 'ADMIN'];
 
 export class UpdateUserDto {
   @ApiPropertyOptional({
@@ -24,6 +27,15 @@ export class UpdateUserDto {
   @IsString({ message: 'Nome deve ser uma string' })
   @TransformTrim()
   name?: string;
+
+  @ApiPropertyOptional({
+    description: 'Tipo de usuário',
+    example: 'PLAYER',
+    enum: USER_TYPE_VALUES,
+  })
+  @IsEnum(UserType)
+  @IsOptional()
+  type?: UserType;
 
   @ApiPropertyOptional({
     example: '+5511999999999',

@@ -8,6 +8,7 @@ import Select from '../../components/form/Select';
 import { prepareFormSubmission } from '../../utils/payload-helper';
 import { useCreateUserMutation } from '../../services/users/users.queries';
 import { z } from 'zod';
+import { useToast } from '../../components/ui/Toast';
 import { 
   UserType,
   USER_TYPE_OPTIONS,
@@ -18,6 +19,7 @@ import {
 const PlayerCreatePage: React.FC = () => {
   const navigate = useNavigate();
   const createUserMutation = useCreateUserMutation();
+  const { showToast } = useToast();
 
   // Opções para os selects usando as constantes compartilhadas
   const typeOptions = USER_TYPE_OPTIONS;
@@ -59,11 +61,11 @@ const PlayerCreatePage: React.FC = () => {
         });
         
         await createUserMutation.mutateAsync(cleanPayload as RegisterUserDto);
-        alert('Jogador cadastrado com sucesso!');
+        showToast('Jogador cadastrado com sucesso!', 'success');
         navigate('/admin/players');
       } catch (error) {
         console.error('Erro ao cadastrar jogador:', error);
-        alert('Erro ao cadastrar jogador. Verifique os dados e tente novamente.');
+        showToast('Erro ao cadastrar jogador. Verifique os dados e tente novamente.', 'error');
       }
     },
   });

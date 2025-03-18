@@ -8,6 +8,7 @@ import Select from '../../components/form/Select';
 import { prepareFormSubmission } from '../../utils/payload-helper';
 import { useUpdateUserMutation, useUser } from '../../services/users/users.queries';
 import { z } from 'zod';
+import { useToast } from '../../components/ui/Toast';
 import { 
   UserType,
   USER_TYPE_OPTIONS,
@@ -20,6 +21,7 @@ const PlayerEditPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const userId = id ? parseInt(id, 10) : 0;
   const [formInitialized, setFormInitialized] = useState(false);
+  const { showToast } = useToast();
 
   // Buscar dados do usuário
   const { data: user, isLoading: isLoadingUser, error: userError } = useUser(userId);
@@ -59,7 +61,7 @@ const PlayerEditPage: React.FC = () => {
         const cleanPayload = prepareFormSubmission<UpdateUserDto>(values as UpdateUserDto, {
           emptyStringsToNull: true,
           removeNull: false,
-          alwaysInclude: ['type'] // Garantir que o tipo seja sempre incluído
+          alwaysInclude: ['type'] // Manter campo type no payload
         });
         
         await updateUserMutation.mutateAsync({
@@ -67,11 +69,11 @@ const PlayerEditPage: React.FC = () => {
           data: cleanPayload as UpdateUserDto
         });
         
-        alert('Jogador atualizado com sucesso!');
+        showToast('Jogador atualizado com sucesso!', 'success');
         navigate('/admin/players');
       } catch (error) {
         console.error('Erro ao atualizar jogador:', error);
-        alert('Erro ao atualizar jogador. Verifique os dados e tente novamente.');
+        showToast('Erro ao atualizar jogador. Verifique os dados e tente novamente.', 'error');
       }
     },
   });
