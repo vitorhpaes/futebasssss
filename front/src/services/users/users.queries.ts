@@ -38,9 +38,7 @@ export const useUsers = (filters?: UserFilterParams) => {
         if (filters?.orderDirection) queryParams.append('orderDirection', filters.orderDirection);
         
         const query = queryParams.toString() ? `?${queryParams.toString()}` : '';
-        console.log('Fazendo requisição para:', `/users${query}`);
         const response = await api.get(`/users${query}`);
-        console.log('Resposta recebida:', response.data);
         
         try {
           return userListSchema.parse(response.data);

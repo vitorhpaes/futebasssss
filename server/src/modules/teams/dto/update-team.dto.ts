@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, IsNumber } from 'class-validator';
 
 export class UpdateTeamDto {
   @ApiProperty({
@@ -19,4 +19,13 @@ export class UpdateTeamDto {
   @IsString()
   @IsOptional()
   color?: string;
+
+  @ApiProperty({
+    description: 'ID da sessão do jogo',
+    example: 1,
+    required: false,
+  })
+  @IsNumber()
+  @IsOptional()
+  sessionId?: number;
 }

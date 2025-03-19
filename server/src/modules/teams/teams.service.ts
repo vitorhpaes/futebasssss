@@ -37,7 +37,19 @@ export class TeamsService {
     });
   }
 
-  async getTeamPlayers(id: number, sessionId?: number) {
+  async getTeamPlayers(
+    id: number,
+    sessionId?: number,
+  ): Promise<
+    {
+      id: number;
+      name: string | null;
+      position: string | null;
+      goals: number;
+      assists: number;
+      confirmed: boolean;
+    }[]
+  > {
     const playerSessions = await this.prisma.playerSession.findMany({
       where: { teamId: id, ...(sessionId && { sessionId }) },
       include: {

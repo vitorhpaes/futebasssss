@@ -3,7 +3,6 @@ import { FiFilter } from 'react-icons/fi';
 import Alert from '../../../components/ui/Alert';
 import { PlayerSession } from '../../../services/player-sessions/player-sessions.interfaces';
 import * as S from '../../../pages/admin/MatchManagePage.styles';
-import { FilterFormProps } from '../FilterForm';
 import PlayerItem from '../PlayerItem';
 
 interface AllPlayersTabProps {

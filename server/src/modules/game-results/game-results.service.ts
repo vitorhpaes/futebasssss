@@ -12,7 +12,11 @@ export class GameResultsService {
     try {
       return await this.prisma.gameResult.findMany({
         include: {
-          session: true,
+          session: {
+            include: {
+              teams: true,
+            },
+          },
           teamA: true,
           teamB: true,
           winnerTeam: true,
@@ -31,7 +35,11 @@ export class GameResultsService {
       const gameResult = await this.prisma.gameResult.findUnique({
         where: { id },
         include: {
-          session: true,
+          session: {
+            include: {
+              teams: true,
+            },
+          },
           teamA: true,
           teamB: true,
           winnerTeam: true,
@@ -61,6 +69,11 @@ export class GameResultsService {
       const gameResult = await this.prisma.gameResult.findUnique({
         where: { sessionId },
         include: {
+          session: {
+            include: {
+              teams: true,
+            },
+          },
           teamA: true,
           teamB: true,
           winnerTeam: true,
@@ -101,6 +114,17 @@ export class GameResultsService {
         }
         // Em caso de empate, winnerId permanece undefined
       }
+
+      // Primeiro, vincula os times à sessão
+      await this.prisma.team.update({
+        where: { id: teamAId },
+        data: { sessionId },
+      });
+
+      await this.prisma.team.update({
+        where: { id: teamBId },
+        data: { sessionId },
+      });
 
       return await this.prisma.gameResult.create({
         data: {
@@ -168,7 +192,11 @@ export class GameResultsService {
         where: { id },
         data: updateData,
         include: {
-          session: true,
+          session: {
+            include: {
+              teams: true,
+            },
+          },
           teamA: true,
           teamB: true,
           winnerTeam: true,
