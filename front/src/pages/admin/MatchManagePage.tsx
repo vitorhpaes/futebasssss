@@ -1,6 +1,7 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiArrowLeft, FiMapPin, FiCalendar, FiClock, FiUsers, FiUserCheck, FiCoffee } from 'react-icons/fi';
+import { FiArrowLeft, FiMapPin, FiCalendar, FiClock, FiUsers, FiUserCheck } from 'react-icons/fi';
+import { GiBeerStein } from 'react-icons/gi';
 import { useMatch } from '../../services/matches/matches.queries';
 import { usePlayersWithSessionData, useConfirmPlayerMutation, useUpdatePlayerSessionMutation } from '../../services/player-sessions/player-sessions.queries';
 import { PlayerSession } from '../../services/player-sessions/player-sessions.interfaces';
@@ -10,6 +11,7 @@ import Alert from '../../components/ui/Alert';
 import * as S from './MatchManagePage.styles';
 import { useToast } from '../../components/ui/Toast';
 import { useFormik } from 'formik';
+import MatchStats from '../../components/match/MatchStats';
 
 // Componentes extraídos
 import FilterForm, { FilterParams } from '../../components/match/FilterForm';
@@ -20,53 +22,19 @@ import ConfirmedPlayersTab from '../../components/match/tabs/ConfirmedPlayersTab
 // Tipo de aba
 type TabType = 'all' | 'confirmed' | 'resenha';
 
-// Interface para o tipo de equipe na partida
+// Interface para o MatchTeam
 interface MatchTeam {
-  id?: number;
-  name?: string;
+  id: number;
+  sessionId: number;
+  name: string;
   color?: string;
 }
 
-// Interface para o componente Team
-interface TeamProps {
-  team: MatchTeam | null | undefined;
-  players: PlayerSession[];
-  handleAddToTeam?: (userId: number, teamId: number) => void;
+// Interface para o componente ConfirmedPlayersTab
+interface MatchTeams {
+  teamA?: MatchTeam;
+  teamB?: MatchTeam;
 }
-
-// Componente para exibir um time com os jogadores
-const TeamComponent = ({ team, players }: TeamProps) => {
-  return (
-    <S.TeamContainer>
-      <S.TeamHeader $color={team?.color}>
-        <span>{team?.name || 'Time'}</span>
-        <span>{players.length} jogadores</span>
-      </S.TeamHeader>
-      
-      <S.TeamPlayerList>
-        {players.length > 0 ? (
-          players.map(player => (
-            <S.TeamPlayerItem key={player.userId}>
-              <S.PlayerInfo>
-                <S.PlayerAvatar>
-                  {player.user?.name?.charAt(0).toUpperCase() || ''}
-                </S.PlayerAvatar>
-                <div>
-                  <S.PlayerName>{player.user?.name || 'Sem nome'}</S.PlayerName>
-                  <S.PlayerPosition>{player.user?.position || 'Sem posição'}</S.PlayerPosition>
-                </div>
-              </S.PlayerInfo>
-            </S.TeamPlayerItem>
-          ))
-        ) : (
-          <S.EmptyTeamMessage>
-            Adicione jogadores a este time
-          </S.EmptyTeamMessage>
-        )}
-      </S.TeamPlayerList>
-    </S.TeamContainer>
-  );
-};
 
 const MatchManagePage = () => {
   const { id } = useParams<{ id: string }>();
@@ -112,6 +80,13 @@ const MatchManagePage = () => {
       setIsFilterOpen(false);
     }
   });
+
+  // Memorizamos os times A e B a partir do array de times
+  const { teamA, teamB } = useMemo(() => {
+    const teamA = match?.teams[0];
+    const teamB = match?.teams[1];
+    return { teamA, teamB };
+  }, [match]);
 
   // Função para renderizar o formulário de filtro
   const renderFilterForm = () => (
@@ -194,8 +169,6 @@ const MatchManagePage = () => {
     
     // Verificar se o teamId é undefined ou zero
     if (teamId === undefined || teamId <= 0) {
-      // Para partidas de teste, podemos criar os times dinamicamente
-      // Em vez de mostrar um erro, vamos alertar o usuário de que não há times criados para esta partida
       showToast(
         `Não foi possível adicionar o jogador ao time. Time não configurado para esta partida.`,
         'error',
@@ -222,8 +195,15 @@ const MatchManagePage = () => {
         },
         {
           onSuccess: () => {
+            // Encontrar o time pelo ID para exibir o nome
+            const teamName = validTeamId === teamA?.id 
+              ? teamA?.name 
+              : validTeamId === teamB?.id 
+                ? teamB?.name 
+                : 'time';
+                
             showToast(
-              `Jogador adicionado ao time com sucesso!`,
+              `Jogador adicionado ao ${teamName || 'time'} com sucesso!`,
               'success',
               3000
             );
@@ -349,10 +329,15 @@ const MatchManagePage = () => {
   const resenhaCount = allPlayersWithSessionData?.filter(p => p.confirmed && !p.willPlay).length || 0;
   const pendingCount = allPlayersWithSessionData?.filter(p => !p.confirmed).length || 0;
 
-  // Jogadores por time para a aba de confirmados
-  const teamAPlayers = filteredPlayers.filter(p => p.teamId === match.teamA?.id);
-  const teamBPlayers = filteredPlayers.filter(p => p.teamId === match.teamB?.id);
+  const teamAPlayers = filteredPlayers.filter(p => p.teamId === teamA?.id);
+  const teamBPlayers = filteredPlayers.filter(p => p.teamId === teamB?.id);
   const unassignedPlayers = filteredPlayers.filter(p => !p.teamId);
+
+  // Criar um objeto simplificado para passar ao componente ConfirmedPlayersTab
+  const matchTeams: MatchTeams = {
+    teamA,
+    teamB
+  };
 
   return (
     <S.Container>
@@ -391,41 +376,25 @@ const MatchManagePage = () => {
         {activeTab !== 'confirmed' && (
           <S.TeamsContainer>
             <S.TeamBlock>
-              <S.TeamName>{match.teamA?.name || 'Time A'}</S.TeamName>
-              <S.TeamColor $color={match.teamA?.color} />
+              <S.TeamName>{teamA?.name || 'Time A'}</S.TeamName>
+              <S.TeamColor $color={teamA?.color} />
             </S.TeamBlock>
             
             <S.VersusText>VS</S.VersusText>
             
             <S.TeamBlock>
-              <S.TeamName>{match.teamB?.name || 'Time B'}</S.TeamName>
-              <S.TeamColor $color={match.teamB?.color} />
+              <S.TeamName>{teamB?.name || 'Time B'}</S.TeamName>
+              <S.TeamColor $color={teamB?.color} />
             </S.TeamBlock>
           </S.TeamsContainer>
         )}
 
         {/* Estatísticas resumidas */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'space-around', 
-          marginTop: '16px', 
-          padding: '8px', 
-          background: '#f9f9f9', 
-          borderRadius: '4px' 
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#2E7D32' }}>{confirmedCount}</div>
-            <div style={{ fontSize: '14px', color: '#666' }}>Confirmados</div>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#FF9800' }}>{resenhaCount}</div>
-            <div style={{ fontSize: '14px', color: '#666' }}>Resenha</div>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#757575' }}>{pendingCount}</div>
-            <div style={{ fontSize: '14px', color: '#666' }}>Pendentes</div>
-          </div>
-        </div>
+        <MatchStats
+          confirmedCount={confirmedCount}
+          resenhaCount={resenhaCount}
+          pendingCount={pendingCount}
+        />
       </S.MatchInfo>
 
       {/* Abas de navegação */}
@@ -448,7 +417,7 @@ const MatchManagePage = () => {
           $active={activeTab === 'resenha'} 
           onClick={() => setActiveTab('resenha')}
         >
-          <FiCoffee size={16} />
+          <GiBeerStein size={16} />
           Resenha
         </S.Tab>
       </S.TabsContainer>
@@ -484,7 +453,7 @@ const MatchManagePage = () => {
           teamAPlayers={teamAPlayers}
           teamBPlayers={teamBPlayers}
           unassignedPlayers={unassignedPlayers}
-          match={match}
+          match={matchTeams}
           isFilterOpen={isFilterOpen}
           setIsFilterOpen={setIsFilterOpen}
           handleAddToTeam={handleAddToTeam}
