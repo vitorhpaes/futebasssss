@@ -78,12 +78,9 @@ const PlayerEditPage: React.FC = () => {
     },
   });
 
-  // Log para debug e inicialização garantida do formulário
+  // Inicialização garantida do formulário
   useEffect(() => {
     if (user) {
-      console.log('Dados do usuário carregados:', user);
-      console.log('Valor da posição:', user.position);
-      
       // Garantir que o valor da posição seja definido explicitamente
       formik.setFieldValue('position', user.position || '');
       formik.setFieldValue('type', user.type || UserType.PLAYER);

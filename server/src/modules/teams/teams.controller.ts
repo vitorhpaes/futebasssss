@@ -27,6 +27,7 @@ class TeamEntity implements Team {
   id: number;
   name: string;
   color: string;
+  sessionId: number | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -106,7 +107,7 @@ export class TeamsController {
   async getTeamPlayers(
     @Param('id', ParseIntPipe) id: number,
     @Query('sessionId') sessionId?: string,
-  ): Promise<any[]> {
+  ): Promise<TeamPlayerDto[]> {
     // Verificar se o time existe
     const team = await this.teamsService.findOne(id);
     if (!team) {

@@ -46,10 +46,8 @@ export const useMatches = (filters?: MatchFilterParams) => {
         }
         
         const query = queryParams.toString() ? `?${queryParams.toString()}` : '';
-        console.log('Fazendo requisição para:', `${endpoint}${query}`);
         
         const response = await api.get(`${endpoint}${query}`);
-        console.log('Resposta recebida:', response.data);
         
         try {
           return matchListSchema.parse(response.data);
@@ -99,8 +97,6 @@ export const useCreateMatchMutation = () => {
   return useMutation<Match, ApiError, CreateMatchDto>({
     mutationFn: async (data: CreateMatchDto) => {
       try {
-        console.log('Criando partida com dados:', data);
-        
         // Primeiro, cria a sessão (partida)
         const sessionResponse = await api.post('/sessions', {
           date: data.date,
@@ -109,23 +105,19 @@ export const useCreateMatchMutation = () => {
           notes: data.notes
         });
         
-        console.log('Partida criada:', sessionResponse.data);
-        
-        // Depois, cria o time A
+        // Depois, cria o time A com o sessionId
         const teamAResponse = await api.post('/teams', {
           name: data.teamAName,
-          color: data.teamAColor || 'Azul'
+          color: data.teamAColor || 'Azul',
+          sessionId: sessionResponse.data.id
         });
         
-        console.log('Time A criado:', teamAResponse.data);
-        
-        // Depois, cria o time B
+        // Depois, cria o time B com o sessionId
         const teamBResponse = await api.post('/teams', {
           name: data.teamBName,
-          color: data.teamBColor || 'Vermelho'
+          color: data.teamBColor || 'Vermelho',
+          sessionId: sessionResponse.data.id
         });
-        
-        console.log('Time B criado:', teamBResponse.data);
         
         // Combina os dados para retornar
         const result = {

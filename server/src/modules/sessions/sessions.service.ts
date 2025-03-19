@@ -23,6 +23,7 @@ export class SessionsService {
       include: {
         playerSessions: true,
         gameResult: true,
+        teams: true,
       },
     });
   }

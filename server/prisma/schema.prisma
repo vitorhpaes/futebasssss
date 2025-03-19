@@ -64,18 +64,21 @@ model Session {
   playerSessions PlayerSession[]
   gameResult     GameResult?
   playerFavorites PlayerFavorite[]
+  teams          Team[]
 
   @@map("sessions")
 }
 
 model Team {
-  id      Int      @id @default(autoincrement())
-  name    String
-  color   String
+  id        Int      @id @default(autoincrement())
+  name      String
+  color     String
+  sessionId Int?     @map("session_id")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relações
+  session        Session?       @relation(fields: [sessionId], references: [id])
   playerSessions PlayerSession[]
   teamAGames     GameResult[]   @relation("TeamA")
   teamBGames     GameResult[]   @relation("TeamB")

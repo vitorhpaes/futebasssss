@@ -12,13 +12,13 @@ import { SessionsService } from './sessions.service';
 import { CreateSessionDto } from './dto/create-session.dto';
 import { UpdateSessionDto } from './dto/update-session.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { Session } from '@prisma/client';
+import { Session, SessionStatus } from '@prisma/client';
 
 class SessionEntity implements Session {
   id: number;
   date: Date;
   location: string;
-  status: any; // Usando any para evitar erros de linter com o enum
+  status: SessionStatus;
   notes: string | null;
   createdAt: Date;
   updatedAt: Date;

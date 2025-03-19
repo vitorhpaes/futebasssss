@@ -1,5 +1,6 @@
 import React from 'react';
-import { FiCheckCircle, FiCoffee } from 'react-icons/fi';
+import { FiCheckCircle } from 'react-icons/fi';
+import { GiBeerStein } from 'react-icons/gi';
 import { PlayerSession } from '../../services/player-sessions/player-sessions.interfaces';
 import * as S from '../../pages/admin/MatchManagePage.styles';
 
@@ -67,7 +68,7 @@ const PlayerItem: React.FC<PlayerItemProps> = ({
                   padding: '4px 8px'
                 }}
               >
-                <FiCoffee size={12} />
+                <GiBeerStein size={12} />
                 Resenha
               </S.ResenhaButton>
             )}
@@ -88,7 +89,7 @@ const PlayerItem: React.FC<PlayerItemProps> = ({
               disabled={confirmPlayerMutation.isPending}
               style={confirmPlayerMutation.isPending ? { cursor: 'wait', opacity: 0.7 } : {}}
             >
-              <FiCoffee size={14} />
+              <GiBeerStein size={14} />
               {confirmPlayerMutation.isPending ? 'Processando...' : 'Resenha'}
             </S.ResenhaButton>
           </S.PlayerActions>

@@ -1,11 +1,13 @@
 import { z } from 'zod';
 import { SessionStatus } from '@futebass-ia/constants';
+import { playerSessionSchema } from '../player-sessions/player-sessions.interfaces';
 
 // Definição do esquema de validação para os times
 export const teamSchema = z.object({
   id: z.number(),
   name: z.string(),
-  color: z.string().optional()
+  color: z.string().optional(),
+  sessionId: z.number()
 });
 
 // Definição do esquema de validação para as partidas
@@ -15,8 +17,8 @@ export const matchSchema = z.object({
   location: z.string(),
   status: z.nativeEnum(SessionStatus),
   notes: z.string().optional().nullable(),
-  teamA: teamSchema.optional(),
-  teamB: teamSchema.optional()
+  teams: z.array(teamSchema),
+  playerSessions: z.array(playerSessionSchema)
 });
 
 // Definição do esquema de validação para listas de partidas
