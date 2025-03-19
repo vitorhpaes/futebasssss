@@ -7,6 +7,7 @@ import TeamComponent from '../TeamComponent';
 
 interface MatchTeam {
   id?: number;
+  sessionId?: number;
   name?: string;
   color?: string;
 }
@@ -60,7 +61,6 @@ const ConfirmedPlayersTab: React.FC<ConfirmedPlayersTabProps> = ({
 
       {filteredPlayers && filteredPlayers.length > 0 ? (
         <div>
-          {/* Times */}
           <S.TeamsGrid>
             <TeamComponent 
               team={match.teamA} 
@@ -74,7 +74,6 @@ const ConfirmedPlayersTab: React.FC<ConfirmedPlayersTabProps> = ({
             />
           </S.TeamsGrid>
           
-          {/* Jogadores não atribuídos a times */}
           {unassignedPlayers.length > 0 && (
             <>
               <S.SectionTitle style={{ marginTop: '32px', marginBottom: '16px' }}>
@@ -97,18 +96,12 @@ const ConfirmedPlayersTab: React.FC<ConfirmedPlayersTabProps> = ({
                       <S.ConfirmButton 
                         onClick={() => handleAddToTeam(player.userId, match.teamA?.id)}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <S.TeamColor $color={match.teamA?.color} style={{ width: '12px', height: '12px' }} />
-                          {match.teamA?.name || 'Time A'}
-                        </div>
+                        {match.teamA?.name}
                       </S.ConfirmButton>
                       <S.ResenhaButton 
                         onClick={() => handleAddToTeam(player.userId, match.teamB?.id)}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <S.TeamColor $color={match.teamB?.color} style={{ width: '12px', height: '12px' }} />
-                          {match.teamB?.name || 'Time B'}
-                        </div>
+                        {match.teamB?.name}
                       </S.ResenhaButton>
                     </S.PlayerActions>
                   </S.UnassignedPlayer>
