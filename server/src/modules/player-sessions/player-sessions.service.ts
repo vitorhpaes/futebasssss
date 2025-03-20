@@ -8,8 +8,11 @@ import { UpdatePlayerSessionDto } from './dto/update-player-session.dto';
 export class PlayerSessionsService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(): Promise<PlayerSession[]> {
+  async findAll(includeDeleted = false): Promise<PlayerSession[]> {
     return await this.prisma.playerSession.findMany({
+      where: {
+        ...(includeDeleted ? {} : { deletedAt: null }),
+      },
       include: {
         user: true,
         session: true,
@@ -18,9 +21,12 @@ export class PlayerSessionsService {
     });
   }
 
-  async findOne(id: number): Promise<PlayerSession | null> {
-    return await this.prisma.playerSession.findUnique({
-      where: { id },
+  async findOne(id: number, includeDeleted = false): Promise<PlayerSession | null> {
+    return await this.prisma.playerSession.findFirst({
+      where: { 
+        id,
+        ...(includeDeleted ? {} : { deletedAt: null }),
+      },
       include: {
         user: true,
         session: true,
@@ -29,9 +35,12 @@ export class PlayerSessionsService {
     });
   }
 
-  async findBySessionId(sessionId: number): Promise<PlayerSession[]> {
+  async findBySessionId(sessionId: number, includeDeleted = false): Promise<PlayerSession[]> {
     return await this.prisma.playerSession.findMany({
-      where: { sessionId },
+      where: { 
+        sessionId,
+        ...(includeDeleted ? {} : { deletedAt: null }),
+      },
       include: {
         user: true,
         team: true,
@@ -39,9 +48,12 @@ export class PlayerSessionsService {
     });
   }
 
-  async findByUserId(userId: number): Promise<PlayerSession[]> {
+  async findByUserId(userId: number, includeDeleted = false): Promise<PlayerSession[]> {
     return await this.prisma.playerSession.findMany({
-      where: { userId },
+      where: { 
+        userId,
+        ...(includeDeleted ? {} : { deletedAt: null }),
+      },
       include: {
         session: true,
         team: true,
@@ -114,6 +126,47 @@ export class PlayerSessionsService {
   async remove(id: number): Promise<PlayerSession> {
     return await this.prisma.playerSession.delete({
       where: { id },
+    });
+  }
+
+  async findDeleted(): Promise<PlayerSession[]> {
+    try {
+      const playerSessions = await this.prisma.$queryRaw<PlayerSession[]>`
+        SELECT id, confirmed, goals, assists, created_at as "createdAt", 
+        updated_at as "updatedAt", user_id as "userId", session_id as "sessionId", 
+        team_id as "teamId", will_play as "willPlay", deleted_at as "deletedAt"
+        FROM player_sessions 
+        WHERE deleted_at IS NOT NULL
+      `;
+      return playerSessions;
+    } catch (error) {
+      console.error('Erro ao buscar associações excluídas:', error);
+      return [];
+    }
+  }
+
+  async restore(id: number): Promise<PlayerSession> {
+    return await this.prisma.playerSession.update({
+      where: { id },
+      data: {
+        deletedAt: null,
+      },
+    });
+  }
+
+  async permanentDelete(id: number): Promise<PlayerSession> {
+    return await this.prisma.$transaction(async (prisma) => {
+      // Busca a associação antes da exclusão permanente
+      const playerSession = await prisma.playerSession.findFirst({
+        where: { id },
+      });
+
+      // Realiza a exclusão permanente, ignorando o middleware de exclusão lógica
+      await prisma.$executeRaw`
+        DELETE FROM player_sessions WHERE id = ${id}
+      `;
+
+      return playerSession;
     });
   }
 

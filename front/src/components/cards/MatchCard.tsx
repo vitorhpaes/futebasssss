@@ -2,13 +2,14 @@ import React from 'react';
 import styled from 'styled-components';
 import { SessionStatus, sessionStatusMap } from '@futebass-ia/constants';
 import { formatDateTime } from '../../utils/date-utils';
-import { FiMapPin, FiCalendar, FiClock, FiEdit, FiFileText, FiInfo } from 'react-icons/fi';
+import { FiMapPin, FiCalendar, FiClock, FiEdit, FiFileText, FiInfo, FiTrash2 } from 'react-icons/fi';
 import { Match } from '../../services/matches/matches.interfaces';
 
 // Props para o componente
 export interface MatchCardProps {
   match: Match;
   onEdit?: (id: number) => void;
+  onDelete?: (id: number) => void;
 }
 
 // Estilos
@@ -201,8 +202,25 @@ const EditButton = styled.button`
   }
 `;
 
+const DeleteButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  background-color: ${({ theme }) => theme.colors.background.default};
+  color: ${({ theme }) => theme.colors.error.main};
+  
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.neutral.light};
+  }
+`;
+
 // Componente
-const MatchCard: React.FC<MatchCardProps> = ({ match, onEdit }) => {
+const MatchCard: React.FC<MatchCardProps> = ({ match, onEdit, onDelete }) => {
   // Obter o status em texto mais amigável
   const getStatusLabel = (status: SessionStatus): string => {
     return sessionStatusMap.get(status) || String(status);
@@ -211,6 +229,10 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onEdit }) => {
   // Extrair a data e hora para exibição
   const date = formatDateTime(match.date, 'DD/MM/YYYY');
   const time = formatDateTime(match.date, 'HH:mm');
+
+  // Encontrar os times A e B a partir do array de times
+  const teamA = match.teams && match.teams.length > 0 ? match.teams[0] : null;
+  const teamB = match.teams && match.teams.length > 1 ? match.teams[1] : null;
 
   return (
     <CardContainer>
@@ -234,15 +256,15 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onEdit }) => {
       
       <TeamsContainer>
         <TeamBlock>
-          <TeamName>{match.teamA?.name || 'Time A'}</TeamName>
-          <TeamColor $color={match.teamA?.color} />
+          <TeamName>{teamA?.name || 'Time A'}</TeamName>
+          <TeamColor $color={teamA?.color} />
         </TeamBlock>
         
         <VersusText>VS</VersusText>
         
         <TeamBlock>
-          <TeamName>{match.teamB?.name || 'Time B'}</TeamName>
-          <TeamColor $color={match.teamB?.color} />
+          <TeamName>{teamB?.name || 'Time B'}</TeamName>
+          <TeamColor $color={teamB?.color} />
         </TeamBlock>
       </TeamsContainer>
       
@@ -266,12 +288,20 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onEdit }) => {
         </CardField>
       </CardContent>
       
-      {onEdit && (
+      {(onEdit || onDelete) && (
         <CardActions>
-          <EditButton onClick={() => onEdit(match.id)}>
-            <FiEdit size={14} />
-            Gerenciar partida
-          </EditButton>
+          {onDelete && (
+            <DeleteButton onClick={() => onDelete(match.id)}>
+              <FiTrash2 size={14} />
+              Excluir
+            </DeleteButton>
+          )}
+          {onEdit && (
+            <EditButton onClick={() => onEdit(match.id)}>
+              <FiEdit size={14} />
+              Gerenciar partida
+            </EditButton>
+          )}
         </CardActions>
       )}
     </CardContainer>

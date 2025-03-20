@@ -8,8 +8,11 @@ import { UpdateSessionDto } from './dto/update-session.dto';
 export class SessionsService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(): Promise<Session[]> {
+  async findAll(includeDeleted = false): Promise<Session[]> {
     return await this.prisma.session.findMany({
+      where: {
+        ...(includeDeleted ? {} : { deletedAt: null }),
+      },
       include: {
         playerSessions: true,
         gameResult: true,
@@ -17,9 +20,12 @@ export class SessionsService {
     });
   }
 
-  async findOne(id: number): Promise<Session | null> {
-    return await this.prisma.session.findUnique({
-      where: { id },
+  async findOne(id: number, includeDeleted = false): Promise<Session | null> {
+    return await this.prisma.session.findFirst({
+      where: {
+        id,
+        ...(includeDeleted ? {} : { deletedAt: null }),
+      },
       include: {
         playerSessions: true,
         gameResult: true,
@@ -72,13 +78,14 @@ export class SessionsService {
     });
   }
 
-  async findUpcoming(): Promise<Session[]> {
+  async findUpcoming(includeDeleted = false): Promise<Session[]> {
     return await this.prisma.session.findMany({
       where: {
         date: {
           gte: new Date(),
         },
         status: SessionStatus.SCHEDULED,
+        ...(includeDeleted ? {} : { deletedAt: null }),
       },
       orderBy: {
         date: 'asc',
@@ -93,12 +100,13 @@ export class SessionsService {
     });
   }
 
-  async findPast(): Promise<Session[]> {
+  async findPast(includeDeleted = false): Promise<Session[]> {
     return await this.prisma.session.findMany({
       where: {
         date: {
           lt: new Date(),
         },
+        ...(includeDeleted ? {} : { deletedAt: null }),
       },
       orderBy: {
         date: 'desc',
@@ -116,6 +124,39 @@ export class SessionsService {
           },
         },
       },
+    });
+  }
+
+  async findDeleted(): Promise<Session[]> {
+    return await this.prisma.$queryRaw`
+      SELECT * FROM sessions 
+      WHERE deleted_at IS NOT NULL
+      ORDER BY date DESC
+    `;
+  }
+
+  async restore(id: number): Promise<Session> {
+    return await this.prisma.session.update({
+      where: { id },
+      data: {
+        deletedAt: null,
+      },
+    });
+  }
+
+  async permanentDelete(id: number): Promise<Session> {
+    return await this.prisma.$transaction(async (prisma) => {
+      // Busca a sessão antes da exclusão permanente
+      const session = await prisma.session.findFirst({
+        where: { id },
+      });
+
+      // Realiza a exclusão permanente, ignorando o middleware de exclusão lógica
+      await prisma.$executeRaw`
+        DELETE FROM sessions WHERE id = ${id}
+      `;
+
+      return session;
     });
   }
 }
