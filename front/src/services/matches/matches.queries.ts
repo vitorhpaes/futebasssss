@@ -193,4 +193,48 @@ export const useDeleteMatchMutation = () => {
       queryClient.invalidateQueries({ queryKey: MATCHES_QUERY_KEYS.lists() });
     }
   });
+};
+
+/**
+ * Hook para restaurar uma partida excluída logicamente
+ */
+export const useRestoreMatchMutation = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation<Match, ApiError, number>({
+    mutationFn: async (id: number) => {
+      try {
+        const response = await api.patch(`/sessions/${id}/restore`);
+        return matchSchema.parse(response.data);
+      } catch (error) {
+        throw handleApiError(error);
+      }
+    },
+    onSuccess: (_, id) => {
+      // Invalidar queries para forçar o recarregamento dos dados
+      queryClient.invalidateQueries({ queryKey: MATCHES_QUERY_KEYS.detail(id) });
+      queryClient.invalidateQueries({ queryKey: MATCHES_QUERY_KEYS.lists() });
+    }
+  });
+};
+
+/**
+ * Hook para excluir permanentemente uma partida
+ */
+export const usePermanentDeleteMatchMutation = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation<void, ApiError, number>({
+    mutationFn: async (id: number) => {
+      try {
+        await api.delete(`/sessions/${id}/permanent`);
+      } catch (error) {
+        throw handleApiError(error);
+      }
+    },
+    onSuccess: () => {
+      // Invalidar queries para forçar o recarregamento dos dados
+      queryClient.invalidateQueries({ queryKey: MATCHES_QUERY_KEYS.lists() });
+    }
+  });
 }; 

@@ -7,22 +7,22 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  NotFoundException,
+  HttpCode,
+  Query,
 } from '@nestjs/common';
 import { SessionsService } from './sessions.service';
+import { Session } from '@prisma/client';
 import { CreateSessionDto } from './dto/create-session.dto';
 import { UpdateSessionDto } from './dto/update-session.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { Session, SessionStatus } from '@prisma/client';
-
-class SessionEntity implements Session {
-  id: number;
-  date: Date;
-  location: string;
-  status: SessionStatus;
-  notes: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBody,
+  ApiQuery,
+} from '@nestjs/swagger';
 
 @ApiTags('sessions')
 @Controller('sessions')
@@ -30,90 +30,202 @@ export class SessionsController {
   constructor(private readonly sessionsService: SessionsService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Criar uma nova sessão de jogo' })
+  @HttpCode(201)
+  @ApiOperation({ summary: 'Criar uma nova sessão' })
+  @ApiBody({ type: CreateSessionDto })
   @ApiResponse({
     status: 201,
     description: 'Sessão criada com sucesso',
-    type: SessionEntity,
   })
   async create(@Body() createSessionDto: CreateSessionDto): Promise<Session> {
     return this.sessionsService.create(createSessionDto);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar todas as sessões de jogo' })
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Listar todas as sessões' })
+  @ApiQuery({
+    name: 'includeDeleted',
+    required: false,
+    type: Boolean,
+    description: 'Incluir sessões excluídas logicamente',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Lista de sessões',
-    type: [SessionEntity],
+    description: 'Lista de sessões retornada com sucesso',
   })
-  async findAll(): Promise<Session[]> {
-    return this.sessionsService.findAll();
+  async findAll(
+    @Query('includeDeleted') includeDeleted?: string,
+  ): Promise<Session[]> {
+    return this.sessionsService.findAll(includeDeleted === 'true');
   }
 
   @Get('upcoming')
-  @ApiOperation({ summary: 'Listar sessões de jogo futuras' })
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Listar sessões futuras' })
+  @ApiQuery({
+    name: 'includeDeleted',
+    required: false,
+    type: Boolean,
+    description: 'Incluir sessões excluídas logicamente',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Lista de sessões futuras',
-    type: [SessionEntity],
+    description: 'Lista de sessões futuras retornada com sucesso',
   })
-  async findUpcoming(): Promise<Session[]> {
-    return this.sessionsService.findUpcoming();
+  async findUpcoming(
+    @Query('includeDeleted') includeDeleted?: string,
+  ): Promise<Session[]> {
+    return this.sessionsService.findUpcoming(includeDeleted === 'true');
   }
 
   @Get('past')
-  @ApiOperation({ summary: 'Listar sessões de jogo passadas' })
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Listar sessões passadas' })
+  @ApiQuery({
+    name: 'includeDeleted',
+    required: false,
+    type: Boolean,
+    description: 'Incluir sessões excluídas logicamente',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Lista de sessões passadas',
-    type: [SessionEntity],
+    description: 'Lista de sessões passadas retornada com sucesso',
   })
-  async findPast(): Promise<Session[]> {
-    return this.sessionsService.findPast();
+  async findPast(
+    @Query('includeDeleted') includeDeleted?: string,
+  ): Promise<Session[]> {
+    return this.sessionsService.findPast(includeDeleted === 'true');
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Obter uma sessão de jogo pelo ID' })
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Buscar uma sessão pelo ID' })
   @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiQuery({
+    name: 'includeDeleted',
+    required: false,
+    type: Boolean,
+    description: 'Incluir sessões excluídas logicamente',
+  })
   @ApiResponse({
     status: 200,
-    description: 'Dados da sessão',
-    type: SessionEntity,
+    description: 'Sessão encontrada com sucesso',
   })
   @ApiResponse({ status: 404, description: 'Sessão não encontrada' })
   async findOne(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<Session | null> {
-    return this.sessionsService.findOne(id);
+    @Query('includeDeleted') includeDeleted?: string,
+  ): Promise<Session> {
+    const session = await this.sessionsService.findOne(
+      id,
+      includeDeleted === 'true',
+    );
+    if (!session) {
+      throw new NotFoundException(`Sessão com ID ${id} não encontrada`);
+    }
+    return session;
   }
 
   @Patch(':id')
+  @HttpCode(200)
   @ApiOperation({ summary: 'Atualizar uma sessão existente' })
   @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiBody({ type: UpdateSessionDto })
   @ApiResponse({
     status: 200,
     description: 'Sessão atualizada com sucesso',
-    type: SessionEntity,
   })
   @ApiResponse({ status: 404, description: 'Sessão não encontrada' })
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateSessionDto: UpdateSessionDto,
   ): Promise<Session> {
-    return this.sessionsService.update(id, updateSessionDto);
+    try {
+      return await this.sessionsService.update(id, updateSessionDto);
+    } catch (error) {
+      // Verificar se a sessão existe antes de tentar atualizar
+      const session = await this.sessionsService.findOne(id);
+      if (!session) {
+        throw new NotFoundException(`Sessão com ID ${id} não encontrada`);
+      }
+      throw error;
+    }
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Remover uma sessão' })
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Remover uma sessão (exclusão lógica)' })
   @ApiParam({ name: 'id', description: 'ID da sessão' })
   @ApiResponse({
     status: 200,
     description: 'Sessão removida com sucesso',
-    type: SessionEntity,
   })
   @ApiResponse({ status: 404, description: 'Sessão não encontrada' })
   async remove(@Param('id', ParseIntPipe) id: number): Promise<Session> {
+    // Verificar se a sessão existe antes de tentar remover
+    const session = await this.sessionsService.findOne(id);
+    if (!session) {
+      throw new NotFoundException(`Sessão com ID ${id} não encontrada`);
+    }
     return this.sessionsService.remove(id);
+  }
+
+  @Get('deleted/list')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Listar todas as sessões excluídas logicamente' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de sessões excluídas retornada com sucesso',
+  })
+  async findDeleted(): Promise<Session[]> {
+    return this.sessionsService.findDeleted();
+  }
+
+  @Patch(':id/restore')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Restaurar uma sessão excluída logicamente' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiResponse({
+    status: 200,
+    description: 'Sessão restaurada com sucesso',
+  })
+  @ApiResponse({ status: 404, description: 'Sessão não encontrada' })
+  async restore(@Param('id', ParseIntPipe) id: number): Promise<Session> {
+    // Verificar se a sessão excluída existe antes de tentar restaurar
+    const session = await this.sessionsService.findOne(id, true);
+    if (!session) {
+      throw new NotFoundException(`Sessão com ID ${id} não encontrada`);
+    }
+
+    // Verificar se a sessão está excluída
+    const sessionDeleted = await this.sessionsService.findDeleted();
+    const isDeleted = sessionDeleted.some((s) => s.id === id);
+
+    if (!isDeleted) {
+      throw new NotFoundException(`Sessão com ID ${id} não está excluída`);
+    }
+
+    return this.sessionsService.restore(id);
+  }
+
+  @Delete(':id/permanent')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Remover permanentemente uma sessão' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiResponse({
+    status: 200,
+    description: 'Sessão removida permanentemente com sucesso',
+  })
+  @ApiResponse({ status: 404, description: 'Sessão não encontrada' })
+  async permanentDelete(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<Session> {
+    // Verificar se a sessão existe antes de tentar remover permanentemente
+    const session = await this.sessionsService.findOne(id, true);
+    if (!session) {
+      throw new NotFoundException(`Sessão com ID ${id} não encontrada`);
+    }
+    return this.sessionsService.permanentDelete(id);
   }
 }

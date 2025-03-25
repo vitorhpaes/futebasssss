@@ -8,13 +8,22 @@ import { UpdateTeamDto } from './dto/update-team.dto';
 export class TeamsService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(): Promise<Team[]> {
-    return await this.prisma.team.findMany();
+  async findAll(includeDeleted = false): Promise<Team[]> {
+    return await this.prisma.team.findMany({
+      where: {
+        ...(includeDeleted ? {} : { deletedAt: null }),
+      }
+    });
   }
 
-  async findOne(id: number): Promise<Team | null> {
-    return await this.prisma.team.findUnique({
-      where: { id },
+  async findOne(id: number, includeDeleted = false): Promise<Team | null> {
+    const where: any = { id };
+    if (!includeDeleted) {
+      where.deletedAt = null;
+    }
+    
+    return await this.prisma.team.findFirst({
+      where,
     });
   }
 
@@ -34,6 +43,46 @@ export class TeamsService {
   async remove(id: number): Promise<Team> {
     return await this.prisma.team.delete({
       where: { id },
+    });
+  }
+
+  async findDeleted(): Promise<Team[]> {
+    try {
+      const teams = await this.prisma.$queryRaw<Team[]>`
+        SELECT id, name, color, session_id as "sessionId", created_at as "createdAt", 
+        updated_at as "updatedAt", deleted_at as "deletedAt" 
+        FROM teams 
+        WHERE deleted_at IS NOT NULL
+      `;
+      return teams;
+    } catch (error) {
+      console.error('Erro ao buscar times excluídos:', error);
+      return [];
+    }
+  }
+
+  async restore(id: number): Promise<Team> {
+    return await this.prisma.team.update({
+      where: { id },
+      data: {
+        deletedAt: null,
+      },
+    });
+  }
+
+  async permanentDelete(id: number): Promise<Team> {
+    return await this.prisma.$transaction(async (prisma) => {
+      // Busca o time antes da exclusão permanente
+      const team = await prisma.team.findFirst({
+        where: { id },
+      });
+
+      // Realiza a exclusão permanente, ignorando o middleware de exclusão lógica
+      await prisma.$executeRaw`
+        DELETE FROM teams WHERE id = ${id}
+      `;
+
+      return team;
     });
   }
 
