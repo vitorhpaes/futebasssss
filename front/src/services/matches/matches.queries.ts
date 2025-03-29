@@ -97,7 +97,7 @@ export const useCreateMatchMutation = () => {
   return useMutation<Match, ApiError, CreateMatchDto>({
     mutationFn: async (data: CreateMatchDto) => {
       try {
-        // Primeiro, cria a sessão (partida)
+        // Criar a sessão (partida)
         const sessionResponse = await api.post('/sessions', {
           date: data.date,
           location: data.location,
@@ -105,15 +105,15 @@ export const useCreateMatchMutation = () => {
           notes: data.notes
         });
         
-        // Depois, cria o time A com o sessionId
+        // Criar o time A
         const teamAResponse = await api.post('/teams', {
-          name: data.teamAName,
+          name: 'Time A',
           sessionId: sessionResponse.data.id
         });
         
-        // Depois, cria o time B com o sessionId
+        // Criar o time B
         const teamBResponse = await api.post('/teams', {
-          name: data.teamBName,
+          name: 'Time B',
           sessionId: sessionResponse.data.id
         });
         

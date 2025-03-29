@@ -23,8 +23,6 @@ export const createMatchSchema = z.object({
   date: z.string(),
   location: z.string(),
   notes: z.string().optional(),
-  teamAName: z.string(),
-  teamBName: z.string()
 });
 
 // Definição do esquema de validação para atualização de partidas
