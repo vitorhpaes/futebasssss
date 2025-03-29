@@ -19,15 +19,7 @@ interface FormValues {
   notes: string;
   teamAName: string;
   teamBName: string;
-  teamAColor: string;
-  teamBColor: string;
 }
-
-// Opções de cores para os times (se houver no futuro)
-const defaultColors = {
-  teamA: 'Azul',
-  teamB: 'Vermelho'
-};
 
 const MatchCreatePage: React.FC = () => {
   const navigate = useNavigate();
@@ -45,8 +37,6 @@ const MatchCreatePage: React.FC = () => {
       notes: formData.notes,
       teamAName: formData.teamAName || 'Time A',
       teamBName: formData.teamBName || 'Time B',
-      teamAColor: formData.teamAColor || defaultColors.teamA,
-      teamBColor: formData.teamBColor || defaultColors.teamB
     },
     validationSchema: toFormikValidationSchema(createMatchSchema.omit({ date: true }).extend({
       date: createMatchSchema.shape.date,
@@ -76,8 +66,6 @@ const MatchCreatePage: React.FC = () => {
           notes: values.notes,
           teamAName: values.teamAName,
           teamBName: values.teamBName,
-          teamAColor: values.teamAColor,
-          teamBColor: values.teamBColor
         });
         
         // Mostrar toast de sucesso

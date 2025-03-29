@@ -5,21 +5,18 @@ import { PlayerSession } from '../../services/player-sessions/player-sessions.in
 interface MatchTeam {
   id?: number;
   name?: string;
-  color?: string;
 }
 
 interface TeamComponentProps {
-  team: MatchTeam | null | undefined;
+  team?: MatchTeam;
   players: PlayerSession[];
-  handleAddToTeam?: (userId: number, teamId: number | undefined) => void;
 }
 
 const TeamComponent: React.FC<TeamComponentProps> = ({ team, players }) => {
   return (
     <S.TeamContainer>
-      <S.TeamHeader $color={team?.color}>
+      <S.TeamHeader>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <S.TeamColor $color={team?.color} style={{ width: '20px', height: '20px', border: `2px solid ${team?.color || '#ccc'}` }} />
           <span style={{ fontSize: '16px', fontWeight: 'bold' }}>{team?.name || 'Time'}</span>
         </div>
         <span>{players.length} jogadores</span>
@@ -30,7 +27,7 @@ const TeamComponent: React.FC<TeamComponentProps> = ({ team, players }) => {
           players.map(player => (
             <S.TeamPlayerItem key={player.userId}>
               <S.PlayerInfo>
-                <S.PlayerAvatar style={{ border: `2px solid ${team?.color || '#ccc'}` }}>
+                <S.PlayerAvatar>
                   {player.user?.name?.charAt(0).toUpperCase() || ''}
                 </S.PlayerAvatar>
                 <div>

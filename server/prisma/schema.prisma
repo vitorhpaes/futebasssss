@@ -46,7 +46,6 @@ model Session {
 model Team {
   id              Int              @id @default(autoincrement())
   name            String
-  color           String
   createdAt       DateTime         @default(now()) @map("created_at")
   updatedAt       DateTime         @updatedAt @map("updated_at")
   sessionId       Int?             @map("session_id")

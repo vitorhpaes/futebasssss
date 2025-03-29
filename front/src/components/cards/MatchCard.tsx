@@ -141,15 +141,6 @@ const TeamName = styled.div`
   color: ${({ theme }) => theme.colors.text.primary};
 `;
 
-const TeamColor = styled.div<{ $color?: string }>`
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background-color: ${({ $color }) => $color || '#cccccc'};
-  margin-top: 4px;
-  border: 1px solid ${({ theme }) => theme.colors.neutral.light};
-`;
-
 const VersusText = styled.div`
   position: absolute;
   top: 50%;
@@ -257,14 +248,12 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onEdit, onDelete }) => {
       <TeamsContainer>
         <TeamBlock>
           <TeamName>{teamA?.name || 'Time A'}</TeamName>
-          <TeamColor $color={teamA?.color} />
         </TeamBlock>
         
         <VersusText>VS</VersusText>
         
         <TeamBlock>
           <TeamName>{teamB?.name || 'Time B'}</TeamName>
-          <TeamColor $color={teamB?.color} />
         </TeamBlock>
       </TeamsContainer>
       

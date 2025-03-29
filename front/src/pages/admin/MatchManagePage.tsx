@@ -42,25 +42,25 @@ const MatchManagePage = () => {
   const { showToast } = useToast();
   const matchId = id ? parseInt(id, 10) : 0;
   const filterRef = useRef<HTMLDivElement>(null);
-  
+
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [filteredPlayers, setFilteredPlayers] = useState<PlayerSession[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  
+
   // Buscar informações da partida
-  const { 
-    data: match, 
-    isLoading: isLoadingMatch, 
-    error: matchError 
+  const {
+    data: match,
+    isLoading: isLoadingMatch,
+    error: matchError
   } = useMatch(matchId);
-  
+
   // Buscar jogadores relacionados a esta partida
   const {
     data: allPlayersWithSessionData,
     isLoading: isLoadingPlayers,
     error: playersError
   } = usePlayersWithSessionData(matchId);
-  
+
   // Mutation para confirmar presença
   const confirmPlayerMutation = useConfirmPlayerMutation();
   const updatePlayerMutation = useUpdatePlayerSessionMutation();
@@ -107,8 +107,8 @@ const MatchManagePage = () => {
       {
         onSuccess: () => {
           showToast(
-            willPlay 
-              ? `Presença do jogador confirmada com sucesso!` 
+            willPlay
+              ? `Presença do jogador confirmada com sucesso!`
               : `Jogador marcado como resenha com sucesso!`,
             'success',
             3000
@@ -130,12 +130,12 @@ const MatchManagePage = () => {
   const handleTogglePlayerStatus = (userId: number, willPlay = true) => {
     // Buscar a sessão do jogador
     const playerSession = allPlayersWithSessionData?.find(ps => ps.userId === userId);
-    
+
     if (playerSession && playerSession.id) {
       updatePlayerMutation.mutate(
-        { 
-          sessionId: matchId, 
-          userId, 
+        {
+          sessionId: matchId,
+          userId,
           data: {
             willPlay
           }
@@ -143,8 +143,8 @@ const MatchManagePage = () => {
         {
           onSuccess: () => {
             showToast(
-              willPlay 
-                ? `Jogador movido para lista de jogo!` 
+              willPlay
+                ? `Jogador movido para lista de jogo!`
                 : `Jogador movido para resenha!`,
               'success',
               3000
@@ -166,7 +166,7 @@ const MatchManagePage = () => {
   // Função para adicionar jogador a um time
   const handleAddToTeam = (userId: number, teamId: number | undefined) => {
     console.log('⚽ Tentando adicionar jogador ao time:', { userId, teamId });
-    
+
     // Verificar se o teamId é undefined ou zero
     if (teamId === undefined || teamId <= 0) {
       showToast(
@@ -179,16 +179,16 @@ const MatchManagePage = () => {
 
     // Buscar a sessão do jogador
     const playerSession = allPlayersWithSessionData?.find(ps => ps.userId === userId);
-    
+
     if (playerSession) {
       // Garantir que o teamId é um número
       const validTeamId = Number(teamId);
       console.log('⚽ Enviando atualização com teamId:', validTeamId);
-      
+
       updatePlayerMutation.mutate(
-        { 
-          sessionId: matchId, 
-          userId, 
+        {
+          sessionId: matchId,
+          userId,
           data: {
             teamId: validTeamId
           }
@@ -196,12 +196,12 @@ const MatchManagePage = () => {
         {
           onSuccess: () => {
             // Encontrar o time pelo ID para exibir o nome
-            const teamName = validTeamId === teamA?.id 
-              ? teamA?.name 
-              : validTeamId === teamB?.id 
-                ? teamB?.name 
+            const teamName = validTeamId === teamA?.id
+              ? teamA?.name
+              : validTeamId === teamB?.id
+                ? teamB?.name
                 : 'time';
-                
+
             showToast(
               `Jogador adicionado ao ${teamName || 'time'} com sucesso!`,
               'success',
@@ -251,7 +251,7 @@ const MatchManagePage = () => {
     if (isFilterOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
-    
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
@@ -260,30 +260,30 @@ const MatchManagePage = () => {
   // Filtrar jogadores baseado nos filtros e na aba ativa
   useEffect(() => {
     if (!allPlayersWithSessionData) return;
-    
+
     // Primeiro filtramos por aba
     let filtered = [...allPlayersWithSessionData];
-    
+
     if (activeTab === 'confirmed') {
       filtered = filtered.filter(p => p.confirmed && p.willPlay);
     } else if (activeTab === 'resenha') {
       filtered = filtered.filter(p => p.confirmed && !p.willPlay);
     }
-    
+
     // Depois aplicamos os filtros de busca
     if (formik.values.name) {
       const searchName = formik.values.name.toLowerCase();
-      filtered = filtered.filter(p => 
+      filtered = filtered.filter(p =>
         p.user?.name?.toLowerCase().includes(searchName) || false
       );
     }
-    
+
     if (formik.values.position) {
-      filtered = filtered.filter(p => 
+      filtered = filtered.filter(p =>
         p.user?.position === formik.values.position
       );
     }
-    
+
     setFilteredPlayers(filtered);
   }, [allPlayersWithSessionData, formik.values, activeTab]);
 
@@ -373,21 +373,18 @@ const MatchManagePage = () => {
           </S.MatchDetail>
         </S.MatchDetails>
 
-        {activeTab !== 'confirmed' && (
-          <S.TeamsContainer>
-            <S.TeamBlock>
-              <S.TeamName>{teamA?.name || 'Time A'}</S.TeamName>
-              <S.TeamColor $color={teamA?.color} />
-            </S.TeamBlock>
-            
-            <S.VersusText>VS</S.VersusText>
-            
-            <S.TeamBlock>
-              <S.TeamName>{teamB?.name || 'Time B'}</S.TeamName>
-              <S.TeamColor $color={teamB?.color} />
-            </S.TeamBlock>
-          </S.TeamsContainer>
-        )}
+        <S.TeamsContainer>
+          <S.TeamBlock>
+            <S.TeamName>{teamA?.name || 'Time A'}</S.TeamName>
+          </S.TeamBlock>
+
+          <S.VersusText>VS</S.VersusText>
+
+          <S.TeamBlock>
+            <S.TeamName>{teamB?.name || 'Time B'}</S.TeamName>
+          </S.TeamBlock>
+        </S.TeamsContainer>
+
 
         {/* Estatísticas resumidas */}
         <MatchStats
@@ -399,22 +396,22 @@ const MatchManagePage = () => {
 
       {/* Abas de navegação */}
       <S.TabsContainer>
-        <S.Tab 
-          $active={activeTab === 'all'} 
+        <S.Tab
+          $active={activeTab === 'all'}
           onClick={() => setActiveTab('all')}
         >
           <FiUsers size={16} />
           Todos
         </S.Tab>
-        <S.Tab 
-          $active={activeTab === 'confirmed'} 
+        <S.Tab
+          $active={activeTab === 'confirmed'}
           onClick={() => setActiveTab('confirmed')}
         >
           <FiUserCheck size={16} />
           Confirmados para Jogo
         </S.Tab>
-        <S.Tab 
-          $active={activeTab === 'resenha'} 
+        <S.Tab
+          $active={activeTab === 'resenha'}
           onClick={() => setActiveTab('resenha')}
         >
           <GiBeerStein size={16} />

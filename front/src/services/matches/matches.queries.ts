@@ -108,14 +108,12 @@ export const useCreateMatchMutation = () => {
         // Depois, cria o time A com o sessionId
         const teamAResponse = await api.post('/teams', {
           name: data.teamAName,
-          color: data.teamAColor || 'Azul',
           sessionId: sessionResponse.data.id
         });
         
         // Depois, cria o time B com o sessionId
         const teamBResponse = await api.post('/teams', {
           name: data.teamBName,
-          color: data.teamBColor || 'Vermelho',
           sessionId: sessionResponse.data.id
         });
         

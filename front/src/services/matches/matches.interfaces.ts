@@ -30,9 +30,7 @@ export const createMatchSchema = z.object({
   location: z.string(),
   notes: z.string().optional(),
   teamAName: z.string(),
-  teamBName: z.string(),
-  teamAColor: z.string().optional(),
-  teamBColor: z.string().optional()
+  teamBName: z.string()
 });
 
 // Definição do esquema de validação para atualização de partidas

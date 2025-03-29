@@ -11,14 +11,6 @@ export class CreateTeamDto {
   name: string;
 
   @ApiProperty({
-    description: 'Cor do time/uniforme',
-    example: 'Azul',
-  })
-  @IsString()
-  @IsNotEmpty()
-  color: string;
-
-  @ApiProperty({
     description: 'ID da sessão do jogo',
     example: 1,
   })

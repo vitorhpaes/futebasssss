@@ -47,6 +47,7 @@ export const registerUserSchema = z.object({
   position: z.union([positionSchema, z.string(), z.null()]).optional(),
   observations: z.string()
     .optional()
+    .nullable()
     .transform(val => val === '' ? null : val),
 });
 
