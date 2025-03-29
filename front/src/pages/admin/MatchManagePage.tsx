@@ -165,7 +165,7 @@ const MatchManagePage = () => {
 
   // Função para adicionar jogador a um time
   const handleAddToTeam = (userId: number, teamId: number | undefined) => {
-    console.log('⚽ Tentando adicionar jogador ao time:', { userId, teamId });
+
 
     // Verificar se o teamId é undefined ou zero
     if (teamId === undefined || teamId <= 0) {
