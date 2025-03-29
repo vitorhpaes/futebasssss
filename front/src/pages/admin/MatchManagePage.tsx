@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiArrowLeft, FiMapPin, FiCalendar, FiClock, FiUsers, FiUserCheck } from 'react-icons/fi';
+import { FiArrowLeft, FiMapPin, FiCalendar, FiClock, FiUsers, FiUserCheck, FiStar } from 'react-icons/fi';
 import { GiBeerStein } from 'react-icons/gi';
 import { useMatch } from '../../services/matches/matches.queries';
 import { usePlayersWithSessionData, useConfirmPlayerMutation, useUpdatePlayerSessionMutation } from '../../services/player-sessions/player-sessions.queries';
@@ -12,6 +12,7 @@ import * as S from './MatchManagePage.styles';
 import { useToast } from '../../components/ui/Toast';
 import { useFormik } from 'formik';
 import MatchStats from '../../components/match/MatchStats';
+import styled from 'styled-components';
 
 // Componentes extraídos
 import FilterForm, { FilterParams } from '../../components/match/FilterForm';
@@ -25,9 +26,20 @@ type TabType = 'all' | 'confirmed' | 'resenha';
 // Interface para o MatchTeam
 interface MatchTeam {
   id: number;
-  sessionId: number;
+  sessionId: number | null;
   name: string;
   color?: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
+  captainId: number | null;
+  captain: {
+    id: number;
+    user: {
+      id: number;
+      name: string;
+    };
+  } | null;
 }
 
 // Interface para o componente ConfirmedPlayersTab
@@ -35,6 +47,14 @@ interface MatchTeams {
   teamA?: MatchTeam;
   teamB?: MatchTeam;
 }
+
+const CaptainInfo = styled.span`
+  font-size: 12px;
+  color: ${({ theme }) => theme.colors.text.secondary};
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
 
 const MatchManagePage = () => {
   const { id } = useParams<{ id: string }>();
@@ -110,16 +130,14 @@ const MatchManagePage = () => {
             willPlay
               ? `Presença do jogador confirmada com sucesso!`
               : `Jogador marcado como resenha com sucesso!`,
-            'success',
-            3000
+            { type: 'success', duration: 3000 }
           );
         },
         onError: (error) => {
           console.error('Erro ao confirmar jogador:', error);
           showToast(
             `Erro ao confirmar: ${error.message || 'Tente novamente mais tarde.'}`,
-            'error',
-            5000
+            { type: 'error', duration: 5000 }
           );
         }
       }
@@ -146,16 +164,14 @@ const MatchManagePage = () => {
               willPlay
                 ? `Jogador movido para lista de jogo!`
                 : `Jogador movido para resenha!`,
-              'success',
-              3000
+              { type: 'success', duration: 3000 }
             );
           },
           onError: (error) => {
             console.error('Erro ao atualizar:', error);
             showToast(
               `Erro ao atualizar: ${error.message || 'Tente novamente mais tarde.'}`,
-              'error',
-              5000
+              { type: 'error', duration: 5000 }
             );
           }
         }
@@ -163,16 +179,13 @@ const MatchManagePage = () => {
     }
   };
 
-  // Função para adicionar jogador a um time
+  // Função para adicionar jogador ao time
   const handleAddToTeam = (userId: number, teamId: number | undefined) => {
-
-
     // Verificar se o teamId é undefined ou zero
     if (teamId === undefined || teamId <= 0) {
       showToast(
         `Não foi possível adicionar o jogador ao time. Time não configurado para esta partida.`,
-        'error',
-        5000
+        { type: 'error', duration: 5000 }
       );
       return;
     }
@@ -204,16 +217,14 @@ const MatchManagePage = () => {
 
             showToast(
               `Jogador adicionado ao ${teamName || 'time'} com sucesso!`,
-              'success',
-              3000
+              { type: 'success', duration: 3000 }
             );
           },
           onError: (error) => {
             console.error('⚠️ Erro ao adicionar ao time:', error);
             showToast(
               `Erro ao adicionar ao time: ${error.message || 'Tente novamente mais tarde.'}`,
-              'error',
-              5000
+              { type: 'error', duration: 5000 }
             );
           }
         }
@@ -375,13 +386,29 @@ const MatchManagePage = () => {
 
         <S.TeamsContainer>
           <S.TeamBlock>
-            <S.TeamName>{teamA?.name || 'Time A'}</S.TeamName>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+              <S.TeamName>{teamA?.name || 'Time A'}</S.TeamName>
+              {teamA?.captain?.user && (
+                <CaptainInfo>
+                  <FiStar size={12} />
+                  {teamA.captain.user.name}
+                </CaptainInfo>
+              )}
+            </div>
           </S.TeamBlock>
 
           <S.VersusText>VS</S.VersusText>
 
           <S.TeamBlock>
-            <S.TeamName>{teamB?.name || 'Time B'}</S.TeamName>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+              <S.TeamName>{teamB?.name || 'Time B'}</S.TeamName>
+              {teamB?.captain?.user && (
+                <CaptainInfo>
+                  <FiStar size={12} />
+                  {teamB.captain.user.name}
+                </CaptainInfo>
+              )}
+            </div>
           </S.TeamBlock>
         </S.TeamsContainer>
 

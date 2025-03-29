@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { SessionStatus, sessionStatusMap } from '@futebass-ia/constants';
 import { formatDateTime } from '../../utils/date-utils';
-import { FiMapPin, FiCalendar, FiClock, FiEdit, FiFileText, FiInfo, FiTrash2 } from 'react-icons/fi';
+import { FiMapPin, FiCalendar, FiClock, FiEdit, FiFileText, FiInfo, FiTrash2, FiStar } from 'react-icons/fi';
 import { Match } from '../../services/matches/matches.interfaces';
 
 // Props para o componente
@@ -135,10 +135,25 @@ const TeamBlock = styled.div`
   width: 45%;
 `;
 
+const TeamInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+`;
+
 const TeamName = styled.div`
   font-weight: 600;
   font-size: 16px;
   color: ${({ theme }) => theme.colors.text.primary};
+`;
+
+const CaptainInfo = styled.span`
+  font-size: 11px;
+  color: ${({ theme }) => theme.colors.text.secondary};
+  display: flex;
+  align-items: center;
+  gap: 4px;
 `;
 
 const VersusText = styled.div`
@@ -247,13 +262,29 @@ const MatchCard: React.FC<MatchCardProps> = ({ match, onEdit, onDelete }) => {
       
       <TeamsContainer>
         <TeamBlock>
-          <TeamName>{teamA?.name || 'Time A'}</TeamName>
+          <TeamInfo>
+            <TeamName>{teamA?.name || 'Time A'}</TeamName>
+            {teamA?.captain?.user && (
+              <CaptainInfo>
+                <FiStar size={10} />
+                {teamA.captain.user.name}
+              </CaptainInfo>
+            )}
+          </TeamInfo>
         </TeamBlock>
         
         <VersusText>VS</VersusText>
         
         <TeamBlock>
-          <TeamName>{teamB?.name || 'Time B'}</TeamName>
+          <TeamInfo>
+            <TeamName>{teamB?.name || 'Time B'}</TeamName>
+            {teamB?.captain?.user && (
+              <CaptainInfo>
+                <FiStar size={10} />
+                {teamB.captain.user.name}
+              </CaptainInfo>
+            )}
+          </TeamInfo>
         </TeamBlock>
       </TeamsContainer>
       

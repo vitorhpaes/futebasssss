@@ -41,9 +41,20 @@ const CaptainBadge = styled.span`
   margin-left: 8px;
 `;
 
+const CaptainInfo = styled.span`
+  font-size: 12px;
+  color: ${({ theme }) => theme.colors.text.secondary};
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
 const TeamComponent: React.FC<TeamComponentProps> = ({ team, players }) => {
   const updateTeamCaptain = useUpdateTeamCaptain();
   const { showToast } = useToast();
+
+  // Encontrar o jogador que é capitão
+  const captain = players.find(player => player.id === team?.captainId);
 
   const handleSetCaptain = async (playerSessionId: number) => {
     if (!team?.id) return;
@@ -70,12 +81,13 @@ const TeamComponent: React.FC<TeamComponentProps> = ({ team, players }) => {
   return (
     <S.TeamContainer>
       <S.TeamHeader>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
           <span style={{ fontSize: '16px', fontWeight: 'bold' }}>{team?.name || 'Time'}</span>
-          {team?.captainId && (
-            <span style={{ fontSize: '12px', color: '#666' }}>
-              (Captain ID: {team.captainId})
-            </span>
+          {captain && captain.user && (
+            <CaptainInfo>
+              <FiStar size={12} />
+              Capitão: {captain.user.name}
+            </CaptainInfo>
           )}
         </div>
         <span>{players.length} jogadores</span>
