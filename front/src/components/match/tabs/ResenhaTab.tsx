@@ -1,70 +1,63 @@
-import React from 'react';
-import { FiFilter, FiCoffee } from 'react-icons/fi';
-import Alert from '../../../components/ui/Alert';
+import React, { useState } from 'react';
+import { GiBeerStein } from 'react-icons/gi';
+import { useConfirmPlayer } from '../../../services/player-sessions/useConfirmPlayer';
+import { useTogglePlayerStatus } from '../../../services/player-sessions/useTogglePlayerStatus';
+import { useFilteredPlayers } from '../../../services/player-sessions/useFilteredPlayers';
+import PlayerListItem from '../PlayerListItem';
+import { TabHeader, TabTitleContainer, FilterButton } from '../../../pages/admin/MatchManagePage.styles';
 import { PlayerSession } from '../../../services/player-sessions/player-sessions.interfaces';
-import * as S from '../../../pages/admin/MatchManagePage.styles';
-import PlayerItem from '../PlayerItem';
 
 interface ResenhaTabProps {
-  filteredPlayers: PlayerSession[];
-  isFilterOpen: boolean;
-  setIsFilterOpen: (open: boolean) => void;
-  handleConfirmPlayer: (userId: number, willPlay: boolean) => void;
-  handleTogglePlayerStatus: (userId: number, willPlay: boolean) => void;
-  confirmPlayerMutation: { isPending: boolean };
   renderFilterForm: () => React.ReactNode;
 }
 
-const ResenhaTab: React.FC<ResenhaTabProps> = ({
-  filteredPlayers,
-  isFilterOpen,
-  setIsFilterOpen,
-  handleConfirmPlayer,
-  handleTogglePlayerStatus,
-  confirmPlayerMutation,
-  renderFilterForm
-}) => {
+const ResenhaTab: React.FC<ResenhaTabProps> = ({ renderFilterForm }) => {
+  const [showConfirmed, setShowConfirmed] = useState(false);
+  const { data: players = [] } = useFilteredPlayers({ willPlay: false });
+  const confirmPlayerMutation = useConfirmPlayer();
+  const togglePlayerStatusMutation = useTogglePlayerStatus();
+
+  const handleConfirmPlayer = (userId: number, willPlay?: boolean) => {
+    confirmPlayerMutation.mutate({ userId, willPlay });
+  };
+
+  const handleToggleStatus = (userId: number, willPlay?: boolean) => {
+    togglePlayerStatusMutation.mutate({ userId, willPlay });
+  };
+
+  const handleFilterClick = () => {
+    setShowConfirmed(!showConfirmed);
+  };
+
+  const filteredPlayers = players.filter((player: PlayerSession) => 
+    showConfirmed ? player.confirmed : !player.confirmed
+  );
+
   return (
-    <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <S.SectionTitle>
-          <FiCoffee size={16} style={{ marginRight: '8px' }} />
-          Jogadores na Resenha 
-          {filteredPlayers.length > 0 && (
-            <span style={{ fontWeight: 'normal', fontSize: '14px', marginLeft: '8px' }}>
-              ({filteredPlayers.length} encontrados)
-            </span>
-          )}
-        </S.SectionTitle>
-        
-        <S.ConfirmButton onClick={() => setIsFilterOpen(!isFilterOpen)}>
-          <FiFilter size={16} />
-          {isFilterOpen ? 'Ocultar Filtros' : 'Filtrar'}
-        </S.ConfirmButton>
-      </div>
+    <div>
+      <TabHeader>
+        <TabTitleContainer>
+          <GiBeerStein size={24} />
+          <h2>Resenha</h2>
+          <span>({filteredPlayers.length})</span>
+        </TabTitleContainer>
+        <FilterButton onClick={handleFilterClick}>
+          {showConfirmed ? 'Mostrar Não Confirmados' : 'Mostrar Confirmados'}
+        </FilterButton>
+      </TabHeader>
 
-      {isFilterOpen && renderFilterForm()}
+      {renderFilterForm()}
 
-      {filteredPlayers && filteredPlayers.length > 0 ? (
-        <S.PlayerList>
-          {filteredPlayers.map((ps) => (
-            <PlayerItem 
-              key={ps.userId}
-              ps={ps} 
-              handleConfirmPlayer={handleConfirmPlayer}
-              handleTogglePlayerStatus={handleTogglePlayerStatus}
-              confirmPlayerMutation={confirmPlayerMutation}
-            />
-          ))}
-        </S.PlayerList>
-      ) : (
-        <Alert
-          type="info"
-          title="Nenhum jogador na resenha"
-          message="Nenhum jogador confirmado para resenha com os filtros selecionados."
+      {filteredPlayers.map((player: PlayerSession) => (
+        <PlayerListItem
+          key={player.userId}
+          player={player}
+          onConfirm={handleConfirmPlayer}
+          onToggleStatus={handleToggleStatus}
+          isLoading={confirmPlayerMutation.isLoading || togglePlayerStatusMutation.isLoading}
         />
-      )}
-    </>
+      ))}
+    </div>
   );
 };
 

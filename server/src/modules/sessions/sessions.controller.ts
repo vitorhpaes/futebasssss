@@ -11,9 +11,10 @@ import {
   HttpCode,
   Query,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { SessionsService } from './sessions.service';
-import { Session, SessionStatus } from '@prisma/client';
+import { Session, SessionStatus, Prisma } from '@prisma/client';
 import { CreateSessionDto } from './dto/create-session.dto';
 import { UpdateSessionDto } from './dto/update-session.dto';
 import {
@@ -118,14 +119,21 @@ export class SessionsController {
     @Param('id', ParseIntPipe) id: number,
     @Query('includeDeleted') includeDeleted?: string,
   ): Promise<Session> {
-    const session = await this.sessionsService.findOne(
-      id,
-      includeDeleted === 'true',
-    );
-    if (!session) {
-      throw new NotFoundException(`Sessão com ID ${id} não encontrada`);
+    try {
+      const session = await this.sessionsService.findOne(
+        id,
+        includeDeleted === 'true',
+      );
+      if (!session) {
+        throw new NotFoundException(`Sessão com ID ${id} não encontrada`);
+      }
+      return session;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new BadRequestException('Erro ao buscar sessão');
+      }
+      throw error;
     }
-    return session;
   }
 
   @Patch(':id')
@@ -164,12 +172,18 @@ export class SessionsController {
   })
   @ApiResponse({ status: 404, description: 'Sessão não encontrada' })
   async remove(@Param('id', ParseIntPipe) id: number): Promise<Session> {
-    // Verificar se a sessão existe antes de tentar remover
-    const session = await this.sessionsService.findOne(id);
-    if (!session) {
-      throw new NotFoundException(`Sessão com ID ${id} não encontrada`);
+    try {
+      const session = await this.sessionsService.findOne(id);
+      if (!session) {
+        throw new NotFoundException(`Sessão com ID ${id} não encontrada`);
+      }
+      return this.sessionsService.remove(id);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new BadRequestException('Erro ao remover sessão');
+      }
+      throw error;
     }
-    return this.sessionsService.remove(id);
   }
 
   @Get('deleted/list')
@@ -193,21 +207,31 @@ export class SessionsController {
   })
   @ApiResponse({ status: 404, description: 'Sessão não encontrada' })
   async restore(@Param('id', ParseIntPipe) id: number): Promise<Session> {
-    // Verificar se a sessão excluída existe antes de tentar restaurar
-    const session = await this.sessionsService.findOne(id, true);
-    if (!session) {
-      throw new NotFoundException(`Sessão com ID ${id} não encontrada`);
+    try {
+      const session = await this.sessionsService.findOne(id, true);
+      if (!session) {
+        throw new NotFoundException(`Sessão com ID ${id} não encontrada`);
+      }
+
+      const deletedSessions = await this.sessionsService.findDeleted();
+      if (!Array.isArray(deletedSessions)) {
+        throw new InternalServerErrorException(
+          'Erro ao buscar sessões excluídas',
+        );
+      }
+
+      const isDeleted = deletedSessions.some((s: any) => s.id === id);
+      if (!isDeleted) {
+        throw new NotFoundException(`Sessão com ID ${id} não está excluída`);
+      }
+
+      return this.sessionsService.restore(id);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new BadRequestException('Erro ao restaurar sessão');
+      }
+      throw error;
     }
-
-    // Verificar se a sessão está excluída
-    const sessionDeleted = await this.sessionsService.findDeleted();
-    const isDeleted = sessionDeleted.some((s) => s.id === id);
-
-    if (!isDeleted) {
-      throw new NotFoundException(`Sessão com ID ${id} não está excluída`);
-    }
-
-    return this.sessionsService.restore(id);
   }
 
   @Delete(':id/permanent')
@@ -222,12 +246,20 @@ export class SessionsController {
   async permanentDelete(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<Session> {
-    // Verificar se a sessão existe antes de tentar remover permanentemente
-    const session = await this.sessionsService.findOne(id, true);
-    if (!session) {
-      throw new NotFoundException(`Sessão com ID ${id} não encontrada`);
+    try {
+      const session = await this.sessionsService.findOne(id, true);
+      if (!session) {
+        throw new NotFoundException(`Sessão com ID ${id} não encontrada`);
+      }
+      return this.sessionsService.permanentDelete(id);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new BadRequestException(
+          'Erro ao excluir permanentemente a sessão',
+        );
+      }
+      throw error;
     }
-    return this.sessionsService.permanentDelete(id);
   }
 
   @Patch(':id/status')
@@ -256,21 +288,24 @@ export class SessionsController {
     @Param('id', ParseIntPipe) id: number,
     @Body('status') status: SessionStatus,
   ): Promise<Session> {
-    // Verificar se o status é válido
-    if (!Object.values(SessionStatus).includes(status)) {
+    const validStatuses = Object.values(SessionStatus);
+    if (!validStatuses.includes(status)) {
       throw new BadRequestException(
-        `Status inválido. Valores permitidos: ${Object.values(
-          SessionStatus,
-        ).join(', ')}`,
+        `Status inválido. Valores permitidos: ${validStatuses.map(String).join(', ')}`,
       );
     }
 
-    // Verificar se a sessão existe
-    const session = await this.sessionsService.findOne(id);
-    if (!session) {
-      throw new NotFoundException(`Sessão com ID ${id} não encontrada`);
+    try {
+      const session = await this.sessionsService.findOne(id);
+      if (!session) {
+        throw new NotFoundException(`Sessão com ID ${id} não encontrada`);
+      }
+      return this.sessionsService.updateStatus(id, status);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new BadRequestException('Erro ao atualizar status da sessão');
+      }
+      throw error;
     }
-
-    return this.sessionsService.updateStatus(id, status);
   }
 }
