@@ -9,7 +9,7 @@ export class SessionsService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(includeDeleted = false): Promise<Session[]> {
-    return await this.prisma.session.findMany({
+    return this.prisma.session.findMany({
       where: {
         ...(includeDeleted ? {} : { deletedAt: null }),
       },
@@ -21,7 +21,7 @@ export class SessionsService {
   }
 
   async findOne(id: number, includeDeleted = false): Promise<Session | null> {
-    return await this.prisma.session.findFirst({
+    return this.prisma.session.findFirst({
       where: {
         id,
         ...(includeDeleted ? {} : { deletedAt: null }),
@@ -37,7 +37,7 @@ export class SessionsService {
   async create(data: CreateSessionDto): Promise<Session> {
     const { date, location, status, notes } = data;
 
-    return await this.prisma.session.create({
+    return this.prisma.session.create({
       data: {
         date: new Date(date),
         location,
@@ -66,20 +66,20 @@ export class SessionsService {
       updateData.notes = data.notes;
     }
 
-    return await this.prisma.session.update({
+    return this.prisma.session.update({
       where: { id },
       data: updateData,
     });
   }
 
   async remove(id: number): Promise<Session> {
-    return await this.prisma.session.delete({
+    return this.prisma.session.delete({
       where: { id },
     });
   }
 
   async findUpcoming(includeDeleted = false): Promise<Session[]> {
-    return await this.prisma.session.findMany({
+    return this.prisma.session.findMany({
       where: {
         date: {
           gte: new Date(),
@@ -101,7 +101,7 @@ export class SessionsService {
   }
 
   async findPast(includeDeleted = false): Promise<Session[]> {
-    return await this.prisma.session.findMany({
+    return this.prisma.session.findMany({
       where: {
         date: {
           lt: new Date(),
@@ -128,7 +128,7 @@ export class SessionsService {
   }
 
   async findDeleted(): Promise<Session[]> {
-    return await this.prisma.$queryRaw`
+    return this.prisma.$queryRaw`
       SELECT * FROM sessions 
       WHERE deleted_at IS NOT NULL
       ORDER BY date DESC
@@ -136,7 +136,7 @@ export class SessionsService {
   }
 
   async restore(id: number): Promise<Session> {
-    return await this.prisma.session.update({
+    return this.prisma.session.update({
       where: { id },
       data: {
         deletedAt: null,
@@ -145,18 +145,23 @@ export class SessionsService {
   }
 
   async permanentDelete(id: number): Promise<Session> {
-    return await this.prisma.$transaction(async (prisma) => {
-      // Busca a sessão antes da exclusão permanente
+    return this.prisma.$transaction(async (prisma) => {
       const session = await prisma.session.findFirst({
         where: { id },
       });
 
-      // Realiza a exclusão permanente, ignorando o middleware de exclusão lógica
       await prisma.$executeRaw`
         DELETE FROM sessions WHERE id = ${id}
       `;
 
       return session;
+    });
+  }
+
+  async updateStatus(id: number, status: SessionStatus): Promise<Session> {
+    return this.prisma.session.update({
+      where: { id },
+      data: { status },
     });
   }
 }

@@ -3,7 +3,7 @@ import { FiFilter, FiX, FiSearch, FiMapPin } from 'react-icons/fi';
 import Select from '../../components/form/Select';
 import * as S from '../../pages/admin/MatchManagePage.styles';
 import { FormikProps } from 'formik';
-import { Position } from '@futebass-ia/constants';
+import { Position } from '@futebasssss-ia/constants';
 
 export interface FilterParams {
   name: string;

@@ -12,7 +12,7 @@ export class TeamsService {
     return await this.prisma.team.findMany({
       where: {
         ...(includeDeleted ? {} : { deletedAt: null }),
-      }
+      },
     });
   }
 
@@ -21,7 +21,7 @@ export class TeamsService {
     if (!includeDeleted) {
       where.deletedAt = null;
     }
-    
+
     return await this.prisma.team.findFirst({
       where,
     });
@@ -114,5 +114,43 @@ export class TeamsService {
       assists: ps.assists,
       confirmed: ps.confirmed,
     }));
+  }
+
+  async updateCaptain(teamId: number, playerSessionId: number) {
+    // Verifica se o time existe
+    const team = await this.prisma.team.findUnique({
+      where: { id: teamId },
+      include: {
+        playerSessions: true,
+      },
+    });
+
+    if (!team) {
+      throw new Error('Time não encontrado');
+    }
+
+    // Verifica se o jogador faz parte do time
+    const isPlayerInTeam = team.playerSessions.some(
+      (player) => player.id === playerSessionId,
+    );
+
+    if (!isPlayerInTeam) {
+      throw new Error('Jogador não faz parte deste time');
+    }
+
+    // Atualiza o capitão do time
+    return this.prisma.team.update({
+      where: { id: teamId },
+      data: {
+        captainId: playerSessionId,
+      },
+      include: {
+        captain: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
   }
 }

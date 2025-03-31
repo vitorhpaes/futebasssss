@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Position, UserType } from '@futebass-ia/constants';
+import { Position, UserType } from '@futebasssss-ia/constants';
 
 // Schema para tipo de usuário baseado nos enumeradores do pacote de constantes
 const userTypeSchema = z.nativeEnum(UserType);
@@ -47,6 +47,7 @@ export const registerUserSchema = z.object({
   position: z.union([positionSchema, z.string(), z.null()]).optional(),
   observations: z.string()
     .optional()
+    .nullable()
     .transform(val => val === '' ? null : val),
 });
 

@@ -10,9 +10,10 @@ import {
   NotFoundException,
   HttpCode,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { SessionsService } from './sessions.service';
-import { Session } from '@prisma/client';
+import { Session, SessionStatus } from '@prisma/client';
 import { CreateSessionDto } from './dto/create-session.dto';
 import { UpdateSessionDto } from './dto/update-session.dto';
 import {
@@ -227,5 +228,49 @@ export class SessionsController {
       throw new NotFoundException(`Sessão com ID ${id} não encontrada`);
     }
     return this.sessionsService.permanentDelete(id);
+  }
+
+  @Patch(':id/status')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Atualizar o status de uma sessão' })
+  @ApiParam({ name: 'id', description: 'ID da sessão' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        status: {
+          type: 'string',
+          enum: ['SCHEDULED', 'COMPLETED', 'CANCELED'],
+          example: 'COMPLETED',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Status da sessão atualizado com sucesso',
+  })
+  @ApiResponse({ status: 400, description: 'Status inválido' })
+  @ApiResponse({ status: 404, description: 'Sessão não encontrada' })
+  async updateStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('status') status: SessionStatus,
+  ): Promise<Session> {
+    // Verificar se o status é válido
+    if (!Object.values(SessionStatus).includes(status)) {
+      throw new BadRequestException(
+        `Status inválido. Valores permitidos: ${Object.values(
+          SessionStatus,
+        ).join(', ')}`,
+      );
+    }
+
+    // Verificar se a sessão existe
+    const session = await this.sessionsService.findOne(id);
+    if (!session) {
+      throw new NotFoundException(`Sessão com ID ${id} não encontrada`);
+    }
+
+    return this.sessionsService.updateStatus(id, status);
   }
 }

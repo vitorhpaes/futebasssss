@@ -4,13 +4,7 @@ import Alert from '../../../components/ui/Alert';
 import { PlayerSession } from '../../../services/player-sessions/player-sessions.interfaces';
 import * as S from '../../../pages/admin/MatchManagePage.styles';
 import TeamComponent from '../TeamComponent';
-
-interface MatchTeam {
-  id?: number;
-  sessionId?: number;
-  name?: string;
-  color?: string;
-}
+import { Team } from '../../../services/teams/teams.interfaces';
 
 interface ConfirmedPlayersTabProps {
   filteredPlayers: PlayerSession[];
@@ -18,8 +12,8 @@ interface ConfirmedPlayersTabProps {
   teamBPlayers: PlayerSession[];
   unassignedPlayers: PlayerSession[];
   match: {
-    teamA?: MatchTeam;
-    teamB?: MatchTeam;
+    teamA?: Team;
+    teamB?: Team;
   };
   isFilterOpen: boolean;
   setIsFilterOpen: (open: boolean) => void;
@@ -38,19 +32,20 @@ const ConfirmedPlayersTab: React.FC<ConfirmedPlayersTabProps> = ({
   handleAddToTeam,
   renderFilterForm
 }) => {
+  console.log({match})
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <S.SectionTitle>
           <FiUserCheck size={16} style={{ marginRight: '8px' }} />
-          Distribuição de Times 
+          Distribuição de Times
           {filteredPlayers.length > 0 && (
             <span style={{ fontWeight: 'normal', fontSize: '14px', marginLeft: '8px' }}>
               ({filteredPlayers.length} jogadores confirmados)
             </span>
           )}
         </S.SectionTitle>
-        
+
         <S.ConfirmButton onClick={() => setIsFilterOpen(!isFilterOpen)}>
           <FiFilter size={16} />
           {isFilterOpen ? 'Ocultar Filtros' : 'Filtrar'}
@@ -62,24 +57,22 @@ const ConfirmedPlayersTab: React.FC<ConfirmedPlayersTabProps> = ({
       {filteredPlayers && filteredPlayers.length > 0 ? (
         <div>
           <S.TeamsGrid>
-            <TeamComponent 
-              team={match.teamA} 
+            <TeamComponent
+              team={match.teamA}
               players={teamAPlayers}
-              handleAddToTeam={handleAddToTeam}
             />
-            <TeamComponent 
-              team={match.teamB} 
+            <TeamComponent
+              team={match.teamB}
               players={teamBPlayers}
-              handleAddToTeam={handleAddToTeam}
             />
           </S.TeamsGrid>
-          
+
           {unassignedPlayers.length > 0 && (
             <>
               <S.SectionTitle style={{ marginTop: '32px', marginBottom: '16px' }}>
                 Jogadores sem time ({unassignedPlayers.length})
               </S.SectionTitle>
-              
+
               <S.UnassignedPlayersContainer>
                 {unassignedPlayers.map(player => (
                   <S.UnassignedPlayer key={player.userId}>
@@ -93,12 +86,12 @@ const ConfirmedPlayersTab: React.FC<ConfirmedPlayersTabProps> = ({
                       </div>
                     </S.PlayerInfo>
                     <S.PlayerActions>
-                      <S.ConfirmButton 
+                      <S.ConfirmButton
                         onClick={() => handleAddToTeam(player.userId, match.teamA?.id)}
                       >
                         {match.teamA?.name}
                       </S.ConfirmButton>
-                      <S.ResenhaButton 
+                      <S.ResenhaButton
                         onClick={() => handleAddToTeam(player.userId, match.teamB?.id)}
                       >
                         {match.teamB?.name}

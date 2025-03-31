@@ -5,14 +5,11 @@
     "moduleResolution": "node",
     "declaration": true,
     "outDir": "./dist",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "composite": true,
-    "rootDir": ".",
-    "baseUrl": "."
+    "forceConsistentCasingInFileNames": true
   },
-  "include": ["./**/*.ts"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 } 

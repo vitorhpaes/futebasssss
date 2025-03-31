@@ -334,12 +334,12 @@ export const TeamContainer = styled.div`
   box-shadow: ${({ theme }) => theme.shadows.small};
 `;
 
-export const TeamHeader = styled.div<{ $color?: string }>`
+export const TeamHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background-color: ${({ $color, theme }) => $color ? `${$color}20` : theme.colors.background.default};
+  background-color: ${({ theme }) => theme.colors.background.default};
   border-bottom: 1px solid ${({ theme }) => theme.colors.neutral.light};
   font-weight: 600;
 `;
@@ -379,4 +379,12 @@ export const EmptyTeamMessage = styled.div`
   text-align: center;
   color: ${({ theme }) => theme.colors.text.secondary};
   font-style: italic;
+`;
+
+export const CaptainInfo = styled.span`
+  font-size: 12px;
+  color: ${({ theme }) => theme.colors.text.secondary};
+  display: flex;
+  align-items: center;
+  gap: 4px;
 `; 

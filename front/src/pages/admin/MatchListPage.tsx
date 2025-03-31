@@ -9,7 +9,7 @@ import MatchCard from '../../components/cards/MatchCard';
 import styled from 'styled-components';
 import { useFormik } from 'formik';
 import Select from '../../components/form/Select';
-import { SessionStatus, SESSION_STATUS_OPTIONS } from '@futebass-ia/constants';
+import { SessionStatus, SESSION_STATUS_OPTIONS } from '@futebasssss-ia/constants';
 
 // Estilos para o botão de filtro
 const FilterTrigger = styled.button`

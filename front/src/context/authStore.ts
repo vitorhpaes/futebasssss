@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import api from '../services/api';
 import { ApiError } from '../services/auth/auth.interfaces';
-import { UserType } from '@futebass-ia/constants';
+import { UserType } from '@futebasssss-ia/constants';
 
 // Tipo de usuário no frontend (camelCase para padronização)
 export type UserRole = 'admin' | 'player';

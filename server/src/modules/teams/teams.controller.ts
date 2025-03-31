@@ -10,10 +10,12 @@ import {
   Query,
   HttpCode,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { TeamsService } from './teams.service';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
+import { UpdateTeamCaptainDto } from './dto/update-team-captain.dto';
 import {
   ApiTags,
   ApiOperation,
@@ -31,6 +33,7 @@ class TeamEntity implements Team {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
+  captainId: number | null;
 }
 
 class TeamPlayerDto {
@@ -222,5 +225,36 @@ export class TeamsController {
 
     const deletedTeam = await this.teamsService.permanentDelete(id);
     return deletedTeam;
+  }
+
+  @Patch(':id/captain')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Definir o capitão do time' })
+  @ApiParam({ name: 'id', description: 'ID do time' })
+  @ApiResponse({
+    status: 200,
+    description: 'Capitão definido com sucesso',
+    type: TeamEntity,
+  })
+  @ApiResponse({ status: 404, description: 'Time não encontrado' })
+  @ApiResponse({ status: 400, description: 'Jogador não faz parte do time' })
+  async updateCaptain(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateTeamCaptainDto: UpdateTeamCaptainDto,
+  ): Promise<Team> {
+    try {
+      return await this.teamsService.updateCaptain(
+        id,
+        updateTeamCaptainDto.playerSessionId,
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'Time não encontrado') {
+          throw new NotFoundException(error.message);
+        }
+        throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
   }
 }
