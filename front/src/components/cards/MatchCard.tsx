@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import { SessionStatus, sessionStatusMap } from '@futebass-ia/constants';
+import { SessionStatus, sessionStatusMap } from '@futebasssss-ia/constants';
 import { formatDateTime } from '../../utils/date-utils';
-import { FiMapPin, FiCalendar, FiClock, FiEdit, FiFileText, FiInfo, FiTrash2, FiStar } from 'react-icons/fi';
+import { FiCalendar, FiEdit, FiFileText, FiInfo, FiTrash2, FiStar } from 'react-icons/fi';
 import { Match } from '../../services/matches/matches.interfaces';
 
 // Props para o componente
@@ -225,39 +225,40 @@ const DeleteButton = styled.button`
   }
 `;
 
+const StatusContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
 // Componente
 const MatchCard: React.FC<MatchCardProps> = ({ match, onEdit, onDelete }) => {
-  // Obter o status em texto mais amigável
   const getStatusLabel = (status: SessionStatus): string => {
     return sessionStatusMap.get(status) || String(status);
   };
 
-  // Extrair a data e hora para exibição
-  const date = formatDateTime(match.date, 'DD/MM/YYYY');
-  const time = formatDateTime(match.date, 'HH:mm');
-
-  // Encontrar os times A e B a partir do array de times
   const teamA = match.teams && match.teams.length > 0 ? match.teams[0] : null;
   const teamB = match.teams && match.teams.length > 1 ? match.teams[1] : null;
+
 
   return (
     <CardContainer>
       <CardHeader>
         <MatchInfo>
           <MatchTitle>
-            <FiMapPin />
-            {match.location}
+            <FiFileText size={18} />
+            Partida #{match.id}
           </MatchTitle>
           <MatchDateTime>
-            <FiCalendar size={12} />
-            {date}
-            <FiClock size={12} />
-            {time}
+            <FiCalendar size={14} />
+            {formatDateTime(match.date)}
           </MatchDateTime>
         </MatchInfo>
-        <StatusBadge $status={match.status}>
-          {getStatusLabel(match.status)}
-        </StatusBadge>
+        <StatusContainer>
+          <StatusBadge $status={match.status as SessionStatus}>
+            {getStatusLabel(match.status as SessionStatus)}
+          </StatusBadge>
+        </StatusContainer>
       </CardHeader>
       
       <TeamsContainer>

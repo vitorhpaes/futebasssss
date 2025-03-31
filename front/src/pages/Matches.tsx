@@ -5,7 +5,7 @@ import { useMatches, useDeleteMatchMutation } from '../services/matches/matches.
 import { MatchFilterParams } from '../services/matches/matches.interfaces';
 import MatchCard from '../components/cards/MatchCard';
 import { FiPlus } from 'react-icons/fi';
-import { SessionStatus } from '@futebass-ia/constants';
+import { SessionStatus } from '@futebasssss-ia/constants';
 
 // Estilos
 const Container = styled.div`

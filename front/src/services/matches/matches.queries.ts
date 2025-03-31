@@ -11,7 +11,7 @@ import {
 } from './matches.interfaces';
 import { handleApiError } from '../api';
 import { ApiError } from '../auth/auth.interfaces';
-import { SessionStatus } from '@futebass-ia/constants';
+import { SessionStatus } from '@futebasssss-ia/constants';
 
 // Chaves de query para o React Query
 export const MATCHES_QUERY_KEYS = {
@@ -232,6 +232,35 @@ export const usePermanentDeleteMatchMutation = () => {
     },
     onSuccess: () => {
       // Invalidar queries para forçar o recarregamento dos dados
+      queryClient.invalidateQueries({ queryKey: MATCHES_QUERY_KEYS.lists() });
+    }
+  });
+};
+
+/**
+ * Hook para atualizar o status de uma partida
+ */
+export const useUpdateMatchStatusMutation = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation<Match, ApiError, { id: number; status: SessionStatus }>({
+    mutationFn: async ({ id, status }) => {
+      try {
+        const response = await api.patch(`/sessions/${id}/status`, { status });
+        
+        try {
+          return matchSchema.parse(response.data);
+        } catch (parseError) {
+          console.error('Erro ao validar schema:', parseError);
+          return response.data as Match;
+        }
+      } catch (error) {
+        throw handleApiError(error);
+      }
+    },
+    onSuccess: (_, variables) => {
+      // Invalidar queries para forçar o recarregamento dos dados
+      queryClient.invalidateQueries({ queryKey: MATCHES_QUERY_KEYS.detail(variables.id) });
       queryClient.invalidateQueries({ queryKey: MATCHES_QUERY_KEYS.lists() });
     }
   });

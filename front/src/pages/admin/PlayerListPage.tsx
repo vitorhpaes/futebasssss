@@ -9,7 +9,7 @@ import {
   USER_TYPE_OPTIONS,
   POSITION_OPTIONS,
   Option
-} from '@futebass-ia/constants';
+} from '@futebasssss-ia/constants';
 import PlayerCard from '../../components/cards/PlayerCard';
 import { FiFilter, FiX, FiUser, FiUsers, FiTag } from 'react-icons/fi';
 import styled from 'styled-components';

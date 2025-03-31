@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { SessionStatus } from '@futebass-ia/constants';
+import { SessionStatus } from '@futebasssss-ia/constants';
 import { playerSessionSchema } from '../player-sessions/player-sessions.interfaces';
 import { teamSchema } from '../teams/teams.interfaces';
 

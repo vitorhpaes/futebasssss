@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { SessionStatus } from '@futebass-ia/constants';
+import { SessionStatus } from '@futebasssss-ia/constants';
 import * as Form from '@radix-ui/react-form';
 
 export const Container = styled.div`

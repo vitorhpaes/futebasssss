@@ -379,4 +379,12 @@ export const EmptyTeamMessage = styled.div`
   text-align: center;
   color: ${({ theme }) => theme.colors.text.secondary};
   font-style: italic;
+`;
+
+export const CaptainInfo = styled.span`
+  font-size: 12px;
+  color: ${({ theme }) => theme.colors.text.secondary};
+  display: flex;
+  align-items: center;
+  gap: 4px;
 `; 

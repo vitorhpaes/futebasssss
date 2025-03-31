@@ -6,13 +6,13 @@ import { useMatch } from '../../services/matches/matches.queries';
 import { usePlayersWithSessionData, useConfirmPlayerMutation, useUpdatePlayerSessionMutation } from '../../services/player-sessions/player-sessions.queries';
 import { PlayerSession } from '../../services/player-sessions/player-sessions.interfaces';
 import { formatDateTime } from '../../utils/date-utils';
-import { sessionStatusMap, POSITION_OPTIONS } from '@futebass-ia/constants';
+import { POSITION_OPTIONS } from '@futebasssss-ia/constants';
 import Alert from '../../components/ui/Alert';
 import * as S from './MatchManagePage.styles';
 import { useToast } from '../../components/ui/Toast';
 import { useFormik } from 'formik';
 import MatchStats from '../../components/match/MatchStats';
-import styled from 'styled-components';
+import { SessionStatusButton } from '../../components/SessionStatusButton';
 
 // Componentes extraídos
 import FilterForm, { FilterParams } from '../../components/match/FilterForm';
@@ -48,42 +48,20 @@ interface MatchTeams {
   teamB?: MatchTeam;
 }
 
-const CaptainInfo = styled.span`
-  font-size: 12px;
-  color: ${({ theme }) => theme.colors.text.secondary};
-  display: flex;
-  align-items: center;
-  gap: 4px;
-`;
-
 const MatchManagePage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { showToast } = useToast();
   const matchId = id ? parseInt(id, 10) : 0;
+  const { data: match, isLoading: isLoadingMatch, error: matchError } = useMatch(matchId);
+  const { data: allPlayersWithSessionData } = usePlayersWithSessionData(matchId);
+  const confirmPlayerMutation = useConfirmPlayerMutation();
+  const updatePlayerSessionMutation = useUpdatePlayerSessionMutation();
+  const { showToast } = useToast();
   const filterRef = useRef<HTMLDivElement>(null);
 
   const [activeTab, setActiveTab] = useState<TabType>('all');
   const [filteredPlayers, setFilteredPlayers] = useState<PlayerSession[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-
-  // Buscar informações da partida
-  const {
-    data: match,
-    isLoading: isLoadingMatch,
-    error: matchError
-  } = useMatch(matchId);
-
-  // Buscar jogadores relacionados a esta partida
-  const {
-    data: allPlayersWithSessionData,
-    isLoading: isLoadingPlayers,
-    error: playersError
-  } = usePlayersWithSessionData(matchId);
-
-  // Mutation para confirmar presença
-  const confirmPlayerMutation = useConfirmPlayerMutation();
-  const updatePlayerMutation = useUpdatePlayerSessionMutation();
 
   // Opções para o select de posição
   const allPositionsOption = { value: '', label: 'Todas' };
@@ -150,7 +128,7 @@ const MatchManagePage = () => {
     const playerSession = allPlayersWithSessionData?.find(ps => ps.userId === userId);
 
     if (playerSession && playerSession.id) {
-      updatePlayerMutation.mutate(
+      updatePlayerSessionMutation.mutate(
         {
           sessionId: matchId,
           userId,
@@ -198,7 +176,7 @@ const MatchManagePage = () => {
       const validTeamId = Number(teamId);
       console.log('⚽ Enviando atualização com teamId:', validTeamId);
 
-      updatePlayerMutation.mutate(
+      updatePlayerSessionMutation.mutate(
         {
           sessionId: matchId,
           userId,
@@ -234,7 +212,7 @@ const MatchManagePage = () => {
 
   // Voltar para a lista de partidas
   const handleBack = () => {
-    navigate('/admin/matches');
+    navigate(-1);
   };
 
   // Limpar filtros
@@ -245,6 +223,13 @@ const MatchManagePage = () => {
   // Fechar filtro
   const handleCloseFilter = () => {
     setIsFilterOpen(false);
+  };
+
+  // Função para atualizar o status da partida
+  const handleStatusChange = (newStatus: string) => {
+    // O componente SessionStatusButton já faz a chamada à API
+    // Aqui podemos atualizar o cache do React Query se necessário
+    console.log('Status atualizado:', newStatus);
   };
 
   // Formatar a data e hora da partida
@@ -298,41 +283,16 @@ const MatchManagePage = () => {
     setFilteredPlayers(filtered);
   }, [allPlayersWithSessionData, formik.values, activeTab]);
 
-  // Se estiver carregando, mostrar spinner
-  if (isLoadingMatch || isLoadingPlayers) {
-    return (
-      <S.Container>
-        <S.LoadingContainer>
-          <S.Spinner />
-        </S.LoadingContainer>
-      </S.Container>
-    );
+  if (isLoadingMatch) {
+    return <Alert message="Carregando informações da partida..." />;
   }
 
-  // Se houver erro, mostrar mensagem
-  if (matchError || playersError) {
-    return (
-      <S.Container>
-        <Alert
-          type="error"
-          title="Erro ao carregar dados"
-          message="Ocorreu um erro ao carregar os dados da partida. Por favor, tente novamente."
-        />
-      </S.Container>
-    );
+  if (matchError) {
+    return <Alert type="error" message={`Erro ao carregar a partida: ${matchError.message}`} />;
   }
 
-  // Se a partida não for encontrada
   if (!match) {
-    return (
-      <S.Container>
-        <Alert
-          type="error"
-          title="Partida não encontrada"
-          message="A partida solicitada não foi encontrada."
-        />
-      </S.Container>
-    );
+    return <Alert type="error" message="Partida não encontrada" />;
   }
 
   // Contadores para estatísticas
@@ -358,19 +318,22 @@ const MatchManagePage = () => {
             <FiArrowLeft size={16} />
             Voltar
           </S.ConfirmButton>
-          <S.Title>Gerenciar Partida</S.Title>
         </div>
       </S.Header>
 
       <S.MatchInfo>
         <S.MatchHeader>
           <S.MatchTitle>
-            <FiMapPin size={16} />
+            <FiCalendar size={14} />
+            {formatDateTime(match.date)}
+            <FiMapPin size={14} style={{ marginLeft: 8 }} />
             {match.location}
           </S.MatchTitle>
-          <S.StatusBadge $status={match.status}>
-            {sessionStatusMap.get(match.status) || match.status}
-          </S.StatusBadge>
+          <SessionStatusButton
+            sessionId={match.id}
+            currentStatus={match.status}
+            onStatusChange={handleStatusChange}
+          />
         </S.MatchHeader>
 
         <S.MatchDetails>
@@ -389,10 +352,10 @@ const MatchManagePage = () => {
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
               <S.TeamName>{teamA?.name || 'Time A'}</S.TeamName>
               {teamA?.captain?.user && (
-                <CaptainInfo>
+                <S.CaptainInfo>
                   <FiStar size={12} />
                   {teamA.captain.user.name}
-                </CaptainInfo>
+                </S.CaptainInfo>
               )}
             </div>
           </S.TeamBlock>
@@ -403,15 +366,14 @@ const MatchManagePage = () => {
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
               <S.TeamName>{teamB?.name || 'Time B'}</S.TeamName>
               {teamB?.captain?.user && (
-                <CaptainInfo>
+                <S.CaptainInfo>
                   <FiStar size={12} />
                   {teamB.captain.user.name}
-                </CaptainInfo>
+                </S.CaptainInfo>
               )}
             </div>
           </S.TeamBlock>
         </S.TeamsContainer>
-
 
         {/* Estatísticas resumidas */}
         <MatchStats

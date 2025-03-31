@@ -1,4 +1,4 @@
-import { Position, UserType, POSITION_OPTIONS, USER_TYPE_OPTIONS } from '@futebass-ia/constants';
+import { Position, UserType, POSITION_OPTIONS, USER_TYPE_OPTIONS } from '@futebasssss-ia/constants';
 
 /**
  * Obtém o label da posição a partir do valor.

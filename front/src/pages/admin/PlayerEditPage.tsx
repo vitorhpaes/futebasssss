@@ -14,7 +14,7 @@ import {
   USER_TYPE_OPTIONS,
   POSITION_OPTIONS,
   Option
-} from '@futebass-ia/constants';
+} from '@futebasssss-ia/constants';
 
 const PlayerEditPage: React.FC = () => {
   const navigate = useNavigate();

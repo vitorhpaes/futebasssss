@@ -2,7 +2,7 @@
 // Isso é apenas um exemplo enquanto resolvemos a questão das importações
 
 // No ambiente real, você usaria a importação abaixo:
-// import { UserType, Position, SessionStatus } from '@futebass-ia/constants';
+// import { UserType, Position, SessionStatus } from '@futebasssss-ia/constants';
 
 // Para fins de demonstração, vamos definir os enums localmente:
 enum UserType {

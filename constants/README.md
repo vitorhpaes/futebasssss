@@ -1,4 +1,4 @@
-# @futebass-ia/constants
+# @futebasssss-ia/constants
 
 Este pacote contém constantes, enumeradores e utilitários compartilhados entre o front-end e o back-end do projeto Futebass IA.
 
@@ -55,7 +55,7 @@ import {
   getUserTypeOptions,
   getPositionOptions,
   Option
-} from '@futebass-ia/constants';
+} from '@futebasssss-ia/constants';
 
 // Usando enumeradores
 const adminUser = UserType.ADMIN;
@@ -77,7 +77,7 @@ userTypeOptions.map((option: Option<UserType>) => (
 ## Uso no Back-end
 
 ```typescript
-import { UserType, Position, SessionStatus } from '@futebass-ia/constants';
+import { UserType, Position, SessionStatus } from '@futebasssss-ia/constants';
 
 // Usando enumeradores em lógica de negócio
 function canUserEditSession(userType: UserType, sessionStatus: SessionStatus): boolean {
