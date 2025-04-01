@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiFilter } from 'react-icons/fi';
+import { FiFilter, FiUsers } from 'react-icons/fi';
 import Alert from '../../../components/ui/Alert';
 import { PlayerSession } from '../../../services/player-sessions/player-sessions.interfaces';
 import * as S from '../../../pages/admin/MatchManagePage.styles';
@@ -26,21 +26,20 @@ const AllPlayersTab: React.FC<AllPlayersTabProps> = ({
 }) => {
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <S.SectionTitle>
-          Jogadores
+      <S.TabHeader>
+        <S.TabTitleContainer>
+          <FiUsers size={24} />
+          <h2>Todos os Jogadores</h2>
           {filteredPlayers.length > 0 && (
-            <span style={{ fontWeight: 'normal', fontSize: '14px', marginLeft: '8px' }}>
-              ({filteredPlayers.length} encontrados)
-            </span>
+            <span>({filteredPlayers.length} jogadores)</span>
           )}
-        </S.SectionTitle>
-        
-        <S.ConfirmButton onClick={() => setIsFilterOpen(!isFilterOpen)}>
+        </S.TabTitleContainer>
+
+        <S.FilterButton onClick={() => setIsFilterOpen(!isFilterOpen)}>
           <FiFilter size={16} />
           {isFilterOpen ? 'Ocultar Filtros' : 'Filtrar'}
-        </S.ConfirmButton>
-      </div>
+        </S.FilterButton>
+      </S.TabHeader>
 
       {isFilterOpen && renderFilterForm()}
 

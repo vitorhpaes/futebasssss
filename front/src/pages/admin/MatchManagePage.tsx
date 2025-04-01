@@ -11,7 +11,6 @@ import Alert from '../../components/ui/Alert';
 import * as S from './MatchManagePage.styles';
 import { useToast } from '../../components/ui/Toast';
 import { useFormik } from 'formik';
-import MatchStats from '../../components/match/MatchStats';
 import { SessionStatusButton } from '../../components/SessionStatusButton';
 
 // Componentes extraídos
@@ -313,10 +312,10 @@ const MatchManagePage = () => {
   return (
     <S.Container>
       <S.Header>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
           <S.ConfirmButton onClick={handleBack} style={{ background: 'transparent', color: '#666' }}>
             <FiArrowLeft size={16} />
-            Voltar
+            <span className="back-text">Voltar</span>
           </S.ConfirmButton>
         </div>
       </S.Header>
@@ -324,10 +323,10 @@ const MatchManagePage = () => {
       <S.MatchInfo>
         <S.MatchHeader>
           <S.MatchTitle>
-            <FiCalendar size={14} />
+            <FiCalendar size={14} style={{ flexShrink: 0 }} />
             {formatDateTime(match.date)}
-            <FiMapPin size={14} style={{ marginLeft: 8 }} />
-            {match.location}
+            <FiMapPin size={14} style={{ flexShrink: 0, marginLeft: 4 }} />
+            <span style={{ wordBreak: 'break-word' }}>{match.location}</span>
           </S.MatchTitle>
           <SessionStatusButton
             sessionId={match.id}
@@ -338,49 +337,71 @@ const MatchManagePage = () => {
 
         <S.MatchDetails>
           <S.MatchDetail>
-            <FiCalendar size={14} />
+            <FiCalendar size={14} style={{ flexShrink: 0 }} />
             {date}
           </S.MatchDetail>
           <S.MatchDetail>
-            <FiClock size={14} />
+            <FiClock size={14} style={{ flexShrink: 0 }} />
             {time}
           </S.MatchDetail>
         </S.MatchDetails>
 
         <S.TeamsContainer>
           <S.TeamBlock>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+            <S.TeamInfo>
               <S.TeamName>{teamA?.name || 'Time A'}</S.TeamName>
               {teamA?.captain?.user && (
                 <S.CaptainInfo>
-                  <FiStar size={12} />
+                  <FiStar size={14} />
                   {teamA.captain.user.name}
                 </S.CaptainInfo>
               )}
-            </div>
+            </S.TeamInfo>
           </S.TeamBlock>
 
-          <S.VersusText>VS</S.VersusText>
+          <div style={{ position: 'relative' }}>
+            <S.VersusText>VS</S.VersusText>
+            <S.TeamDivider />
+          </div>
 
           <S.TeamBlock>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+            <S.TeamInfo>
               <S.TeamName>{teamB?.name || 'Time B'}</S.TeamName>
               {teamB?.captain?.user && (
                 <S.CaptainInfo>
-                  <FiStar size={12} />
+                  <FiStar size={14} />
                   {teamB.captain.user.name}
                 </S.CaptainInfo>
               )}
-            </div>
+            </S.TeamInfo>
           </S.TeamBlock>
         </S.TeamsContainer>
 
-        {/* Estatísticas resumidas */}
-        <MatchStats
-          confirmedCount={confirmedCount}
-          resenhaCount={resenhaCount}
-          pendingCount={pendingCount}
-        />
+        <S.StatsContainer>
+          <S.StatCard>
+            <S.StatValue $type="confirmed">{confirmedCount}</S.StatValue>
+            <S.StatLabel>
+              <FiUserCheck size={14} style={{ marginRight: '4px' }} />
+              Confirmados
+            </S.StatLabel>
+          </S.StatCard>
+
+          <S.StatCard>
+            <S.StatValue $type="resenha">{resenhaCount}</S.StatValue>
+            <S.StatLabel>
+              <GiBeerStein size={14} style={{ marginRight: '4px' }} />
+              Resenha
+            </S.StatLabel>
+          </S.StatCard>
+
+          <S.StatCard>
+            <S.StatValue $type="pending">{pendingCount}</S.StatValue>
+            <S.StatLabel>
+              <FiUsers size={14} style={{ marginRight: '4px' }} />
+              Pendentes
+            </S.StatLabel>
+          </S.StatCard>
+        </S.StatsContainer>
       </S.MatchInfo>
 
       {/* Abas de navegação */}
@@ -389,63 +410,65 @@ const MatchManagePage = () => {
           $active={activeTab === 'all'}
           onClick={() => setActiveTab('all')}
         >
-          <FiUsers size={16} />
+          <FiUsers />
           Todos
         </S.Tab>
         <S.Tab
           $active={activeTab === 'confirmed'}
           onClick={() => setActiveTab('confirmed')}
         >
-          <FiUserCheck size={16} />
-          Confirmados para Jogo
+          <FiUserCheck />
+          Confirmados
         </S.Tab>
         <S.Tab
           $active={activeTab === 'resenha'}
           onClick={() => setActiveTab('resenha')}
         >
-          <GiBeerStein size={16} />
+          <GiBeerStein />
           Resenha
         </S.Tab>
       </S.TabsContainer>
 
-      {/* Componentes de abas */}
-      {activeTab === 'all' && (
-        <AllPlayersTab
-          filteredPlayers={filteredPlayers}
-          isFilterOpen={isFilterOpen}
-          setIsFilterOpen={setIsFilterOpen}
-          handleConfirmPlayer={handleConfirmPlayer}
-          handleTogglePlayerStatus={handleTogglePlayerStatus}
-          confirmPlayerMutation={confirmPlayerMutation}
-          renderFilterForm={renderFilterForm}
-        />
-      )}
+      {/* Conteúdo das abas */}
+      <S.TabContent>
+        {activeTab === 'all' && (
+          <AllPlayersTab
+            filteredPlayers={filteredPlayers}
+            isFilterOpen={isFilterOpen}
+            setIsFilterOpen={setIsFilterOpen}
+            handleConfirmPlayer={handleConfirmPlayer}
+            handleTogglePlayerStatus={handleTogglePlayerStatus}
+            confirmPlayerMutation={confirmPlayerMutation}
+            renderFilterForm={renderFilterForm}
+          />
+        )}
 
-      {activeTab === 'resenha' && (
-        <ResenhaTab
-          filteredPlayers={filteredPlayers}
-          isFilterOpen={isFilterOpen}
-          setIsFilterOpen={setIsFilterOpen}
-          handleConfirmPlayer={handleConfirmPlayer}
-          handleTogglePlayerStatus={handleTogglePlayerStatus}
-          confirmPlayerMutation={confirmPlayerMutation}
-          renderFilterForm={renderFilterForm}
-        />
-      )}
+        {activeTab === 'resenha' && (
+          <ResenhaTab
+            filteredPlayers={filteredPlayers}
+            isFilterOpen={isFilterOpen}
+            setIsFilterOpen={setIsFilterOpen}
+            handleConfirmPlayer={handleConfirmPlayer}
+            handleTogglePlayerStatus={handleTogglePlayerStatus}
+            confirmPlayerMutation={confirmPlayerMutation}
+            renderFilterForm={renderFilterForm}
+          />
+        )}
 
-      {activeTab === 'confirmed' && (
-        <ConfirmedPlayersTab
-          filteredPlayers={filteredPlayers}
-          teamAPlayers={teamAPlayers}
-          teamBPlayers={teamBPlayers}
-          unassignedPlayers={unassignedPlayers}
-          match={matchTeams}
-          isFilterOpen={isFilterOpen}
-          setIsFilterOpen={setIsFilterOpen}
-          handleAddToTeam={handleAddToTeam}
-          renderFilterForm={renderFilterForm}
-        />
-      )}
+        {activeTab === 'confirmed' && (
+          <ConfirmedPlayersTab
+            filteredPlayers={filteredPlayers}
+            teamAPlayers={teamAPlayers}
+            teamBPlayers={teamBPlayers}
+            unassignedPlayers={unassignedPlayers}
+            match={matchTeams}
+            isFilterOpen={isFilterOpen}
+            setIsFilterOpen={setIsFilterOpen}
+            handleAddToTeam={handleAddToTeam}
+            renderFilterForm={renderFilterForm}
+          />
+        )}
+      </S.TabContent>
     </S.Container>
   );
 };

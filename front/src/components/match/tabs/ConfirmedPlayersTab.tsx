@@ -32,25 +32,22 @@ const ConfirmedPlayersTab: React.FC<ConfirmedPlayersTabProps> = ({
   handleAddToTeam,
   renderFilterForm
 }) => {
-  console.log({match})
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <S.SectionTitle>
-          <FiUserCheck size={16} style={{ marginRight: '8px' }} />
-          Distribuição de Times
+      <S.TabHeader>
+        <S.TabTitleContainer>
+          <FiUserCheck size={24} />
+          <h2>Distribuição de Times</h2>
           {filteredPlayers.length > 0 && (
-            <span style={{ fontWeight: 'normal', fontSize: '14px', marginLeft: '8px' }}>
-              ({filteredPlayers.length} jogadores confirmados)
-            </span>
+            <span>({filteredPlayers.length} jogadores)</span>
           )}
-        </S.SectionTitle>
+        </S.TabTitleContainer>
 
-        <S.ConfirmButton onClick={() => setIsFilterOpen(!isFilterOpen)}>
+        <S.FilterButton onClick={() => setIsFilterOpen(!isFilterOpen)}>
           <FiFilter size={16} />
           {isFilterOpen ? 'Ocultar Filtros' : 'Filtrar'}
-        </S.ConfirmButton>
-      </div>
+        </S.FilterButton>
+      </S.TabHeader>
 
       {isFilterOpen && renderFilterForm()}
 
@@ -69,9 +66,12 @@ const ConfirmedPlayersTab: React.FC<ConfirmedPlayersTabProps> = ({
 
           {unassignedPlayers.length > 0 && (
             <>
-              <S.SectionTitle style={{ marginTop: '32px', marginBottom: '16px' }}>
-                Jogadores sem time ({unassignedPlayers.length})
-              </S.SectionTitle>
+              <S.TabHeader style={{ marginTop: '32px' }}>
+                <S.TabTitleContainer>
+                  <h2>Jogadores sem time</h2>
+                  <span>({unassignedPlayers.length})</span>
+                </S.TabTitleContainer>
+              </S.TabHeader>
 
               <S.UnassignedPlayersContainer>
                 {unassignedPlayers.map(player => (
