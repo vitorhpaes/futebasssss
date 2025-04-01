@@ -57,10 +57,14 @@ const ConfirmedPlayersTab: React.FC<ConfirmedPlayersTabProps> = ({
             <TeamComponent
               team={match.teamA}
               players={teamAPlayers}
+              handleAddToTeam={handleAddToTeam}
+              opposingTeam={match.teamB}
             />
             <TeamComponent
               team={match.teamB}
               players={teamBPlayers}
+              handleAddToTeam={handleAddToTeam}
+              opposingTeam={match.teamA}
             />
           </S.TeamsGrid>
 
