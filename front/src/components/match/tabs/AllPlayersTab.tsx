@@ -13,6 +13,7 @@ interface AllPlayersTabProps {
   handleTogglePlayerStatus: (userId: number, willPlay: boolean) => void;
   confirmPlayerMutation: { isPending: boolean };
   renderFilterForm: () => React.ReactNode;
+  isDisabled?: boolean;
 }
 
 const AllPlayersTab: React.FC<AllPlayersTabProps> = ({
@@ -22,7 +23,8 @@ const AllPlayersTab: React.FC<AllPlayersTabProps> = ({
   handleConfirmPlayer,
   handleTogglePlayerStatus,
   confirmPlayerMutation,
-  renderFilterForm
+  renderFilterForm,
+  isDisabled
 }) => {
   return (
     <>
@@ -35,7 +37,7 @@ const AllPlayersTab: React.FC<AllPlayersTabProps> = ({
           )}
         </S.TabTitleContainer>
 
-        <S.FilterButton onClick={() => setIsFilterOpen(!isFilterOpen)}>
+        <S.FilterButton onClick={() => setIsFilterOpen(!isFilterOpen)} disabled={isDisabled}>
           <FiFilter size={16} />
           {isFilterOpen ? 'Ocultar Filtros' : 'Filtrar'}
         </S.FilterButton>
@@ -52,6 +54,7 @@ const AllPlayersTab: React.FC<AllPlayersTabProps> = ({
               handleConfirmPlayer={handleConfirmPlayer}
               handleTogglePlayerStatus={handleTogglePlayerStatus}
               confirmPlayerMutation={confirmPlayerMutation}
+              isDisabled={isDisabled}
             />
           ))}
         </S.PlayerList>

@@ -14,6 +14,7 @@ interface ResenhaTabProps {
   handleTogglePlayerStatus: (userId: number, willPlay: boolean) => void;
   confirmPlayerMutation: { isPending: boolean };
   renderFilterForm: () => React.ReactNode;
+  isDisabled?: boolean;
 }
 
 const ResenhaTab: React.FC<ResenhaTabProps> = ({
@@ -23,7 +24,8 @@ const ResenhaTab: React.FC<ResenhaTabProps> = ({
   handleConfirmPlayer,
   handleTogglePlayerStatus,
   confirmPlayerMutation,
-  renderFilterForm
+  renderFilterForm,
+  isDisabled
 }) => {
   return (
     <>
@@ -36,7 +38,7 @@ const ResenhaTab: React.FC<ResenhaTabProps> = ({
           )}
         </S.TabTitleContainer>
 
-        <S.FilterButton onClick={() => setIsFilterOpen(!isFilterOpen)}>
+        <S.FilterButton onClick={() => setIsFilterOpen(!isFilterOpen)} disabled={isDisabled}>
           <FiFilter size={16} />
           {isFilterOpen ? 'Ocultar Filtros' : 'Filtrar'}
         </S.FilterButton>
@@ -53,6 +55,7 @@ const ResenhaTab: React.FC<ResenhaTabProps> = ({
               handleConfirmPlayer={handleConfirmPlayer}
               handleTogglePlayerStatus={handleTogglePlayerStatus}
               confirmPlayerMutation={confirmPlayerMutation}
+              isDisabled={isDisabled}
             />
           ))}
         </S.PlayerList>

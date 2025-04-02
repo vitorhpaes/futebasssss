@@ -6,7 +6,7 @@ import { useMatch } from '../../services/matches/matches.queries';
 import { usePlayersWithSessionData, useConfirmPlayerMutation, useUpdatePlayerSessionMutation } from '../../services/player-sessions/player-sessions.queries';
 import { PlayerSession } from '../../services/player-sessions/player-sessions.interfaces';
 import { formatDateTime } from '../../utils/date-utils';
-import { POSITION_OPTIONS } from '@futebasssss-ia/constants';
+import { POSITION_OPTIONS, SessionStatus } from '@futebasssss-ia/constants';
 import Alert from '../../components/ui/Alert';
 import * as S from './MatchManagePage.styles';
 import { useToast } from '../../components/ui/Toast';
@@ -85,6 +85,9 @@ const MatchManagePage = () => {
     return { teamA, teamB };
   }, [match]);
 
+  // Verificar se a partida está finalizada
+  const isMatchCompleted = useMemo(() => match?.status === SessionStatus.COMPLETED, [match?.status]);
+
   // Função para renderizar o formulário de filtro
   const renderFilterForm = () => (
     <div ref={filterRef} style={{ marginBottom: '16px' }}>
@@ -99,6 +102,15 @@ const MatchManagePage = () => {
 
   // Função para confirmar presença do jogador
   const handleConfirmPlayer = (userId: number, willPlay = true) => {
+    // Verificar se a partida está finalizada
+    if (isMatchCompleted) {
+      showToast(
+        `Não é possível alterar confirmações em uma partida finalizada.`,
+        { type: 'error', duration: 5000 }
+      );
+      return;
+    }
+
     confirmPlayerMutation.mutate(
       { sessionId: matchId, userId, willPlay },
       {
@@ -123,6 +135,15 @@ const MatchManagePage = () => {
 
   // Função para alternar entre jogo e resenha
   const handleTogglePlayerStatus = (userId: number, willPlay = true) => {
+    // Verificar se a partida está finalizada
+    if (isMatchCompleted) {
+      showToast(
+        `Não é possível alterar status em uma partida finalizada.`,
+        { type: 'error', duration: 5000 }
+      );
+      return;
+    }
+
     // Buscar a sessão do jogador
     const playerSession = allPlayersWithSessionData?.find(ps => ps.userId === userId);
 
@@ -158,6 +179,15 @@ const MatchManagePage = () => {
 
   // Função para adicionar jogador ao time
   const handleAddToTeam = (userId: number, teamId: number | undefined) => {
+    // Verificar se a partida está finalizada
+    if (isMatchCompleted) {
+      showToast(
+        `Não é possível alterar times em uma partida finalizada.`,
+        { type: 'error', duration: 5000 }
+      );
+      return;
+    }
+
     // Verificar se o teamId é undefined ou zero
     if (teamId === undefined || teamId <= 0) {
       showToast(
@@ -332,6 +362,7 @@ const MatchManagePage = () => {
             sessionId={match.id}
             currentStatus={match.status}
             onStatusChange={handleStatusChange}
+            disabled={isMatchCompleted}
           />
         </S.MatchHeader>
 
@@ -440,6 +471,7 @@ const MatchManagePage = () => {
             handleTogglePlayerStatus={handleTogglePlayerStatus}
             confirmPlayerMutation={confirmPlayerMutation}
             renderFilterForm={renderFilterForm}
+            isDisabled={isMatchCompleted}
           />
         )}
 
@@ -452,6 +484,7 @@ const MatchManagePage = () => {
             handleTogglePlayerStatus={handleTogglePlayerStatus}
             confirmPlayerMutation={confirmPlayerMutation}
             renderFilterForm={renderFilterForm}
+            isDisabled={isMatchCompleted}
           />
         )}
 
@@ -466,6 +499,7 @@ const MatchManagePage = () => {
             setIsFilterOpen={setIsFilterOpen}
             handleAddToTeam={handleAddToTeam}
             renderFilterForm={renderFilterForm}
+            isDisabled={isMatchCompleted}
           />
         )}
       </S.TabContent>

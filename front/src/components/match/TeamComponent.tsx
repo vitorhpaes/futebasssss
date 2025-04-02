@@ -13,6 +13,7 @@ interface TeamComponentProps {
   players: PlayerSession[];
   handleAddToTeam: (userId: number, teamId: number | undefined) => void;
   opposingTeam?: Team;
+  isDisabled?: boolean;
 }
 
 const PlayerActions = styled.div`
@@ -57,7 +58,13 @@ const CaptainInfo = styled.span`
   gap: 4px;
 `;
 
-const TeamComponent: React.FC<TeamComponentProps> = ({ team, players, handleAddToTeam, opposingTeam }) => {
+const TeamComponent: React.FC<TeamComponentProps> = ({
+  team,
+  players,
+  handleAddToTeam,
+  opposingTeam,
+  isDisabled
+}) => {
   const updateTeamCaptain = useUpdateTeamCaptain();
   const { showToast } = useToast();
 
@@ -65,7 +72,7 @@ const TeamComponent: React.FC<TeamComponentProps> = ({ team, players, handleAddT
   const captain = players.find(player => player.id === team?.captainId);
 
   const handleSetCaptain = async (playerSessionId: number) => {
-    if (!team?.id) return;
+    if (!team?.id || isDisabled) return;
 
     try {
       await updateTeamCaptain.mutateAsync({
@@ -130,6 +137,7 @@ const TeamComponent: React.FC<TeamComponentProps> = ({ team, players, handleAddT
                         variant="secondary"
                         size="sm"
                         onClick={() => handleAddToTeam(player.userId, opposingTeam.id)}
+                        disabled={isDisabled}
                       >
                         Alterar time
                       </Button>
@@ -138,7 +146,7 @@ const TeamComponent: React.FC<TeamComponentProps> = ({ team, players, handleAddT
                       variant="warning"
                       size="sm"
                       onClick={() => handleSetCaptain(player.id)}
-                      disabled={team.captainId === player.id}
+                      disabled={team.captainId === player.id || isDisabled}
                     >
                       {team.captainId === player.id ? 'Capitão' : 'Definir como capitão'}
                     </Button>

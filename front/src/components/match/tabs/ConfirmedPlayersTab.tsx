@@ -19,6 +19,7 @@ interface ConfirmedPlayersTabProps {
   setIsFilterOpen: (open: boolean) => void;
   handleAddToTeam: (userId: number, teamId: number | undefined) => void;
   renderFilterForm: () => React.ReactNode;
+  isDisabled?: boolean;
 }
 
 const ConfirmedPlayersTab: React.FC<ConfirmedPlayersTabProps> = ({
@@ -30,7 +31,8 @@ const ConfirmedPlayersTab: React.FC<ConfirmedPlayersTabProps> = ({
   isFilterOpen,
   setIsFilterOpen,
   handleAddToTeam,
-  renderFilterForm
+  renderFilterForm,
+  isDisabled
 }) => {
   return (
     <>
@@ -43,7 +45,7 @@ const ConfirmedPlayersTab: React.FC<ConfirmedPlayersTabProps> = ({
           )}
         </S.TabTitleContainer>
 
-        <S.FilterButton onClick={() => setIsFilterOpen(!isFilterOpen)}>
+        <S.FilterButton onClick={() => setIsFilterOpen(!isFilterOpen)} disabled={isDisabled}>
           <FiFilter size={16} />
           {isFilterOpen ? 'Ocultar Filtros' : 'Filtrar'}
         </S.FilterButton>
@@ -59,12 +61,14 @@ const ConfirmedPlayersTab: React.FC<ConfirmedPlayersTabProps> = ({
               players={teamAPlayers}
               handleAddToTeam={handleAddToTeam}
               opposingTeam={match.teamB}
+              isDisabled={isDisabled}
             />
             <TeamComponent
               team={match.teamB}
               players={teamBPlayers}
               handleAddToTeam={handleAddToTeam}
               opposingTeam={match.teamA}
+              isDisabled={isDisabled}
             />
           </S.TeamsGrid>
 
@@ -92,11 +96,13 @@ const ConfirmedPlayersTab: React.FC<ConfirmedPlayersTabProps> = ({
                     <S.PlayerActions>
                       <S.ConfirmButton
                         onClick={() => handleAddToTeam(player.userId, match.teamA?.id)}
+                        disabled={isDisabled}
                       >
                         {match.teamA?.name}
                       </S.ConfirmButton>
                       <S.ResenhaButton
                         onClick={() => handleAddToTeam(player.userId, match.teamB?.id)}
+                        disabled={isDisabled}
                       >
                         {match.teamB?.name}
                       </S.ResenhaButton>
