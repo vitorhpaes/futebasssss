@@ -9,13 +9,15 @@ interface PlayerItemProps {
   handleConfirmPlayer: (userId: number, willPlay: boolean) => void;
   handleTogglePlayerStatus: (userId: number, willPlay: boolean) => void;
   confirmPlayerMutation: { isPending: boolean };
+  isDisabled?: boolean;
 }
 
 const PlayerItem: React.FC<PlayerItemProps> = ({ 
   ps, 
   handleConfirmPlayer, 
   handleTogglePlayerStatus,
-  confirmPlayerMutation 
+  confirmPlayerMutation,
+  isDisabled
 }) => {
   const isConfirmed = ps.confirmed;
   const isResenha = ps.confirmed && !ps.willPlay;
@@ -48,7 +50,7 @@ const PlayerItem: React.FC<PlayerItemProps> = ({
             {isResenha ? (
               <S.ConfirmButton 
                 onClick={() => handleTogglePlayerStatus(ps.userId, true)}
-                disabled={confirmPlayerMutation.isPending}
+                disabled={isDisabled || confirmPlayerMutation.isPending}
                 style={{ 
                   marginLeft: '8px',
                   fontSize: '12px',
@@ -61,7 +63,7 @@ const PlayerItem: React.FC<PlayerItemProps> = ({
             ) : (
               <S.ResenhaButton 
                 onClick={() => handleTogglePlayerStatus(ps.userId, false)}
-                disabled={confirmPlayerMutation.isPending}
+                disabled={isDisabled || confirmPlayerMutation.isPending}
                 style={{ 
                   marginLeft: '8px',
                   fontSize: '12px',
@@ -78,7 +80,7 @@ const PlayerItem: React.FC<PlayerItemProps> = ({
           <S.PlayerActions>
             <S.ConfirmButton 
               onClick={() => handleConfirmPlayer(ps.userId, true)}
-              disabled={confirmPlayerMutation.isPending}
+              disabled={isDisabled || confirmPlayerMutation.isPending}
               style={confirmPlayerMutation.isPending ? { cursor: 'wait', opacity: 0.7 } : {}}
             >
               <FiCheckCircle size={14} />
@@ -86,7 +88,7 @@ const PlayerItem: React.FC<PlayerItemProps> = ({
             </S.ConfirmButton>
             <S.ResenhaButton 
               onClick={() => handleConfirmPlayer(ps.userId, false)}
-              disabled={confirmPlayerMutation.isPending}
+              disabled={isDisabled || confirmPlayerMutation.isPending}
               style={confirmPlayerMutation.isPending ? { cursor: 'wait', opacity: 0.7 } : {}}
             >
               <GiBeerStein size={14} />

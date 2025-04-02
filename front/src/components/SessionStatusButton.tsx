@@ -139,6 +139,7 @@ interface SessionStatusButtonProps {
   sessionId: number;
   currentStatus: SessionStatus;
   onStatusChange?: (newStatus: SessionStatus) => void;
+  disabled?: boolean;
 }
 
 const statusOptions = [
@@ -151,6 +152,7 @@ export function SessionStatusButton({
   sessionId,
   currentStatus,
   onStatusChange,
+  disabled
 }: SessionStatusButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { showToast } = useToast();
@@ -181,7 +183,7 @@ export function SessionStatusButton({
     <Select.Root
       value={currentStatus}
       onValueChange={handleStatusChange}
-      disabled={isLoading || updateStatus.isPending}
+      disabled={isLoading || updateStatus.isPending || disabled}
     >
       <StyledTrigger $status={currentStatus}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

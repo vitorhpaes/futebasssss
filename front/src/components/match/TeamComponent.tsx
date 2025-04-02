@@ -11,6 +11,9 @@ import { Team } from '../../services/teams/teams.interfaces';
 interface TeamComponentProps {
   team?: Team;
   players: PlayerSession[];
+  handleAddToTeam: (userId: number, teamId: number | undefined) => void;
+  opposingTeam?: Team;
+  isDisabled?: boolean;
 }
 
 const PlayerActions = styled.div`
@@ -18,7 +21,8 @@ const PlayerActions = styled.div`
   align-items: center;
   justify-content: flex-end;
   margin-left: auto;
-  min-width: 80px;
+  gap: ${({ theme }) => theme.spacing[2]};
+  min-width: fit-content;
 `;
 
 const PlayerItemContent = styled.div`
@@ -26,6 +30,11 @@ const PlayerItemContent = styled.div`
   align-items: center;
   width: 100%;
   gap: ${({ theme }) => theme.spacing[3]};
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    justify-content: space-between;
+  }
 `;
 
 const CaptainBadge = styled.span`
@@ -49,7 +58,13 @@ const CaptainInfo = styled.span`
   gap: 4px;
 `;
 
-const TeamComponent: React.FC<TeamComponentProps> = ({ team, players }) => {
+const TeamComponent: React.FC<TeamComponentProps> = ({
+  team,
+  players,
+  handleAddToTeam,
+  opposingTeam,
+  isDisabled
+}) => {
   const updateTeamCaptain = useUpdateTeamCaptain();
   const { showToast } = useToast();
 
@@ -57,7 +72,7 @@ const TeamComponent: React.FC<TeamComponentProps> = ({ team, players }) => {
   const captain = players.find(player => player.id === team?.captainId);
 
   const handleSetCaptain = async (playerSessionId: number) => {
-    if (!team?.id) return;
+    if (!team?.id || isDisabled) return;
 
     try {
       await updateTeamCaptain.mutateAsync({
@@ -117,13 +132,23 @@ const TeamComponent: React.FC<TeamComponentProps> = ({ team, players }) => {
                 </S.PlayerInfo>
                 {team?.id && (
                   <PlayerActions>
+                    {!(team.captainId === player.id) && opposingTeam && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handleAddToTeam(player.userId, opposingTeam.id)}
+                        disabled={isDisabled}
+                      >
+                        Alterar time
+                      </Button>
+                    )}
                     <Button
                       variant="warning"
                       size="sm"
                       onClick={() => handleSetCaptain(player.id)}
-                      disabled={team.captainId === player.id}
+                      disabled={team.captainId === player.id || isDisabled}
                     >
-                      {team.captainId === player.id ? 'Capitão' : 'Definir'}
+                      {team.captainId === player.id ? 'Capitão' : 'Definir como capitão'}
                     </Button>
                   </PlayerActions>
                 )}

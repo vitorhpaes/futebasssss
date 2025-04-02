@@ -3,6 +3,8 @@ import { SessionStatus } from '@futebasssss-ia/constants';
 import * as Form from '@radix-ui/react-form';
 
 export const Container = styled.div`
+  position: relative;
+  z-index: 1;
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
@@ -13,6 +15,8 @@ export const Header = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  position: relative;
+  z-index: 2;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -59,7 +63,7 @@ export const CardGrid = styled.div`
 
 export const FilterWrapper = styled.div`
   position: relative;
-  z-index: 100;
+  z-index: 3;
 `;
 
 export const FilterContainer = styled.div`

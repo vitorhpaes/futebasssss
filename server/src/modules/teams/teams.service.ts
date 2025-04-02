@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../modules/prisma/prisma.service';
-import { Team } from '@prisma/client';
+import { Prisma, Team } from '@prisma/client';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
 
@@ -17,7 +17,7 @@ export class TeamsService {
   }
 
   async findOne(id: number, includeDeleted = false): Promise<Team | null> {
-    const where: any = { id };
+    const where: Prisma.TeamWhereInput = { id };
     if (!includeDeleted) {
       where.deletedAt = null;
     }
@@ -138,11 +138,22 @@ export class TeamsService {
       throw new Error('Jogador não faz parte deste time');
     }
 
-    // Atualiza o capitão do time
+    const player = await this.prisma.playerSession
+      .findUniqueOrThrow({
+        where: { id: playerSessionId },
+        include: {
+          user: true,
+        },
+      })
+      .catch(() => {
+        throw new NotFoundException('Jogador não encontrado');
+      });
+
     return this.prisma.team.update({
       where: { id: teamId },
       data: {
         captainId: playerSessionId,
+        name: `Time ${player.user.name}`,
       },
       include: {
         captain: {
