@@ -53,10 +53,9 @@ model Team {
   teamAGames      GameResult[]     @relation("TeamA")
   teamBGames      GameResult[]     @relation("TeamB")
   winnerGames     GameResult[]     @relation("WinnerTeam")
-  playerFavorites PlayerFavorite[]
   playerSessions  PlayerSession[]
   session         Session?         @relation(fields: [sessionId], references: [id])
-  captainId       Int?            @unique @map("captain_id") // ID do capitão
+  captainId       Int?            @unique @map("captain_id")
   captain         PlayerSession?   @relation("TeamCaptain", fields: [captainId], references: [id])
 
   @@map("teams")
@@ -108,11 +107,9 @@ model PlayerFavorite {
   sessionId  Int       @map("session_id")
   voterId    Int       @map("voter_id")
   favoriteId Int       @map("favorite_id")
-  teamId     Int       @map("team_id")
   deletedAt  DateTime? @map("deleted_at")
   favorite   User      @relation("Favorite", fields: [favoriteId], references: [id])
   session    Session   @relation(fields: [sessionId], references: [id])
-  team       Team      @relation(fields: [teamId], references: [id])
   voter      User      @relation("Voter", fields: [voterId], references: [id])
 
   @@unique([sessionId, voterId, favoriteId])

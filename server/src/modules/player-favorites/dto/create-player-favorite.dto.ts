@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsNumber } from 'class-validator';
 
 export class CreatePlayerFavoriteDto {
   @ApiProperty({
@@ -22,13 +22,4 @@ export class CreatePlayerFavoriteDto {
   })
   @IsNumber()
   favoriteId: number;
-
-  @ApiProperty({
-    description: 'ID do time do jogador favorito',
-    example: 1,
-    required: false,
-  })
-  @IsNumber()
-  @IsOptional()
-  teamId?: number;
 }
