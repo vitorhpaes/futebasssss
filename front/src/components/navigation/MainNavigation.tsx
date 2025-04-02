@@ -94,9 +94,7 @@ const MainNavigation = () => {
         { to: '/admin/matches', label: 'Partidas' },
       ]
     : [
-        { to: '/player/dashboard', label: 'Dashboard' },
-        { to: '/player/matches', label: 'Minhas Partidas' },
-        { to: '/player/stats', label: 'Estatísticas' },
+        { to: '/player/last-session', label: 'Última Sessão' },
       ];
   
   // Fecha o menu móvel quando um link é clicado
