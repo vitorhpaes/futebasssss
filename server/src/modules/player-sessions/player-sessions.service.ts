@@ -21,9 +21,12 @@ export class PlayerSessionsService {
     });
   }
 
-  async findOne(id: number, includeDeleted = false): Promise<PlayerSession | null> {
+  async findOne(
+    id: number,
+    includeDeleted = false,
+  ): Promise<PlayerSession | null> {
     return await this.prisma.playerSession.findFirst({
-      where: { 
+      where: {
         id,
         ...(includeDeleted ? {} : { deletedAt: null }),
       },
@@ -35,9 +38,12 @@ export class PlayerSessionsService {
     });
   }
 
-  async findBySessionId(sessionId: number, includeDeleted = false): Promise<PlayerSession[]> {
+  async findBySessionId(
+    sessionId: number,
+    includeDeleted = false,
+  ): Promise<PlayerSession[]> {
     return await this.prisma.playerSession.findMany({
-      where: { 
+      where: {
         sessionId,
         ...(includeDeleted ? {} : { deletedAt: null }),
       },
@@ -48,9 +54,12 @@ export class PlayerSessionsService {
     });
   }
 
-  async findByUserId(userId: number, includeDeleted = false): Promise<PlayerSession[]> {
+  async findByUserId(
+    userId: number,
+    includeDeleted = false,
+  ): Promise<PlayerSession[]> {
     return await this.prisma.playerSession.findMany({
-      where: { 
+      where: {
         userId,
         ...(includeDeleted ? {} : { deletedAt: null }),
       },
@@ -203,6 +212,7 @@ export class PlayerSessionsService {
       data: {
         goals,
         assists,
+        statsSubmitted: true,
       },
     });
   }
