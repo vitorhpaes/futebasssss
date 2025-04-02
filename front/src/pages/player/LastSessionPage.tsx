@@ -14,7 +14,7 @@ const LastSessionPage = () => {
   return (
     <DashboardContainer>
       <Header>
-        <Title>Última Sessão</Title>
+        <Title>Última Partida</Title>
         <LogoutButton onClick={logout}>Sair</LogoutButton>
       </Header>
 
