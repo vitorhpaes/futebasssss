@@ -8,9 +8,9 @@ import {
 } from './DashboardPage.styles';
 import { Card, Flex, Text, Grid, Heading, Container, Section } from '@radix-ui/themes';
 import { styled } from 'styled-components';
-
-import {  FiUsers, FiAward } from 'react-icons/fi';
+import { FiUsers, FiAward } from 'react-icons/fi';
 import { PlayerSessionCard } from '../../components/PlayerSessionCard';
+import { StatsForm } from '../../components/StatsForm';
 
 const PageContainer = styled(Container)`
   max-width: 1000px;
@@ -64,12 +64,18 @@ const PlayersList = styled(Flex)`
 `;
 
 const LastSessionPage = () => {
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
   const { data: lastMatch, isLoading, error } = useLastMatch();
 
   const handleFavorite = (playerId: number) => {
-    // TODO: Implementar lógica de favoritar jogador
     console.log('Favoritar jogador:', playerId);
+  };
+
+  const userFilledStats = !!lastMatch?.playerSessions.find(playerSession => playerSession.user.id === user?.id)?.statsSubmitted;
+
+  const handleSubmitStats = (stats: { goals: number; assists: number }) => {
+    // TODO: Implementar envio dos stats
+    console.log('Stats enviados:', stats);
   };
 
   return (
@@ -93,7 +99,11 @@ const LastSessionPage = () => {
         </PageContainer>
       ) : (
         <PageContainer>
-            {lastMatch.gameResult && (
+          {!userFilledStats && (
+            <StatsForm onSubmit={handleSubmitStats} />
+          )}
+
+          {lastMatch.gameResult && (
             <Section>
               <SectionTitle size="4">
                 <FiAward size={20} />
@@ -120,7 +130,7 @@ const LastSessionPage = () => {
             </Section>
           )}
 
-          {lastMatch.playerSessions && lastMatch.playerSessions.length > 0 && (
+          {userFilledStats && lastMatch.playerSessions && lastMatch.playerSessions.length > 0 && (
             <Section>
               <SectionTitle size="4">
                 <FiUsers size={20} />
@@ -140,7 +150,6 @@ const LastSessionPage = () => {
               </PlayersList>
             </Section>
           )}
-
         </PageContainer>
       )}
     </DashboardContainer>

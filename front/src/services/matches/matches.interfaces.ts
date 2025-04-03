@@ -67,6 +67,7 @@ export const matchSchema = z.object({
   }).optional(),
   playerSessions: z.array(z.object({
     id: z.number(),
+    statsSubmitted: z.boolean(),
     user: z.object({
       id: z.number(),
       name: z.string(),
