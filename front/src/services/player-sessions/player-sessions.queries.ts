@@ -202,4 +202,72 @@ export const useConfirmPlayerMutation = () => {
       });
     }
   });
+};
+
+// Query para buscar sessões de um jogador
+export const usePlayerSessions = (userId: number) => {
+  return useQuery({
+    queryKey: ['player-sessions', 'user', userId],
+    queryFn: async () => {
+      const response = await api.get<PlayerSessionList>(`/player-sessions/user/${userId}`);
+      return response.data;
+    },
+  });
+};
+
+// Query para buscar jogadores de uma sessão
+export const useSessionPlayers = (sessionId: number) => {
+  return useQuery({
+    queryKey: ['player-sessions', 'session', sessionId],
+    queryFn: async () => {
+      const response = await api.get<PlayerSessionList>(`/player-sessions/session/${sessionId}`);
+      return response.data;
+    },
+  });
+};
+
+// Mutation para atualizar stats do jogador
+export const useUpdatePlayerStats = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, goals, assists }: { id: number; goals: number; assists: number }) => {
+      const response = await api.patch<PlayerSession>(
+        `/player-sessions/${id}/stats?goals=${goals}&assists=${assists}`
+      );
+      return response.data;
+    },
+    onSuccess: async (data) => {
+      // Invalidar queries relacionadas à sessão e ao usuário
+      queryClient.invalidateQueries({ 
+        queryKey: PLAYER_SESSIONS_QUERY_KEYS.listBySession(data.sessionId)
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: PLAYER_SESSIONS_QUERY_KEYS.listByUser(data.userId)
+      });
+    }
+  });
+};
+
+// Mutation para confirmar presença
+export const useConfirmPresence = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userId, sessionId }: { userId: number; sessionId: number }) => {
+      const response = await api.post<PlayerSession>(
+        `/player-sessions/confirm?userId=${userId}&sessionId=${sessionId}`
+      );
+      return response.data;
+    },
+    onSuccess: (_, variables) => {
+      // Invalidar queries relacionadas à sessão e ao usuário
+      queryClient.invalidateQueries({ 
+        queryKey: PLAYER_SESSIONS_QUERY_KEYS.listBySession(variables.sessionId)
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: PLAYER_SESSIONS_QUERY_KEYS.listByUser(variables.userId)
+      });
+    }
+  });
 }; 

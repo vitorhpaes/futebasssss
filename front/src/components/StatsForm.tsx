@@ -4,6 +4,8 @@ import { useFormik } from 'formik';
 import * as z from 'zod';
 import { toFormikValidationSchema } from 'zod-formik-adapter';
 import * as Form from '@radix-ui/react-form';
+import { useUpdatePlayerStats } from '../services/player-sessions/player-sessions.queries';
+import { toast } from 'sonner';
 
 const Container = styled.div`
   width: 100%;
@@ -109,7 +111,7 @@ const SubmitButton = styled(Button)`
 `;
 
 interface StatsFormProps {
-  onSubmit: (stats: { goals: number; assists: number }) => void;
+  playerSessionId: number;
 }
 
 const statsSchema = z.object({
@@ -119,7 +121,9 @@ const statsSchema = z.object({
 
 type StatsFormValues = z.infer<typeof statsSchema>;
 
-export const StatsForm = ({ onSubmit }: StatsFormProps) => {
+export const StatsForm = ({ playerSessionId }: StatsFormProps) => {
+  const { mutate: updateStats, isPending } = useUpdatePlayerStats();
+
   const formik = useFormik<StatsFormValues>({
     initialValues: {
       goals: 0,
@@ -127,10 +131,21 @@ export const StatsForm = ({ onSubmit }: StatsFormProps) => {
     },
     validationSchema: toFormikValidationSchema(statsSchema),
     onSubmit: (values) => {
-      onSubmit({
-        goals: Number(values.goals) || 0,
-        assists: Number(values.assists) || 0,
-      });
+      updateStats(
+        {
+          id: playerSessionId,
+          goals: Number(values.goals) || 0,
+          assists: Number(values.assists) || 0,
+        },
+        {
+          onSuccess: () => {
+            toast.success('Stats enviados com sucesso!');
+          },
+          onError: () => {
+            toast.error('Erro ao enviar os stats. Tente novamente.');
+          }
+        }
+      );
     },
   });
 
@@ -170,8 +185,8 @@ export const StatsForm = ({ onSubmit }: StatsFormProps) => {
           </FormRow>
 
           <ButtonGroup>
-            <SubmitButton type="submit" disabled={formik.isSubmitting}>
-              Enviar estatísticas
+            <SubmitButton type="submit" disabled={formik.isSubmitting || isPending}>
+              {isPending ? 'Enviando...' : 'Enviar estatísticas'}
               <FiSend size={16} />
             </SubmitButton>
           </ButtonGroup>

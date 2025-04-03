@@ -71,12 +71,11 @@ const LastSessionPage = () => {
     console.log('Favoritar jogador:', playerId);
   };
 
-  const userFilledStats = !!lastMatch?.playerSessions.find(playerSession => playerSession.user.id === user?.id)?.statsSubmitted;
+  const userPlayerSession = lastMatch?.playerSessions.find(
+    playerSession => playerSession.user.id === user?.id
+  );
 
-  const handleSubmitStats = (stats: { goals: number; assists: number }) => {
-    // TODO: Implementar envio dos stats
-    console.log('Stats enviados:', stats);
-  };
+  const userFilledStats = !!userPlayerSession?.statsSubmitted;
 
   return (
     <DashboardContainer>
@@ -99,8 +98,8 @@ const LastSessionPage = () => {
         </PageContainer>
       ) : (
         <PageContainer>
-          {!userFilledStats && (
-            <StatsForm onSubmit={handleSubmitStats} />
+          {!userFilledStats && userPlayerSession && (
+            <StatsForm playerSessionId={userPlayerSession.id} />
           )}
 
           {lastMatch.gameResult && (
