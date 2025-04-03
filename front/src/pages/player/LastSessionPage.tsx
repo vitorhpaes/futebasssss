@@ -6,27 +6,61 @@ import {
   Title,
   LogoutButton,
 } from './DashboardPage.styles';
-import { Card, Flex, Text, Box, Grid, Heading, Badge } from '@radix-ui/themes';
+import { Card, Flex, Text, Grid, Heading, Container, Section } from '@radix-ui/themes';
 import { styled } from 'styled-components';
-import dayjs from 'dayjs';
-import { FiMapPin, FiCalendar } from 'react-icons/fi';
+
+import {  FiUsers, FiAward } from 'react-icons/fi';
 import { PlayerSessionCard } from '../../components/PlayerSessionCard';
 
-const StyledCard = styled(Card)`
-  margin: 1rem 0;
-  width: 100%;
+const PageContainer = styled(Container)`
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 `;
 
-const IconWrapper = styled(Flex)`
+const ScoreCard = styled(Card)`
+  background-color: ${({ theme }) => theme.colors.background.paper};
+  border: 1px solid ${({ theme }) => theme.colors.primary.light}30;
+  padding: 1.5rem;
+  text-align: center;
+  width: 100%;
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.primary.main}40;
+  }
+`;
+
+const ScoreText = styled(Text)`
+  font-size: 3.5rem;
+  font-weight: bold;
+  color: ${({ theme }) => theme.colors.primary.dark};
+  line-height: 1;
+`;
+
+const TeamName = styled(Heading)`
+  color: ${({ theme }) => theme.colors.text.primary};
+  margin-bottom: 1rem;
+`;
+
+const SectionTitle = styled(Heading)`
+  display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin: 0.5rem 0;
+  color: ${({ theme }) => theme.colors.primary.dark};
+  margin: 2rem 0 1rem;
+  
+  svg {
+    color: ${({ theme }) => theme.colors.primary.main};
+  }
 `;
 
-const ContentBox = styled(Box)`
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 1rem;
+const PlayersList = styled(Flex)`
+  width: 100%;
+  gap: 0.75rem;
 `;
 
 const LastSessionPage = () => {
@@ -46,82 +80,68 @@ const LastSessionPage = () => {
       </Header>
 
       {isLoading ? (
-        <Text>Carregando...</Text>
+        <PageContainer>
+          <Text size="3">Carregando...</Text>
+        </PageContainer>
       ) : error ? (
-        <Text color="red">Erro ao carregar os dados da última partida</Text>
+        <PageContainer>
+          <Text size="3" color="red">Erro ao carregar os dados da última partida</Text>
+        </PageContainer>
       ) : !lastMatch ? (
-        <Text>Nenhuma partida encontrada</Text>
+        <PageContainer>
+          <Text size="3">Nenhuma partida encontrada</Text>
+        </PageContainer>
       ) : (
-        <ContentBox>
-          <StyledCard>
-            <Flex direction="column" gap="3">
-              <Badge
-                color={lastMatch.status === 'COMPLETED' ? 'green' : lastMatch.status === 'CANCELED' ? 'red' : 'blue'}
-                size="2"
-              >
-                {lastMatch.status === 'COMPLETED' ? 'Finalizada' : lastMatch.status === 'CANCELED' ? 'Cancelada' : 'Agendada'}
-              </Badge>
+        <PageContainer>
+            {lastMatch.gameResult && (
+            <Section>
+              <SectionTitle size="4">
+                <FiAward size={20} />
+                Resultado
+              </SectionTitle>
+              <Grid columns="2" gap="4" mt="3" width="100%">
+                <ScoreCard>
+                  <TeamName size="2" align="center">
+                    {lastMatch.gameResult.teamA?.name || 'Time A'}
+                  </TeamName>
+                  <ScoreText>
+                    {lastMatch.gameResult.teamAScore || 0}
+                  </ScoreText>
+                </ScoreCard>
+                <ScoreCard>
+                  <TeamName size="2" align="center">
+                    {lastMatch.gameResult.teamB?.name || 'Time B'}
+                  </TeamName>
+                  <ScoreText>
+                    {lastMatch.gameResult.teamBScore || 0}
+                  </ScoreText>
+                </ScoreCard>
+              </Grid>
+            </Section>
+          )}
 
-              <IconWrapper>
-                <FiCalendar />
-                <Text>{dayjs(lastMatch.date).format('DD/MM/YYYY [às] HH:mm')}</Text>
-              </IconWrapper>
+          {lastMatch.playerSessions && lastMatch.playerSessions.length > 0 && (
+            <Section>
+              <SectionTitle size="4">
+                <FiUsers size={20} />
+                Jogadores da Partida
+              </SectionTitle>
+              <PlayersList direction="column" mt="3">
+                {lastMatch.playerSessions.map((playerSession) => (
+                  <PlayerSessionCard
+                    key={playerSession.id}
+                    user={playerSession.user}
+                    goals={playerSession.goals ?? 0}
+                    assists={playerSession.assists ?? 0}
+                    favorites={playerSession.favorites ?? 0}
+                    onFavorite={() => handleFavorite(playerSession.id)}
+                  />
+                ))}
+              </PlayersList>
+            </Section>
+          )}
 
-              <IconWrapper>
-                <FiMapPin />
-                <Text>{lastMatch.location}</Text>
-              </IconWrapper>
-
-              {lastMatch.gameResult && (
-                <Box>
-                  <Heading size="4" mb="2">Resultado</Heading>
-                  <Grid columns="2" gap="3" width="100%">
-                    <Card>
-                      <Flex direction="column" align="center" gap="2">
-                        <Heading size="3">{lastMatch.gameResult.teamA?.name || 'Time A'}</Heading>
-                        <Text size="8" weight="bold">{lastMatch.gameResult.teamAScore || 0}</Text>
-                      </Flex>
-                    </Card>
-                    <Card>
-                      <Flex direction="column" align="center" gap="2">
-                        <Heading size="3">{lastMatch.gameResult.teamB?.name || 'Time B'}</Heading>
-                        <Text size="8" weight="bold">{lastMatch.gameResult.teamBScore || 0}</Text>
-                      </Flex>
-                    </Card>
-                  </Grid>
-                </Box>
-              )}
-
-              {lastMatch.playerSessions && lastMatch.playerSessions.length > 0 && (
-                <Box>
-                  <Heading size="4" mb="2">
-                    <Text ml='2'>Jogadores Participantes</Text>
-                  </Heading>
-                  <Flex direction="column" gap="2">
-                    {lastMatch.playerSessions.map((playerSession) => (
-                      <PlayerSessionCard
-                        key={playerSession.id}
-                        user={playerSession.user}
-                        goals={playerSession.goals ?? 0}
-                        assists={playerSession.assists ?? 0}
-                        favorites={playerSession.favorites ?? 0}
-                        onFavorite={() => handleFavorite(playerSession.id)}
-                      />
-                    ))}
-                  </Flex>
-                </Box>
-              )}
-
-              {lastMatch.notes && (
-                <Box>
-                  <Text size="2" color="gray">
-                    {lastMatch.notes}
-                  </Text>
-                </Box>
-              )}
-            </Flex>
-          </StyledCard>
-        </ContentBox>
+        </PageContainer>
       )}
     </DashboardContainer>
   );
