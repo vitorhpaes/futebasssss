@@ -11,6 +11,7 @@ import {
 } from './player-sessions.interfaces';
 import { useUsers } from '../users/users.queries';
 import React from 'react';
+import { MATCHES_QUERY_KEYS } from '../matches/matches.queries';
 
 // Chaves de query para o React Query
 export const PLAYER_SESSIONS_QUERY_KEYS = {
@@ -239,6 +240,9 @@ export const useUpdatePlayerStats = () => {
     },
     onSuccess: async (data) => {
       // Invalidar queries relacionadas à sessão e ao usuário
+      queryClient.invalidateQueries({
+        queryKey: MATCHES_QUERY_KEYS.all
+      });
       queryClient.invalidateQueries({ 
         queryKey: PLAYER_SESSIONS_QUERY_KEYS.listBySession(data.sessionId)
       });
