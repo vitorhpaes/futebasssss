@@ -111,6 +111,7 @@ export class PlayerFavoritesService {
         where: {
           voterId,
           sessionId,
+          deletedAt: null,
         },
       });
 

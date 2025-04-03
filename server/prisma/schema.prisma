@@ -113,7 +113,6 @@ model PlayerFavorite {
   session    Session   @relation(fields: [sessionId], references: [id])
   voter      User      @relation("Voter", fields: [voterId], references: [id])
 
-  @@unique([sessionId, voterId, favoriteId])
   @@map("player_favorites")
 }
 

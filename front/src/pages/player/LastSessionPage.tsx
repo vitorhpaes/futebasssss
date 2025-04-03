@@ -11,6 +11,7 @@ import { styled } from 'styled-components';
 import { FiUsers, FiAward } from 'react-icons/fi';
 import { PlayerSessionCard } from '../../components/PlayerSessionCard';
 import { StatsForm } from '../../components/StatsForm';
+import { useSessionFavorites } from '../../services/player-favorites/player-favorites.queries';
 
 const PageContainer = styled(Container)`
   max-width: 1000px;
@@ -67,13 +68,13 @@ const LastSessionPage = () => {
   const { logout, user } = useAuthStore();
   const { data: lastMatch, isLoading, error } = useLastMatch();
 
-  const handleFavorite = (playerId: number) => {
-    console.log('Favoritar jogador:', playerId);
-  };
+  const { data: favorites } = useSessionFavorites(lastMatch?.id);
 
   const userPlayerSession = lastMatch?.playerSessions.find(
     playerSession => playerSession.user.id === user?.id
   );
+
+  const userFavoritePlayers = favorites?.filter(favorite => favorite.voterId === user?.id)
 
   const userFilledStats = !!userPlayerSession?.statsSubmitted;
 
@@ -140,10 +141,12 @@ const LastSessionPage = () => {
                   <PlayerSessionCard
                     key={playerSession.id}
                     user={playerSession.user}
+                    sessionId={lastMatch.id}
                     goals={playerSession.goals ?? 0}
                     assists={playerSession.assists ?? 0}
-                    favorites={playerSession.favorites ?? 0}
-                    onFavorite={() => handleFavorite(playerSession.id)}
+                    favorites={playerSession.favoritesCount ?? 0}
+                    isFavorite={userFavoritePlayers?.some(favorite => favorite.favoriteId === playerSession.user.id)}
+                    favoriteId={userFavoritePlayers?.find(favorite => favorite.favoriteId === playerSession.user.id)?.id}
                   />
                 ))}
               </PlayersList>

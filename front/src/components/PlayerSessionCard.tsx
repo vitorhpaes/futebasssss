@@ -1,7 +1,10 @@
 import { Card, Text, Box, Button } from '@radix-ui/themes';
-import { FiStar, FiAward, FiTarget, FiHeart } from 'react-icons/fi';
+import { FiAward, FiTarget, FiHeart } from 'react-icons/fi';
 import { styled } from 'styled-components';
-
+import { useCreatePlayerFavorite, useDeletePlayerFavorite } from '../services/player-favorites/player-favorites.queries';
+import { useAuthStore } from '../context/authStore';
+import { toast } from 'sonner';
+import { FaRegStar, FaStar } from 'react-icons/fa';
 const StyledCard = styled(Card)`
   margin: 0.5rem 0;
   padding: 1rem;
@@ -150,21 +153,68 @@ const PlayerName = styled(Text)`
 
 interface PlayerSessionCardProps {
   user: {
+    id: number;
     name: string;
   };
+  sessionId: number;
   goals: number;
   assists: number;
   favorites: number;
-  onFavorite: () => void;
+  isFavorite?: boolean
+  favoriteId?: number
 }
 
 export const PlayerSessionCard = ({
   user,
+  sessionId,
   goals,
   assists,
   favorites,
-  onFavorite,
+  isFavorite,
+  favoriteId,
 }: PlayerSessionCardProps) => {
+  const { user: loggedUser } = useAuthStore();
+  const { mutate: createFavorite, isPending } = useCreatePlayerFavorite();
+  const { mutate: deleteFavorite } = useDeletePlayerFavorite();
+  const handleFavorite = () => {
+    if (!loggedUser) {
+      toast.error('Você precisa estar logado para favoritar um jogador.');
+      return;
+    }
+
+    createFavorite(
+      {
+        sessionId,
+        voterId: loggedUser.id, // ID do usuário logado que está votando
+        favoriteId: user.id, // ID do jogador que está sendo favoritado
+      },
+      {
+        onSuccess: () => {
+          toast.success('Jogador favoritado com sucesso!');
+        },
+        onError: () => {
+          toast.error('Erro ao favoritar jogador. Tente novamente.');
+        }
+      }
+    );
+  };
+
+  const handleDeleteFavorite = (favoriteId: number) => {
+    if (!loggedUser) {
+      toast.error('Você precisa estar logado para desfavoritar um jogador.');
+      return;
+    }
+
+    deleteFavorite(favoriteId, {
+      onSuccess: () => {
+        toast.success('Jogador desfavoritado com sucesso!');
+      },
+      onError: () => {
+        toast.error('Erro ao desfavoritar jogador. Tente novamente.');
+      }
+    });
+  };
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -208,8 +258,8 @@ export const PlayerSessionCard = ({
         </StatItem>
       </StatContainer>
 
-      <FavoriteButton variant="ghost" onClick={onFavorite}>
-        <FiStar size={18} />
+      <FavoriteButton variant="ghost" onClick={isFavorite ? () => handleDeleteFavorite(favoriteId!) : handleFavorite} disabled={isPending}>
+        {isFavorite ? <FaStar size={24} /> : <FaRegStar size={24} />}
       </FavoriteButton>
     </StyledCard>
   );
