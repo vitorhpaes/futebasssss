@@ -5,7 +5,7 @@ import * as z from 'zod';
 import { toFormikValidationSchema } from 'zod-formik-adapter';
 import * as Form from '@radix-ui/react-form';
 import { useUpdatePlayerStats } from '../services/player-sessions/player-sessions.queries';
-import { toast } from 'sonner';
+import { useToast } from '../components/ui/Toast';
 
 const Container = styled.div`
   width: 100%;
@@ -123,6 +123,7 @@ type StatsFormValues = z.infer<typeof statsSchema>;
 
 export const StatsForm = ({ playerSessionId }: StatsFormProps) => {
   const { mutate: updateStats, isPending } = useUpdatePlayerStats();
+  const { showToast } = useToast();
 
   const formik = useFormik<StatsFormValues>({
     initialValues: {
@@ -139,10 +140,16 @@ export const StatsForm = ({ playerSessionId }: StatsFormProps) => {
         },
         {
           onSuccess: () => {
-            toast.success('Stats enviados com sucesso!');
+            showToast('Stats enviados com sucesso!', {
+              type: 'success',
+              duration: 3000
+            });
           },
           onError: () => {
-            toast.error('Erro ao enviar os stats. Tente novamente.');
+            showToast('Erro ao enviar os stats. Tente novamente.', {
+              type: 'error',
+              duration: 5000
+            });
           }
         }
       );
