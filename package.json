@@ -1,17 +1,24 @@
 {
   "name": "futebasssss-ia",
   "private": true,
-  "workspaces": [
-    "front",
-    "server",
-    "constants"
-  ],
+  "workspaces": {
+    "packages": [
+      "front",
+      "server",
+      "constants"
+    ],
+    "nohoist": [
+      "**"
+    ]
+  },
   "scripts": {
+    "build:constants": "cd constants && yarn build",
     "prepare": "husky install"
   },
   "devDependencies": {
     "@commitlint/cli": "^18.4.3",
     "@commitlint/config-conventional": "^18.4.3",
-    "husky": "^8.0.3"
+    "husky": "^8.0.3",
+    "lerna": "^8.2.2"
   }
 }
