@@ -80,8 +80,8 @@ const MatchManagePage = () => {
 
   // Memorizamos os times A e B a partir do array de times
   const { teamA, teamB } = useMemo(() => {
-    const teamA = match?.teams[0];
-    const teamB = match?.teams[1];
+    const teamA = match?.teams?.at(0);
+    const teamB = match?.teams?.at(1);
     return { teamA, teamB };
   }, [match]);
 
@@ -360,7 +360,7 @@ const MatchManagePage = () => {
           </S.MatchTitle>
           <SessionStatusButton
             sessionId={match.id}
-            currentStatus={match.status}
+            currentStatus={match.status as SessionStatus}
             onStatusChange={handleStatusChange}
             disabled={isMatchCompleted}
           />

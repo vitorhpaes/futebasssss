@@ -48,7 +48,7 @@ const MatchCreatePage: React.FC = () => {
             date: 'Data inválida',
             time: 'Hora inválida'
           });
-          showToast('Verifique os campos de data e hora', 'error');
+          showToast('Verifique os campos de data e hora', {type:'error'});
           return;
         }
         
