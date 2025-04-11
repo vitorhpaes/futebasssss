@@ -27,7 +27,6 @@ class PlayerFavoriteEntity {
   sessionId: number;
   voterId: number;
   favoriteId: number;
-  teamId: number;
   createdAt: Date;
 }
 

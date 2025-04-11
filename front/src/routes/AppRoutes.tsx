@@ -4,7 +4,7 @@ import AdminLoginPage from '../pages/auth/AdminLoginPage';
 import AdminDashboardPage from '../pages/admin/DashboardPage';
 import PlayerListPage from '../pages/admin/PlayerListPage';
 import PlayerCreatePage from '../pages/admin/PlayerCreatePage';
-import PlayerDashboardPage from '../pages/player/DashboardPage';
+import LastSessionPage from '../pages/player/LastSessionPage';
 import MatchListPage from '../pages/admin/MatchListPage';
 import MatchCreatePage from '../pages/admin/MatchCreatePage';
 import ProtectedRoute from './ProtectedRoute';
@@ -20,7 +20,7 @@ const AppRoutes = () => {
   // Função para redirecionar usuários logados com base na role e redirectPath
   const handleRoot = () => {
     if (!isAuthenticated || !user) return <Navigate to="/auth/login" />;
-    return <Navigate to={redirectPath || (user.role === 'admin' ? '/admin/dashboard' : '/player/dashboard')} />;
+    return <Navigate to={redirectPath || (user.role === 'admin' ? '/admin/dashboard' : '/player/last-session')} />;
   };
 
   return (
@@ -56,9 +56,7 @@ const AppRoutes = () => {
           element={<ProtectedRoute allowedRoles={['player']} />}
         >
           <Route element={<AuthenticatedLayout />}>
-            <Route path="dashboard" element={<PlayerDashboardPage />} />
-            <Route path="matches" element={<div>Minhas Partidas (em construção)</div>} />
-            <Route path="stats" element={<div>Minhas Estatísticas (em construção)</div>} />
+            <Route path="last-session" element={<LastSessionPage />} />
           </Route>
         </Route>
 

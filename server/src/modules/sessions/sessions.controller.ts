@@ -100,6 +100,86 @@ export class SessionsController {
     return this.sessionsService.findPast(includeDeleted === 'true');
   }
 
+  @Get('last')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Buscar a última sessão com resultados e jogadores favoritos',
+    description:
+      'Retorna a sessão mais recente incluindo os resultados do jogo e os jogadores participantes.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Última sessão retornada com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'number' },
+        date: { type: 'string', format: 'date-time' },
+        location: { type: 'string' },
+        status: {
+          type: 'string',
+          enum: ['SCHEDULED', 'COMPLETED', 'CANCELED'],
+        },
+        notes: { type: 'string', nullable: true },
+        playerSessions: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'number' },
+              user: {
+                type: 'object',
+                properties: {
+                  id: { type: 'number' },
+                  name: { type: 'string' },
+                  email: { type: 'string' },
+                },
+              },
+            },
+          },
+        },
+        gameResult: {
+          type: 'object',
+          nullable: true,
+          properties: {
+            id: { type: 'number' },
+            teamAScore: { type: 'number' },
+            teamBScore: { type: 'number' },
+            teamA: {
+              type: 'object',
+              properties: {
+                id: { type: 'number' },
+                name: { type: 'string' },
+              },
+            },
+            teamB: {
+              type: 'object',
+              properties: {
+                id: { type: 'number' },
+                name: { type: 'string' },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: 'Nenhuma sessão encontrada' })
+  async findLastSession(): Promise<Session> {
+    try {
+      const session = await this.sessionsService.findLastSession();
+      if (!session) {
+        throw new NotFoundException('Nenhuma sessão encontrada');
+      }
+      return session;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        throw new BadRequestException('Erro ao buscar última sessão');
+      }
+      throw error;
+    }
+  }
+
   @Get(':id')
   @HttpCode(200)
   @ApiOperation({ summary: 'Buscar uma sessão pelo ID' })
@@ -220,7 +300,7 @@ export class SessionsController {
         );
       }
 
-      const isDeleted = deletedSessions.some((s: any) => s.id === id);
+      const isDeleted = deletedSessions.some((s) => s.id === id);
       if (!isDeleted) {
         throw new NotFoundException(`Sessão com ID ${id} não está excluída`);
       }

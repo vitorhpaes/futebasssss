@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { PlayerFavorite } from '@prisma/client';
 import { CreatePlayerFavoriteDto } from './dto/create-player-favorite.dto';
@@ -24,7 +28,6 @@ export class PlayerFavoritesService {
           session: true,
           voter: true,
           favorite: true,
-          team: true,
         },
       });
     } catch (error) {
@@ -42,7 +45,6 @@ export class PlayerFavoritesService {
         include: {
           voter: true,
           favorite: true,
-          team: true,
         },
       });
     } catch (error) {
@@ -60,7 +62,6 @@ export class PlayerFavoritesService {
         include: {
           session: true,
           favorite: true,
-          team: true,
         },
       });
     } catch (error) {
@@ -78,7 +79,6 @@ export class PlayerFavoritesService {
         include: {
           session: true,
           voter: true,
-          team: true,
         },
       });
     } catch (error) {
@@ -91,7 +91,7 @@ export class PlayerFavoritesService {
 
   async create(data: CreatePlayerFavoriteDto): Promise<PlayerFavorite> {
     try {
-      const { sessionId, voterId, favoriteId, teamId } = data;
+      const { sessionId, voterId, favoriteId } = data;
 
       // Verificar se o jogador já foi favoritado pelo mesmo votante nesta sessão
       const existing = await this.prisma.playerFavorite.findFirst({
@@ -107,31 +107,30 @@ export class PlayerFavoritesService {
       }
 
       // Verificar quantos favoritos o votante já adicionou neste time para esta sessão
-      const countTeamFavorites = await this.prisma.playerFavorite.count({
+      const countVoterFavorites = await this.prisma.playerFavorite.count({
         where: {
-          sessionId,
           voterId,
-          teamId,
+          sessionId,
+          deletedAt: null,
         },
       });
 
-      // Limitar a 3 favoritos por time
-      if (countTeamFavorites >= 3) {
-        throw new Error('Limite de 3 favoritos por time atingido');
+      if (countVoterFavorites >= 5) {
+        throw new BadRequestException(
+          'Limite de 5 favoritos por time atingido',
+        );
       }
 
       return await this.prisma.playerFavorite.create({
         data: {
-          session: { connect: { id: sessionId } },
-          voter: { connect: { id: voterId } },
-          favorite: { connect: { id: favoriteId } },
-          team: teamId ? { connect: { id: teamId } } : undefined,
+          sessionId,
+          voterId,
+          favoriteId,
         },
         include: {
           session: true,
           voter: true,
           favorite: true,
-          team: true,
         },
       });
     } catch (error) {

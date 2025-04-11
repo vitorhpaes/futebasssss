@@ -153,7 +153,7 @@ export class TeamsService {
       where: { id: teamId },
       data: {
         captainId: playerSessionId,
-        name: `Time ${player.user.name}`,
+        name: `Time ${player.user.name.split(' ')[0]}`,
       },
       include: {
         captain: {

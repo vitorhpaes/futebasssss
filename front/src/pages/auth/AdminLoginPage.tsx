@@ -19,7 +19,7 @@ const AdminLoginPage = () => {
   useEffect(() => {
     // Redireciona usuários já autenticados
     if (isAuthenticated && user) {
-      navigate(redirectPath || (user.role === 'admin' ? '/admin/dashboard' : '/player/dashboard'));
+      navigate(redirectPath || (user.role === 'admin' ? '/admin/dashboard' : '/player/last-session'));
     }
   }, [isAuthenticated, user, navigate, redirectPath]);
 

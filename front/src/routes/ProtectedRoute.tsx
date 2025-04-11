@@ -23,7 +23,7 @@ const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
     // Redireciona para uma página apropriada baseada na role do usuário
     return user.role === 'admin' 
       ? <Navigate to="/admin/dashboard" replace />
-      : <Navigate to="/player/dashboard" replace />;
+      : <Navigate to="/player/last-session" replace />;
   }
 
   // Caso o usuário tenha permissão, renderiza o conteúdo da rota (Outlet)
