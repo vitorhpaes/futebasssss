@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import api from '../api';
 import { 
   Match, 
@@ -262,6 +262,29 @@ export const useUpdateMatchStatusMutation = () => {
       // Invalidar queries para forçar o recarregamento dos dados
       queryClient.invalidateQueries({ queryKey: MATCHES_QUERY_KEYS.detail(variables.id) });
       queryClient.invalidateQueries({ queryKey: MATCHES_QUERY_KEYS.lists() });
+    }
+  });
+};
+
+/**
+ * Hook para obter a última sessão de jogo
+ */
+export const useLastMatch = (): UseQueryResult<Match, ApiError> => {
+  return useQuery<Match, ApiError>({
+    queryKey: [...MATCHES_QUERY_KEYS.all, 'last'],
+    queryFn: async () => {
+      try {
+        const response = await api.get('/sessions/last');
+        
+        try {
+          return matchSchema.parse(response.data);
+        } catch (parseError) {
+          console.error('Erro ao validar schema:', parseError);
+          return response.data as Match;
+        }
+      } catch (error) {
+        throw handleApiError(error);
+      }
     }
   });
 }; 

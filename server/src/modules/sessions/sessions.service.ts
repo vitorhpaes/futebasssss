@@ -165,4 +165,86 @@ export class SessionsService {
       data: { status },
     });
   }
+
+  async findLastSession() {
+    const lastSession = await this.prisma.session.findFirst({
+      where: {
+        deletedAt: null,
+      },
+      orderBy: {
+        date: 'desc',
+      },
+      include: {
+        teams: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        playerSessions: {
+          include: {
+            user: true,
+          },
+        },
+        gameResult: {
+          include: {
+            teamA: true,
+            teamB: true,
+          },
+        },
+      },
+    });
+
+    const lastSessionFavorites = await this.prisma.playerFavorite.findMany({
+      where: {
+        sessionId: lastSession.id,
+      },
+    });
+
+    const teamA = lastSession.teams.at(0);
+    const teamB = lastSession.teams.at(1);
+    delete lastSession.teams;
+
+    const teamAGoals = lastSession.playerSessions.reduce(
+      (acc, playerSession) => {
+        if (playerSession.teamId === teamA.id) {
+          return acc + playerSession.goals;
+        }
+        return acc;
+      },
+      0,
+    );
+
+    const teamBGoals = lastSession.playerSessions.reduce(
+      (acc, playerSession) => {
+        if (playerSession.teamId === teamB.id) {
+          return acc + playerSession.goals;
+        }
+        return acc;
+      },
+      0,
+    );
+
+    const lastSessionWithFavoritesCount = {
+      ...lastSession,
+      playerSessions: lastSession.playerSessions.map((playerSession) => ({
+        ...playerSession,
+        favoritesCount: lastSessionFavorites.filter(
+          (favorite) => favorite.favoriteId === playerSession.userId,
+        ).length,
+      })),
+      previewResult: {
+        teamA: {
+          ...teamA,
+          goals: teamAGoals,
+        },
+        teamB: {
+          ...teamB,
+          goals: teamBGoals,
+        },
+      },
+    };
+
+    return lastSessionWithFavoritesCount;
+  }
 }

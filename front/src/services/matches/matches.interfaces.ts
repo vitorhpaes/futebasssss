@@ -3,6 +3,48 @@ import { SessionStatus } from '@futebasssss-ia/constants';
 
 import { teamSchema } from '../teams/teams.interfaces';
 
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export interface BaseTeam {
+  id: number;
+  name: string;
+}
+
+export interface GameResult {
+  id: number;
+  teamA: BaseTeam;
+  teamB: BaseTeam;
+  teamAScore: number;
+  teamBScore: number;
+}
+
+export interface PlayerSession {
+  id: number;
+  user: User;
+  goals: number;
+  assists: number;
+  favorites?: number;
+}
+
+export interface BaseMatch {
+  id: number;
+  date: string;
+  location: string;
+  status: 'SCHEDULED' | 'COMPLETED' | 'CANCELED';
+  notes?: string;
+  gameResult?: GameResult;
+  playerSessions: PlayerSession[];
+}
+
+export interface MatchFilterParams {
+  upcoming?: boolean;
+  past?: boolean;
+  status?: SessionStatus;
+}
 
 // Definição do esquema de validação para as partidas
 export const matchSchema = z.object({
@@ -63,11 +105,4 @@ export type Team = z.infer<typeof teamSchema>;
 export type Match = z.infer<typeof matchSchema>;
 export type MatchList = z.infer<typeof matchListSchema>;
 export type CreateMatchDto = z.infer<typeof createMatchSchema>;
-export type UpdateMatchDto = z.infer<typeof updateMatchSchema>;
-
-// Parâmetros de filtro para lista de partidas
-export interface MatchFilterParams {
-  status?: SessionStatus;
-  upcoming?: boolean;
-  past?: boolean;
-} 
+export type UpdateMatchDto = z.infer<typeof updateMatchSchema>; 
