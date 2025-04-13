@@ -11,6 +11,8 @@ services:
       - ./.env.server
     networks:
       - futebasssss-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   frontend: 
     build: 
@@ -22,6 +24,8 @@ services:
       - ./.env.frontend
     networks:
       - futebasssss-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 networks:
   futebasssss-network:
