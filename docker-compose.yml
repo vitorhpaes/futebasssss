@@ -26,3 +26,4 @@ services:
 
 networks:
   bridge:
+    external: true
