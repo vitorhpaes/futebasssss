@@ -1,5 +1,5 @@
 import { ApiProperty, ApiHideProperty } from '@nestjs/swagger';
-import { UserType } from '@prisma/client';
+import { UserType, Position } from '@prisma/client';
 
 const POSITION_VALUES = ['GOALKEEPER', 'DEFENDER', 'MIDFIELDER', 'FORWARD'];
 const USER_TYPE_VALUES = ['PLAYER', 'ADMIN'];
@@ -57,7 +57,7 @@ export class UserEntity {
     enum: POSITION_VALUES,
     nullable: true,
   })
-  position: string | null;
+  position: Position | null;
 
   @ApiProperty({
     description: 'Observações sobre o usuário',
@@ -65,4 +65,7 @@ export class UserEntity {
     nullable: true,
   })
   observations: string | null;
+
+  @ApiProperty({ nullable: true, description: 'Data de exclusão lógica' })
+  deletedAt: Date | null;
 }

@@ -8,8 +8,6 @@ export interface MatchFormData {
   notes: string;
   teamAName: string;
   teamBName: string;
-  teamAColor: string;
-  teamBColor: string;
 }
 
 interface MatchFormState {
@@ -24,9 +22,7 @@ const initialState: MatchFormData = {
   time: '',
   notes: '',
   teamAName: 'Time A',
-  teamBName: 'Time B',
-  teamAColor: 'Azul',
-  teamBColor: 'Vermelho'
+  teamBName: 'Time B'
 };
 
 export const useMatchFormStore = create<MatchFormState>()(

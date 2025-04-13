@@ -14,7 +14,7 @@ import {
   USER_TYPE_OPTIONS,
   POSITION_OPTIONS,
   Option
-} from '@futebass-ia/constants';
+} from '@futebasssss-ia/constants';
 
 const PlayerEditPage: React.FC = () => {
   const navigate = useNavigate();
@@ -69,11 +69,11 @@ const PlayerEditPage: React.FC = () => {
           data: cleanPayload as UpdateUserDto
         });
         
-        showToast('Jogador atualizado com sucesso!', 'success');
+        showToast('Jogador atualizado com sucesso!', {type: 'success'});
         navigate('/admin/players');
       } catch (error) {
         console.error('Erro ao atualizar jogador:', error);
-        showToast('Erro ao atualizar jogador. Verifique os dados e tente novamente.', 'error');
+        showToast('Erro ao atualizar jogador. Verifique os dados e tente novamente.', {type: 'error'});
       }
     },
   });

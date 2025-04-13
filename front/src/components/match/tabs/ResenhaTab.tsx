@@ -1,9 +1,10 @@
 import React from 'react';
-import { FiFilter, FiCoffee } from 'react-icons/fi';
-import Alert from '../../../components/ui/Alert';
+import { FiFilter } from 'react-icons/fi';
+import { GiBeerStein } from 'react-icons/gi';
 import { PlayerSession } from '../../../services/player-sessions/player-sessions.interfaces';
 import * as S from '../../../pages/admin/MatchManagePage.styles';
 import PlayerItem from '../PlayerItem';
+import Alert from '../../../components/ui/Alert';
 
 interface ResenhaTabProps {
   filteredPlayers: PlayerSession[];
@@ -13,6 +14,7 @@ interface ResenhaTabProps {
   handleTogglePlayerStatus: (userId: number, willPlay: boolean) => void;
   confirmPlayerMutation: { isPending: boolean };
   renderFilterForm: () => React.ReactNode;
+  isDisabled?: boolean;
 }
 
 const ResenhaTab: React.FC<ResenhaTabProps> = ({
@@ -22,26 +24,25 @@ const ResenhaTab: React.FC<ResenhaTabProps> = ({
   handleConfirmPlayer,
   handleTogglePlayerStatus,
   confirmPlayerMutation,
-  renderFilterForm
+  renderFilterForm,
+  isDisabled
 }) => {
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <S.SectionTitle>
-          <FiCoffee size={16} style={{ marginRight: '8px' }} />
-          Jogadores na Resenha 
+      <S.TabHeader>
+        <S.TabTitleContainer>
+          <GiBeerStein size={24} />
+          <h2>Resenha</h2>
           {filteredPlayers.length > 0 && (
-            <span style={{ fontWeight: 'normal', fontSize: '14px', marginLeft: '8px' }}>
-              ({filteredPlayers.length} encontrados)
-            </span>
+            <span>({filteredPlayers.length} jogadores)</span>
           )}
-        </S.SectionTitle>
-        
-        <S.ConfirmButton onClick={() => setIsFilterOpen(!isFilterOpen)}>
+        </S.TabTitleContainer>
+
+        <S.FilterButton onClick={() => setIsFilterOpen(!isFilterOpen)} disabled={isDisabled}>
           <FiFilter size={16} />
           {isFilterOpen ? 'Ocultar Filtros' : 'Filtrar'}
-        </S.ConfirmButton>
-      </div>
+        </S.FilterButton>
+      </S.TabHeader>
 
       {isFilterOpen && renderFilterForm()}
 
@@ -54,6 +55,7 @@ const ResenhaTab: React.FC<ResenhaTabProps> = ({
               handleConfirmPlayer={handleConfirmPlayer}
               handleTogglePlayerStatus={handleTogglePlayerStatus}
               confirmPlayerMutation={confirmPlayerMutation}
+              isDisabled={isDisabled}
             />
           ))}
         </S.PlayerList>

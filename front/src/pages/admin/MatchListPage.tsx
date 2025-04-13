@@ -1,14 +1,15 @@
 import { useRef, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useMatches } from '../../services/matches/matches.queries';
+import { useMatches, useDeleteMatchMutation } from '../../services/matches/matches.queries';
 import { FiPlus, FiFilter, FiX, FiCalendar, FiMapPin, FiTag } from 'react-icons/fi';
 import Alert from '../../components/ui/Alert';
+import { useToast } from '../../components/ui/Toast';
 import * as S from './MatchListPage.styles';
 import MatchCard from '../../components/cards/MatchCard';
 import styled from 'styled-components';
 import { useFormik } from 'formik';
 import Select from '../../components/form/Select';
-import { SessionStatus, SESSION_STATUS_OPTIONS } from '@futebass-ia/constants';
+import { SessionStatus, SESSION_STATUS_OPTIONS } from '@futebasssss-ia/constants';
 
 // Estilos para o botão de filtro
 const FilterTrigger = styled.button`
@@ -40,6 +41,7 @@ interface MatchFilterParams {
 const MatchListPage = () => {
   const navigate = useNavigate();
   const filterRef = useRef<HTMLDivElement>(null);
+  const { showToast } = useToast();
   
   // Estado para controlar a visibilidade dos filtros
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -84,6 +86,9 @@ const MatchListPage = () => {
     };
   }, [isFilterOpen]);
   
+  // Mutation para excluir partidas
+  const deleteMatchMutation = useDeleteMatchMutation();
+  
   // Usar o hook de query para buscar partidas
   const { data: matches, isLoading, error } = useMatches(formik.values);
 
@@ -95,6 +100,37 @@ const MatchListPage = () => {
   // Função para manipular a edição de uma partida
   const handleEditMatch = (id: number) => {
     navigate(`/admin/matches/manage/${id}`);
+  };
+
+  // Função para iniciar o processo de exclusão
+  const handleDeleteMatch = (id: number) => {
+    showToast(`Deseja realmente excluir esta partida?`, {
+      type: 'info',
+      duration: 10000, // 10 segundos para responder
+      actions: [
+        {
+          label: 'Cancelar',
+          variant: 'secondary',
+          onClick: () => {
+            // Não faz nada, apenas fecha o toast
+          }
+        },
+        {
+          label: 'Confirmar exclusão',
+          variant: 'danger',
+          onClick: () => {
+            deleteMatchMutation.mutate(id, {
+              onSuccess: () => {
+                showToast('Partida excluída com sucesso!', { type: 'success' });
+              },
+              onError: (error) => {
+                showToast(`Erro ao excluir partida: ${error.message}`, { type: 'error' });
+              }
+            });
+          }
+        }
+      ]
+    });
   };
 
   return (
@@ -215,6 +251,7 @@ const MatchListPage = () => {
               key={match.id}
               match={match}
               onEdit={handleEditMatch}
+              onDelete={handleDeleteMatch}
             />
           ))}
         </S.CardGrid>

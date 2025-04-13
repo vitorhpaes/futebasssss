@@ -10,10 +10,12 @@ import {
   Query,
   HttpCode,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { TeamsService } from './teams.service';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
+import { UpdateTeamCaptainDto } from './dto/update-team-captain.dto';
 import {
   ApiTags,
   ApiOperation,
@@ -30,6 +32,8 @@ class TeamEntity implements Team {
   sessionId: number | null;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt: Date | null;
+  captainId: number | null;
 }
 
 class TeamPlayerDto {
@@ -68,6 +72,20 @@ export class TeamsController {
   })
   async findAll(): Promise<Team[]> {
     return this.teamsService.findAll();
+  }
+
+  @Get('deleted/list')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Listar todos os times excluídos logicamente' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de times excluídos retornada com sucesso',
+    type: TeamEntity,
+    isArray: true,
+  })
+  async findDeleted(): Promise<Team[]> {
+    const deletedTeams = await this.teamsService.findDeleted();
+    return deletedTeams;
   }
 
   @Get(':id')
@@ -145,7 +163,7 @@ export class TeamsController {
 
   @Delete(':id')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Remover um time' })
+  @ApiOperation({ summary: 'Remover um time (exclusão lógica)' })
   @ApiParam({ name: 'id', description: 'ID do time' })
   @ApiResponse({
     status: 200,
@@ -161,5 +179,82 @@ export class TeamsController {
     }
 
     return this.teamsService.remove(id);
+  }
+
+  @Patch(':id/restore')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Restaurar um time excluído logicamente' })
+  @ApiParam({ name: 'id', description: 'ID do time' })
+  @ApiResponse({
+    status: 200,
+    description: 'Time restaurado com sucesso',
+    type: TeamEntity,
+  })
+  @ApiResponse({ status: 404, description: 'Time não encontrado' })
+  async restore(@Param('id', ParseIntPipe) id: number): Promise<Team> {
+    // Verificar se o time excluído existe
+    const teamDeleted = await this.teamsService.findOne(id, true);
+    if (!teamDeleted) {
+      throw new NotFoundException(`Time com ID ${id} não encontrado`);
+    }
+
+    if (!teamDeleted.deletedAt) {
+      throw new NotFoundException(`Time com ID ${id} não está excluído`);
+    }
+
+    const restoredTeam = await this.teamsService.restore(id);
+    return restoredTeam;
+  }
+
+  @Delete(':id/permanent')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Remover um time permanentemente' })
+  @ApiParam({ name: 'id', description: 'ID do time' })
+  @ApiResponse({
+    status: 200,
+    description: 'Time removido permanentemente com sucesso',
+    type: TeamEntity,
+  })
+  @ApiResponse({ status: 404, description: 'Time não encontrado' })
+  async permanentDelete(@Param('id', ParseIntPipe) id: number): Promise<Team> {
+    // Verificar se o time existe (mesmo que excluído)
+    const team = await this.teamsService.findOne(id, true);
+    if (!team) {
+      throw new NotFoundException(`Time com ID ${id} não encontrado`);
+    }
+
+    const deletedTeam = await this.teamsService.permanentDelete(id);
+    return deletedTeam;
+  }
+
+  @Patch(':id/captain')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Definir o capitão do time' })
+  @ApiParam({ name: 'id', description: 'ID do time' })
+  @ApiResponse({
+    status: 200,
+    description: 'Capitão definido com sucesso',
+    type: TeamEntity,
+  })
+  @ApiResponse({ status: 404, description: 'Time não encontrado' })
+  @ApiResponse({ status: 400, description: 'Jogador não faz parte do time' })
+  async updateCaptain(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateTeamCaptainDto: UpdateTeamCaptainDto,
+  ): Promise<Team> {
+    try {
+      return await this.teamsService.updateCaptain(
+        id,
+        updateTeamCaptainDto.playerSessionId,
+      );
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message === 'Time não encontrado') {
+          throw new NotFoundException(error.message);
+        }
+        throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
   }
 }

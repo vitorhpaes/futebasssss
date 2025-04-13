@@ -6,9 +6,24 @@ import { FiX, FiCheckCircle, FiAlertCircle, FiInfo } from 'react-icons/fi';
 // Tipos de toast
 export type ToastType = 'success' | 'error' | 'info';
 
+// Interface para ações do toast
+export interface ToastAction {
+  label: string;
+  altText?: string;
+  onClick: () => void;
+  variant?: 'primary' | 'secondary' | 'danger' | 'success';
+}
+
+// Interface para configuração do toast
+export interface ToastOptions {
+  type?: ToastType;
+  duration?: number;
+  actions?: ToastAction[];
+}
+
 // Interface para o contexto de toast
 interface ToastContextType {
-  showToast: (message: string, type?: ToastType, duration?: number) => void;
+  showToast: (message: string, options?: ToastOptions) => void;
 }
 
 // Criando o contexto
@@ -74,7 +89,7 @@ const StyledToast = styled(ToastPrimitive.Root)`
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
   padding: 15px;
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
   gap: 15px;
   border-left: 4px solid ${({ theme }) => theme.colors.primary.main};
   
@@ -109,6 +124,12 @@ const StyledToast = styled(ToastPrimitive.Root)`
       color: ${({ theme }) => theme.colors.secondary.main};
     }
   }
+`;
+
+const ToastHeader = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
 `;
 
 const ToastContent = styled.div`
@@ -150,13 +171,72 @@ const ToastIconWrapper = styled.div`
   font-size: 20px;
 `;
 
+const ToastActions = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+`;
+
+const ToastActionButton = styled(ToastPrimitive.Action)<{ $variant?: string }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  
+  ${({ $variant, theme }) => {
+    switch ($variant) {
+      case 'primary':
+        return `
+          background-color: ${theme.colors.primary.main};
+          color: white;
+          &:hover {
+            background-color: ${theme.colors.primary.dark};
+          }
+        `;
+      case 'danger':
+        return `
+          background-color: ${theme.colors.error.main};
+          color: white;
+          &:hover {
+            background-color: ${theme.colors.error.dark};
+          }
+        `;
+      case 'success':
+        return `
+          background-color: ${theme.colors.primary.main};
+          color: white;
+          &:hover {
+            background-color: ${theme.colors.primary.dark};
+          }
+        `;
+      case 'secondary':
+      default:
+        return `
+          background-color: ${theme.colors.background.default};
+          color: ${theme.colors.text.primary};
+          &:hover {
+            background-color: ${theme.colors.neutral.light};
+          }
+        `;
+    }
+  }}
+`;
+
 // Componente Toast
 const Toast: React.FC<{ 
   message: string;
   type: ToastType;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-}> = ({ message, type, open, onOpenChange }) => {
+  actions?: ToastAction[];
+}> = ({ message, type, open, onOpenChange, actions }) => {
   // Determinar ícone com base no tipo
   const getIcon = () => {
     switch (type) {
@@ -187,14 +267,34 @@ const Toast: React.FC<{
 
   return (
     <StyledToast open={open} onOpenChange={onOpenChange} data-type={type}>
-      <ToastIconWrapper>
-        {getIcon()}
-      </ToastIconWrapper>
-      
-      <ToastContent>
-        <ToastTitle>{getTitle()}</ToastTitle>
-        <ToastDescription>{message}</ToastDescription>
-      </ToastContent>
+      <ToastHeader>
+        <ToastIconWrapper>
+          {getIcon()}
+        </ToastIconWrapper>
+        
+        <ToastContent>
+          <ToastTitle>{getTitle()}</ToastTitle>
+          <ToastDescription>{message}</ToastDescription>
+        </ToastContent>
+      </ToastHeader>
+
+      {actions && actions.length > 0 && (
+        <ToastActions>
+          {actions.map((action, index) => (
+            <ToastActionButton 
+              key={index} 
+              altText={action.altText || action.label}
+              $variant={action.variant}
+              onClick={() => {
+                action.onClick();
+                onOpenChange(false); // Fecha o toast após a ação
+              }}
+            >
+              {action.label}
+            </ToastActionButton>
+          ))}
+        </ToastActions>
+      )}
       
       <ToastClose>
         <FiX size={16} />
@@ -208,13 +308,16 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [type, setType] = useState<ToastType>('info');
+  const [actions, setActions] = useState<ToastAction[]>([]);
 
-  const showToast = (newMessage: string, newType: ToastType = 'info', duration = 5000) => {
+  const showToast = (newMessage: string, options?: ToastOptions) => {
     setMessage(newMessage);
-    setType(newType);
+    setType(options?.type || 'info');
+    setActions(options?.actions || []);
     setOpen(true);
     
     // Resetar após "duration" ms
+    const duration = options?.duration || 5000;
     if (duration > 0) {
       setTimeout(() => {
         setOpen(false);
@@ -231,6 +334,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           type={type}
           open={open}
           onOpenChange={setOpen}
+          actions={actions}
         />
         <ToastViewport />
       </ToastPrimitive.Provider>

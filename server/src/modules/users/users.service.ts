@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../modules/prisma/prisma.service';
 import { User, Prisma, UserType, Position } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class UsersService {
@@ -13,6 +13,7 @@ export class UsersService {
     position?: Position,
     orderBy?: string,
     orderDirection: 'asc' | 'desc' = 'asc',
+    includeDeleted = false,
   ): Promise<User[]> {
     const validOrderFields = ['name', 'position', 'type'];
     const orderField = validOrderFields.includes(orderBy) ? orderBy : 'name';
@@ -22,6 +23,7 @@ export class UsersService {
         ...(name && { name: { contains: name, mode: 'insensitive' } }),
         ...(type && { type }),
         ...(position && { position }),
+        ...(includeDeleted ? {} : { deletedAt: null }),
       },
       orderBy: {
         [orderField]: orderDirection,
@@ -50,9 +52,12 @@ export class UsersService {
     });
   }
 
-  async findOne(id: number): Promise<User | null> {
-    return await this.prisma.user.findUnique({
-      where: { id },
+  async findOne(id: number, includeDeleted = false): Promise<User | null> {
+    return await this.prisma.user.findFirst({
+      where: {
+        id,
+        ...(includeDeleted ? {} : { deletedAt: null }),
+      },
     });
   }
 
@@ -91,6 +96,39 @@ export class UsersService {
   async remove(id: number): Promise<User> {
     return await this.prisma.user.delete({
       where: { id },
+    });
+  }
+
+  async findDeleted(): Promise<User[]> {
+    return await this.prisma.$queryRaw`
+      SELECT * FROM users 
+      WHERE deleted_at IS NOT NULL
+      ORDER BY name ASC
+    `;
+  }
+
+  async restore(id: number): Promise<User> {
+    return await this.prisma.user.update({
+      where: { id },
+      data: {
+        deletedAt: null,
+      },
+    });
+  }
+
+  async permanentDelete(id: number): Promise<User> {
+    return await this.prisma.$transaction(async (prisma) => {
+      // Busca o usuário antes da exclusão permanente
+      const user = await prisma.user.findFirst({
+        where: { id },
+      });
+
+      // Realiza a exclusão permanente, ignorando o middleware de exclusão lógica
+      await prisma.$executeRaw`
+        DELETE FROM users WHERE id = ${id}
+      `;
+
+      return user;
     });
   }
 }

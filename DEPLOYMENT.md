@@ -97,13 +97,13 @@ Alternativamente, você pode implantar o front-end e o back-end como aplicaçõe
 Para o front-end:
 ```bash
 # Incluir o pacote de constantes compilado no build do front-end
-cp -r constants/dist front/node_modules/@futebass-ia/constants
+cp -r constants/dist front/node_modules/@futebasssss-ia/constants
 ```
 
 Para o back-end:
 ```bash
 # Incluir o pacote de constantes compilado no build do back-end
-cp -r constants/dist server/node_modules/@futebass-ia/constants
+cp -r constants/dist server/node_modules/@futebasssss-ia/constants
 ```
 
 #### Opção 3: Publicar o Pacote de Constantes como um Pacote NPM
@@ -113,7 +113,7 @@ Para uma solução mais robusta, você pode publicar o pacote de constantes em u
 1. Configure o `package.json` do pacote de constantes:
 ```json
 {
-  "name": "@futebass-ia/constants",
+  "name": "@futebasssss-ia/constants",
   "version": "1.0.0",
   "private": true,
   "publishConfig": {

@@ -14,7 +14,7 @@ import {
   USER_TYPE_OPTIONS,
   POSITION_OPTIONS,
   Option
-} from '@futebass-ia/constants';
+} from '@futebasssss-ia/constants';
 
 const PlayerCreatePage: React.FC = () => {
   const navigate = useNavigate();
@@ -61,11 +61,11 @@ const PlayerCreatePage: React.FC = () => {
         });
         
         await createUserMutation.mutateAsync(cleanPayload as RegisterUserDto);
-        showToast('Jogador cadastrado com sucesso!', 'success');
+        showToast('Jogador cadastrado com sucesso!', {type: 'success'});
         navigate('/admin/players');
       } catch (error) {
         console.error('Erro ao cadastrar jogador:', error);
-        showToast('Erro ao cadastrar jogador. Verifique os dados e tente novamente.', 'error');
+        showToast('Erro ao cadastrar jogador. Verifique os dados e tente novamente.', {type: 'error'});
       }
     },
   });

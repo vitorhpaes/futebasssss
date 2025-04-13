@@ -35,4 +35,10 @@ export const updatePlayerSessionSchema = z.object({
 // Tipos inferidos dos schemas
 export type PlayerSession = z.infer<typeof playerSessionSchema>;
 export type PlayerSessionList = z.infer<typeof playerSessionListSchema>;
-export type UpdatePlayerSessionDto = z.infer<typeof updatePlayerSessionSchema>; 
+export type UpdatePlayerSessionDto = z.infer<typeof updatePlayerSessionSchema>;
+
+export interface User {
+  id: number;
+  name: string;
+  position?: string;
+}

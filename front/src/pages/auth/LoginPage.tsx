@@ -19,7 +19,7 @@ const LoginPage = () => {
   useEffect(() => {
     // Redireciona usuários já autenticados
     if (isAuthenticated && user) {
-      navigate(redirectPath || (user.role === 'admin' ? '/admin/dashboard' : '/player/dashboard'));
+      navigate(redirectPath || (user.role === 'admin' ? '/admin/dashboard' : '/player/last-session'));
     }
   }, [isAuthenticated, user, navigate, redirectPath]);
 
@@ -33,7 +33,7 @@ const LoginPage = () => {
             Acesso para jogadores e participantes do sistema
           </AppDescription>
         </LogoContainer>
-        <LoginForm role="player" redirectPath="/player/dashboard" />
+        <LoginForm role="player" redirectPath="/player/last-session" />
         <FooterLink to="/admin/login">Acessar como administrador</FooterLink>
       </LoginCard>
     </LoginContainer>

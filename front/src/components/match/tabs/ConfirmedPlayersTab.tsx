@@ -4,13 +4,7 @@ import Alert from '../../../components/ui/Alert';
 import { PlayerSession } from '../../../services/player-sessions/player-sessions.interfaces';
 import * as S from '../../../pages/admin/MatchManagePage.styles';
 import TeamComponent from '../TeamComponent';
-
-interface MatchTeam {
-  id?: number;
-  sessionId?: number;
-  name?: string;
-  color?: string;
-}
+import { Team } from '../../../services/teams/teams.interfaces';
 
 interface ConfirmedPlayersTabProps {
   filteredPlayers: PlayerSession[];
@@ -18,13 +12,14 @@ interface ConfirmedPlayersTabProps {
   teamBPlayers: PlayerSession[];
   unassignedPlayers: PlayerSession[];
   match: {
-    teamA?: MatchTeam;
-    teamB?: MatchTeam;
+    teamA?: Team;
+    teamB?: Team;
   };
   isFilterOpen: boolean;
   setIsFilterOpen: (open: boolean) => void;
   handleAddToTeam: (userId: number, teamId: number | undefined) => void;
   renderFilterForm: () => React.ReactNode;
+  isDisabled?: boolean;
 }
 
 const ConfirmedPlayersTab: React.FC<ConfirmedPlayersTabProps> = ({
@@ -36,50 +31,56 @@ const ConfirmedPlayersTab: React.FC<ConfirmedPlayersTabProps> = ({
   isFilterOpen,
   setIsFilterOpen,
   handleAddToTeam,
-  renderFilterForm
+  renderFilterForm,
+  isDisabled
 }) => {
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <S.SectionTitle>
-          <FiUserCheck size={16} style={{ marginRight: '8px' }} />
-          Distribuição de Times 
+      <S.TabHeader>
+        <S.TabTitleContainer>
+          <FiUserCheck size={24} />
+          <h2>Distribuição de Times</h2>
           {filteredPlayers.length > 0 && (
-            <span style={{ fontWeight: 'normal', fontSize: '14px', marginLeft: '8px' }}>
-              ({filteredPlayers.length} jogadores confirmados)
-            </span>
+            <span>({filteredPlayers.length} jogadores)</span>
           )}
-        </S.SectionTitle>
-        
-        <S.ConfirmButton onClick={() => setIsFilterOpen(!isFilterOpen)}>
+        </S.TabTitleContainer>
+
+        <S.FilterButton onClick={() => setIsFilterOpen(!isFilterOpen)} disabled={isDisabled}>
           <FiFilter size={16} />
           {isFilterOpen ? 'Ocultar Filtros' : 'Filtrar'}
-        </S.ConfirmButton>
-      </div>
+        </S.FilterButton>
+      </S.TabHeader>
 
       {isFilterOpen && renderFilterForm()}
 
       {filteredPlayers && filteredPlayers.length > 0 ? (
         <div>
           <S.TeamsGrid>
-            <TeamComponent 
-              team={match.teamA} 
+            <TeamComponent
+              team={match.teamA}
               players={teamAPlayers}
               handleAddToTeam={handleAddToTeam}
+              opposingTeam={match.teamB}
+              isDisabled={isDisabled}
             />
-            <TeamComponent 
-              team={match.teamB} 
+            <TeamComponent
+              team={match.teamB}
               players={teamBPlayers}
               handleAddToTeam={handleAddToTeam}
+              opposingTeam={match.teamA}
+              isDisabled={isDisabled}
             />
           </S.TeamsGrid>
-          
+
           {unassignedPlayers.length > 0 && (
             <>
-              <S.SectionTitle style={{ marginTop: '32px', marginBottom: '16px' }}>
-                Jogadores sem time ({unassignedPlayers.length})
-              </S.SectionTitle>
-              
+              <S.TabHeader style={{ marginTop: '32px' }}>
+                <S.TabTitleContainer>
+                  <h2>Jogadores sem time</h2>
+                  <span>({unassignedPlayers.length})</span>
+                </S.TabTitleContainer>
+              </S.TabHeader>
+
               <S.UnassignedPlayersContainer>
                 {unassignedPlayers.map(player => (
                   <S.UnassignedPlayer key={player.userId}>
@@ -93,13 +94,15 @@ const ConfirmedPlayersTab: React.FC<ConfirmedPlayersTabProps> = ({
                       </div>
                     </S.PlayerInfo>
                     <S.PlayerActions>
-                      <S.ConfirmButton 
+                      <S.ConfirmButton
                         onClick={() => handleAddToTeam(player.userId, match.teamA?.id)}
+                        disabled={isDisabled}
                       >
                         {match.teamA?.name}
                       </S.ConfirmButton>
-                      <S.ResenhaButton 
+                      <S.ResenhaButton
                         onClick={() => handleAddToTeam(player.userId, match.teamB?.id)}
+                        disabled={isDisabled}
                       >
                         {match.teamB?.name}
                       </S.ResenhaButton>

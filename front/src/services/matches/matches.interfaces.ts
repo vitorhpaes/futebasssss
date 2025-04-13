@@ -1,24 +1,85 @@
 import { z } from 'zod';
-import { SessionStatus } from '@futebass-ia/constants';
-import { playerSessionSchema } from '../player-sessions/player-sessions.interfaces';
+import { SessionStatus } from '@futebasssss-ia/constants';
 
-// Definição do esquema de validação para os times
-export const teamSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  color: z.string().optional(),
-  sessionId: z.number()
-});
+import { teamSchema } from '../teams/teams.interfaces';
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+export interface BaseTeam {
+  id: number;
+  name: string;
+}
+
+export interface GameResult {
+  id: number;
+  teamA: BaseTeam;
+  teamB: BaseTeam;
+  teamAScore: number;
+  teamBScore: number;
+}
+
+export interface PlayerSession {
+  id: number;
+  user: User;
+  goals: number;
+  assists: number;
+  favorites?: number;
+}
+
+export interface BaseMatch {
+  id: number;
+  date: string;
+  location: string;
+  status: 'SCHEDULED' | 'COMPLETED' | 'CANCELED';
+  notes?: string;
+  gameResult?: GameResult;
+  playerSessions: PlayerSession[];
+}
+
+export interface MatchFilterParams {
+  upcoming?: boolean;
+  past?: boolean;
+  status?: SessionStatus;
+}
 
 // Definição do esquema de validação para as partidas
 export const matchSchema = z.object({
   id: z.number(),
   date: z.string(),
   location: z.string(),
-  status: z.nativeEnum(SessionStatus),
-  notes: z.string().optional().nullable(),
-  teams: z.array(teamSchema),
-  playerSessions: z.array(playerSessionSchema)
+  status: z.enum(['SCHEDULED', 'COMPLETED', 'CANCELED']),
+  notes: z.string().optional(),
+  gameResult: z.object({
+    id: z.number(),
+    teamA: z.object({
+      id: z.number(),
+      name: z.string(),
+    }),
+    teamB: z.object({
+      id: z.number(),
+      name: z.string(),
+    }),
+    teamAScore: z.number(),
+    teamBScore: z.number(),
+  }).optional(),
+  playerSessions: z.array(z.object({
+    id: z.number(),
+    statsSubmitted: z.boolean(),
+    favoritesCount: z.number(),
+    user: z.object({
+      id: z.number(),
+      name: z.string(),
+      email: z.string(),
+    }),
+    goals: z.number(),
+    assists: z.number(),
+    favorites: z.number().optional(),
+  })),
+  teams: z.array(teamSchema).optional(),
 });
 
 // Definição do esquema de validação para listas de partidas
@@ -29,10 +90,6 @@ export const createMatchSchema = z.object({
   date: z.string(),
   location: z.string(),
   notes: z.string().optional(),
-  teamAName: z.string(),
-  teamBName: z.string(),
-  teamAColor: z.string().optional(),
-  teamBColor: z.string().optional()
 });
 
 // Definição do esquema de validação para atualização de partidas
@@ -48,11 +105,4 @@ export type Team = z.infer<typeof teamSchema>;
 export type Match = z.infer<typeof matchSchema>;
 export type MatchList = z.infer<typeof matchListSchema>;
 export type CreateMatchDto = z.infer<typeof createMatchSchema>;
-export type UpdateMatchDto = z.infer<typeof updateMatchSchema>;
-
-// Parâmetros de filtro para lista de partidas
-export interface MatchFilterParams {
-  status?: SessionStatus;
-  upcoming?: boolean;
-  past?: boolean;
-} 
+export type UpdateMatchDto = z.infer<typeof updateMatchSchema>; 

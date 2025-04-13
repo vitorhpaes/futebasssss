@@ -12,15 +12,6 @@ export class UpdateTeamDto {
   name?: string;
 
   @ApiProperty({
-    description: 'Cor do time/uniforme',
-    example: 'Azul',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  color?: string;
-
-  @ApiProperty({
     description: 'ID da sessão do jogo',
     example: 1,
     required: false,

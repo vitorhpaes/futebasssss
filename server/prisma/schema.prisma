@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,136 +7,129 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserType {
-  PLAYER
-  ADMIN
-}
-
-enum Position {
-  GOALKEEPER
-  DEFENDER
-  MIDFIELDER
-  FORWARD
-}
-
-enum SessionStatus {
-  SCHEDULED
-  COMPLETED
-  CANCELED
-}
-
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  password  String
-  type      UserType @default(PLAYER)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-  position  Position? @map("position")
-  phone     String?
-  observations String?
-
-  // Relações
-  playerSessions PlayerSession[]
-  voterFavorites PlayerFavorite[] @relation("Voter")
+  id             Int              @id @default(autoincrement())
+  email          String           @unique
+  name           String?
+  password       String
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @updatedAt @map("updated_at")
+  type           UserType         @default(PLAYER)
+  phone          String?
+  position       Position?        @map("position")
+  observations   String?
+  deletedAt      DateTime?        @map("deleted_at")
   favoritedBy    PlayerFavorite[] @relation("Favorite")
+  voterFavorites PlayerFavorite[] @relation("Voter")
+  playerSessions PlayerSession[]
 
   @@map("users")
 }
 
 model Session {
-  id       Int           @id @default(autoincrement())
-  date     DateTime
-  location String
-  status   SessionStatus @default(SCHEDULED)
-  notes    String?
-  createdAt DateTime     @default(now()) @map("created_at")
-  updatedAt DateTime     @updatedAt @map("updated_at")
-
-  // Relações
-  playerSessions PlayerSession[]
-  gameResult     GameResult?
+  id              Int              @id @default(autoincrement())
+  date            DateTime
+  location        String
+  status          SessionStatus    @default(SCHEDULED)
+  notes           String?
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  deletedAt       DateTime?        @map("deleted_at")
+  gameResult      GameResult?
   playerFavorites PlayerFavorite[]
-  teams          Team[]
+  playerSessions  PlayerSession[]
+  teams           Team[]
 
   @@map("sessions")
 }
 
 model Team {
-  id        Int      @id @default(autoincrement())
-  name      String
-  color     String
-  sessionId Int?     @map("session_id")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  // Relações
-  session        Session?       @relation(fields: [sessionId], references: [id])
-  playerSessions PlayerSession[]
-  teamAGames     GameResult[]   @relation("TeamA")
-  teamBGames     GameResult[]   @relation("TeamB")
-  winnerGames    GameResult[]   @relation("WinnerTeam")
-  playerFavorites PlayerFavorite[]
+  id              Int              @id @default(autoincrement())
+  name            String
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  sessionId       Int?             @map("session_id")
+  deletedAt       DateTime?        @map("deleted_at")
+  teamAGames      GameResult[]     @relation("TeamA")
+  teamBGames      GameResult[]     @relation("TeamB")
+  winnerGames     GameResult[]     @relation("WinnerTeam")
+  playerSessions  PlayerSession[]
+  session         Session?         @relation(fields: [sessionId], references: [id])
+  captainId       Int?            @unique @map("captain_id")
+  captain         PlayerSession?   @relation("TeamCaptain", fields: [captainId], references: [id])
 
   @@map("teams")
 }
 
 model PlayerSession {
-  id        Int      @id @default(autoincrement())
-  confirmed Boolean  @default(false)
-  willPlay  Boolean  @default(true)
-  goals     Int      @default(0)
-  assists   Int      @default(0)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  // Relações
-  user      User     @relation(fields: [userId], references: [id])
-  userId    Int      @map("user_id")
-  session   Session  @relation(fields: [sessionId], references: [id])
-  sessionId Int      @map("session_id")
-  team      Team?    @relation(fields: [teamId], references: [id])
-  teamId    Int?     @map("team_id")
+  id            Int       @id @default(autoincrement())
+  confirmed     Boolean   @default(false)
+  goals         Int       @default(0)
+  assists       Int       @default(0)
+  statsSubmitted Boolean   @default(false) @map("stats_submitted")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  userId        Int       @map("user_id")
+  sessionId     Int       @map("session_id")
+  teamId        Int?      @map("team_id")
+  willPlay      Boolean   @default(true)
+  deletedAt     DateTime? @map("deleted_at")
+  session       Session   @relation(fields: [sessionId], references: [id])
+  team          Team?     @relation(fields: [teamId], references: [id])
+  user          User      @relation(fields: [userId], references: [id])
+  captainOf     Team?     @relation("TeamCaptain")
 
   @@unique([userId, sessionId])
   @@map("player_sessions")
 }
 
 model GameResult {
-  id          Int      @id @default(autoincrement())
-  teamAScore  Int      @default(0) @map("team_a_score")
-  teamBScore  Int      @default(0) @map("team_b_score")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  // Relações
-  session     Session  @relation(fields: [sessionId], references: [id])
-  sessionId   Int      @unique @map("session_id")
-  teamA       Team     @relation("TeamA", fields: [teamAId], references: [id])
-  teamAId     Int      @map("team_a_id")
-  teamB       Team     @relation("TeamB", fields: [teamBId], references: [id])
-  teamBId     Int      @map("team_b_id")
-  winnerTeam  Team?    @relation("WinnerTeam", fields: [winnerTeamId], references: [id])
-  winnerTeamId Int?    @map("winner_team_id")
+  id           Int       @id @default(autoincrement())
+  teamAScore   Int       @default(0) @map("team_a_score")
+  teamBScore   Int       @default(0) @map("team_b_score")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  sessionId    Int       @unique @map("session_id")
+  teamAId      Int       @map("team_a_id")
+  teamBId      Int       @map("team_b_id")
+  winnerTeamId Int?      @map("winner_team_id")
+  deletedAt    DateTime? @map("deleted_at")
+  session      Session   @relation(fields: [sessionId], references: [id])
+  teamA        Team      @relation("TeamA", fields: [teamAId], references: [id])
+  teamB        Team      @relation("TeamB", fields: [teamBId], references: [id])
+  winnerTeam   Team?     @relation("WinnerTeam", fields: [winnerTeamId], references: [id])
 
   @@map("game_results")
 }
 
 model PlayerFavorite {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now()) @map("created_at")
+  id         Int       @id @default(autoincrement())
+  createdAt  DateTime  @default(now()) @map("created_at")
+  sessionId  Int       @map("session_id")
+  voterId    Int       @map("voter_id")
+  favoriteId Int       @map("favorite_id")
+  deletedAt  DateTime? @map("deleted_at")
+  favorite   User      @relation("Favorite", fields: [favoriteId], references: [id])
+  session    Session   @relation(fields: [sessionId], references: [id])
+  voter      User      @relation("Voter", fields: [voterId], references: [id])
 
-  // Relações
-  session    Session  @relation(fields: [sessionId], references: [id])
-  sessionId  Int      @map("session_id")
-  voter      User     @relation("Voter", fields: [voterId], references: [id])
-  voterId    Int      @map("voter_id")
-  favorite   User     @relation("Favorite", fields: [favoriteId], references: [id])
-  favoriteId Int      @map("favorite_id")
-  team       Team     @relation(fields: [teamId], references: [id])
-  teamId     Int      @map("team_id")
-
-  @@unique([sessionId, voterId, favoriteId])
   @@map("player_favorites")
+}
+
+enum UserType {
+  PLAYER
+  ADMIN
+}
+
+enum Position {
+  DEFENDER
+  MIDFIELDER
+  FORWARD
+  GOALKEEPER
+}
+
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELED
 }

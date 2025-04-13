@@ -1,0 +1,35 @@
+# Build stage
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+COPY . .
+
+RUN yarn install --frozen-lockfile
+
+RUN yarn build:constants
+
+WORKDIR /app/server
+
+RUN yarn add @prisma/client
+RUN yarn prisma migrate deploy
+
+RUN yarn build
+
+# Production stage
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+# Copy built assets
+COPY --from=builder /app/server/dist ./dist
+COPY --from=builder /app/server/node_modules ./node_modules
+COPY --from=builder /app/server/package.json ./package.json
+
+# Expose application port
+EXPOSE 3000
+
+WORKDIR /app
+
+# Start the server
+CMD [ "yarn", "start:prod" ]

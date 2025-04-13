@@ -31,7 +31,7 @@ export const useUsers = (filters?: UserFilterParams) => {
       try {
         const queryParams = new URLSearchParams();
         
-        if (filters?.name) queryParams.append('name', filters.name);
+        if (filters?.name) queryParams.append('name', filters?.name);
         if (filters?.position) queryParams.append('position', filters.position);
         if (filters?.type) queryParams.append('type', filters.type);
         if (filters?.orderBy) queryParams.append('orderBy', filters.orderBy);

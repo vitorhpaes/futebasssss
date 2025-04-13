@@ -8,7 +8,7 @@ import { createMatchSchema } from '../../services/matches/matches.interfaces';
 import { combineDateAndTime } from '../../utils/date-utils';
 import { useToast } from '../../components/ui/Toast';
 import Alert from '../../components/ui/Alert';
-import { FiCalendar, FiMapPin, FiClock, FiFileText, FiUsers, FiArrowLeft, FiSave } from 'react-icons/fi';
+import { FiCalendar, FiMapPin, FiClock, FiFileText, FiArrowLeft, FiSave } from 'react-icons/fi';
 import * as S from './MatchCreatePage.styles';
 
 // Tipo para os valores do formulário
@@ -17,17 +17,7 @@ interface FormValues {
   date: string;
   time: string;
   notes: string;
-  teamAName: string;
-  teamBName: string;
-  teamAColor: string;
-  teamBColor: string;
 }
-
-// Opções de cores para os times (se houver no futuro)
-const defaultColors = {
-  teamA: 'Azul',
-  teamB: 'Vermelho'
-};
 
 const MatchCreatePage: React.FC = () => {
   const navigate = useNavigate();
@@ -43,10 +33,6 @@ const MatchCreatePage: React.FC = () => {
       date: formData.date,
       time: formData.time,
       notes: formData.notes,
-      teamAName: formData.teamAName || 'Time A',
-      teamBName: formData.teamBName || 'Time B',
-      teamAColor: formData.teamAColor || defaultColors.teamA,
-      teamBColor: formData.teamBColor || defaultColors.teamB
     },
     validationSchema: toFormikValidationSchema(createMatchSchema.omit({ date: true }).extend({
       date: createMatchSchema.shape.date,
@@ -62,7 +48,7 @@ const MatchCreatePage: React.FC = () => {
             date: 'Data inválida',
             time: 'Hora inválida'
           });
-          showToast('Verifique os campos de data e hora', 'error');
+          showToast('Verifique os campos de data e hora', {type:'error'});
           return;
         }
         
@@ -74,14 +60,13 @@ const MatchCreatePage: React.FC = () => {
           date: dateTimeISO,
           location: values.location,
           notes: values.notes,
-          teamAName: values.teamAName,
-          teamBName: values.teamBName,
-          teamAColor: values.teamAColor,
-          teamBColor: values.teamBColor
         });
         
         // Mostrar toast de sucesso
-        showToast('Partida criada com sucesso!', 'success');
+        showToast('Partida criada com sucesso!', {
+          type: 'success',
+          duration: 3000
+        });
         
         // Redirecionar após 2 segundos se bem sucedido
         setTimeout(() => {
@@ -89,7 +74,10 @@ const MatchCreatePage: React.FC = () => {
         }, 2000);
       } catch (error) {
         console.error('Erro ao criar partida:', error);
-        showToast('Ocorreu um erro ao criar a partida. Tente novamente.', 'error');
+        showToast('Ocorreu um erro ao criar a partida. Tente novamente.', {
+          type: 'error',
+          duration: 5000
+        });
       }
     },
   });
@@ -220,52 +208,6 @@ const MatchCreatePage: React.FC = () => {
                 <S.FormHelperText>
                   Estas anotações serão compartilhadas com todos os jogadores.
                 </S.FormHelperText>
-              </div>
-            </S.FormColumn>
-          </S.FormRow>
-
-          <S.FormRow>
-            <S.FormColumn>
-              <div>
-                <S.FormLabel htmlFor="teamAName">
-                  <FiUsers size={16} style={{ marginRight: '6px' }} />
-                  Nome do Time A *
-                </S.FormLabel>
-                <S.FormInput
-                  id="teamAName"
-                  type="text"
-                  name="teamAName"
-                  value={formik.values.teamAName}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  placeholder="Ex: Leões"
-                  required
-                />
-                {formik.touched.teamAName && formik.errors.teamAName && (
-                  <S.FormHelperText>{formik.errors.teamAName}</S.FormHelperText>
-                )}
-              </div>
-            </S.FormColumn>
-
-            <S.FormColumn>
-              <div>
-                <S.FormLabel htmlFor="teamBName">
-                  <FiUsers size={16} style={{ marginRight: '6px' }} />
-                  Nome do Time B *
-                </S.FormLabel>
-                <S.FormInput
-                  id="teamBName"
-                  type="text"
-                  name="teamBName"
-                  value={formik.values.teamBName}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                  placeholder="Ex: Tigres"
-                  required
-                />
-                {formik.touched.teamBName && formik.errors.teamBName && (
-                  <S.FormHelperText>{formik.errors.teamBName}</S.FormHelperText>
-                )}
               </div>
             </S.FormColumn>
           </S.FormRow>
