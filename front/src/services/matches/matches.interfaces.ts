@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { SessionStatus } from '@futebasssss-ia/constants';
+
 import { teamSchema } from '../teams/teams.interfaces';
 
 export interface User {
@@ -78,6 +79,7 @@ export const matchSchema = z.object({
     assists: z.number(),
     favorites: z.number().optional(),
   })),
+  teams: z.array(teamSchema).optional(),
 });
 
 // Definição do esquema de validação para listas de partidas

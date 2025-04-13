@@ -42,15 +42,3 @@ export interface User {
   name: string;
   position?: string;
 }
-
-export interface PlayerSession {
-  userId: number;
-  user?: User;
-  confirmed: boolean;
-  willPlay: boolean;
-}
-
-export interface UpdatePlayerSessionDto {
-  userId: number;
-  willPlay?: boolean;
-} 

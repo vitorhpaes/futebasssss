@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  server:
+    build: 
+      context: .
+      dockerfile: ./server/dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./.env.server
+    networks:
+      - futebasssss-network
+
+  frontend: 
+    build: 
+      context: .
+      dockerfile: ./front/dockerfile
+    ports:
+      - "80:80"
+    env_file:
+      - ./.env.frontend
+    networks:
+      - futebasssss-network
+
+networks:
+  futebasssss-network:
