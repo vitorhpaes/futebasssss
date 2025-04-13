@@ -12,7 +12,7 @@ RUN yarn build:constants
 WORKDIR /app/server
 
 RUN yarn add @prisma/client
-RUN yarn prisma migrate deploy
+RUN yarn prisma generate
 
 RUN yarn build
 
