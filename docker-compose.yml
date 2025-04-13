@@ -10,9 +10,8 @@ services:
     env_file:
       - ./.env.server
     networks:
-      - futebasssss-network
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - bridge
+
 
   frontend: 
     build: 
@@ -23,9 +22,7 @@ services:
     env_file:
       - ./.env.frontend
     networks:
-      - futebasssss-network
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - bridge
 
 networks:
-  futebasssss-network:
+  bridge:
