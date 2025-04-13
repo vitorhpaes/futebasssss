@@ -5,21 +5,25 @@ services:
     build: 
       context: .
       dockerfile: ./server/dockerfile
+    env_file:
+      - ./server/.env
     ports:
       - "3000:3000"
     networks:
-      - bridge
+      - futebasssss-network
 
 
   frontend: 
     build: 
       context: .
       dockerfile: ./front/dockerfile
+    env_file: 
+      - ./front/.env
     ports:
       - "80:80"
     networks:
-      - bridge
+      - futebasssss-network
 
 networks:
-  bridge:
+  futebasssss-network:
     external: true
