@@ -18,11 +18,11 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           # Porta default é 22, se for outra especifique, ex: port: 2222
           script: |
-            # Navega até a pasta do seu projeto no servidor
+            # navigate into vps directory
             cd /var/www/vhosts/futebasssss.com.br/httpdocs
             
             git pull origin main
             
-            # Atualiza imagens e containers
-            docker-compose pull
-            docker-compose up -d --force-recreate --build
+            # updates docker containers
+            docker compose pull
+            docker compose up -d --force-recreate --build
