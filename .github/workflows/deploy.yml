@@ -1,0 +1,27 @@
+name: Production
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH (usuário e senha)
+        uses: appleboy/ssh-action@v0.1.17
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          # Porta default é 22, se for outra especifique, ex: port: 2222
+          script: |
+            # Navega até a pasta do seu projeto no servidor
+            cd /var/www/vhosts/futebasssss.com.br/httpdocs
+            
+            git pull origin main
+            
+            # Atualiza imagens e containers
+            docker-compose pull
+            docker-compose up -d --force-recreate --build
