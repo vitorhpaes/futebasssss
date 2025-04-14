@@ -42,10 +42,10 @@ async function bootstrap() {
 
   app.enableCors({
     origin: [
+      'http://futebasssss.com.br',
+      'https://futebasssss.com.br',
       'http://localhost:5000',
       'http://127.0.0.1:5000',
-      'http://localhost:4173',
-      'http://127.0.0.1:4173',
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
@@ -54,7 +54,7 @@ async function bootstrap() {
     maxAge: 86400, // 24 horas em segundos
   });
 
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix(process.env.NODE_ENV === 'production' ? 'v1' : 'api');
 
   const config = new DocumentBuilder()
     .setTitle('Futebasssss API')

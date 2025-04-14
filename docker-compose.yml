@@ -2,6 +2,8 @@ version: '3.8'
 
 services:
   server:
+    container_name: 
+      futebasssss-server
     image: 
       futebasssss-server
     build: 
@@ -16,6 +18,8 @@ services:
 
 
   frontend:
+    container_name: 
+      futebasssss-frontend
     image: 
       futebasssss-frontend    
     build: 
