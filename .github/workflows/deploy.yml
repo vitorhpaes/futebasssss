@@ -25,4 +25,6 @@ jobs:
             
             # updates docker containers
             docker compose pull
-            docker compose up -d --force-recreate --build
+            docker compose up -d --force-recreate --build --no-cache
+            # remove docker cache and unused things
+            docker system prune -af

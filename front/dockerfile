@@ -9,6 +9,7 @@ RUN yarn build:constants
 
 WORKDIR /app/front
 RUN yarn install
+RUN cat .env
 RUN yarn build
 
 FROM nginx:alpine
