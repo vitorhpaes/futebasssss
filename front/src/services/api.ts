@@ -4,7 +4,7 @@ import { apiErrorSchema, ApiError } from './auth/auth.interfaces';
 
 // Configuração base para o cliente Axios
 const config: AxiosRequestConfig = {
-  baseURL: '/api', // Usando o proxy do Vite em vez de acessar diretamente
+  baseURL: import.meta.env.VITE_API_URL, 
   timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 30000,
   headers: {
     'Content-Type': 'application/json',
