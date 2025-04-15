@@ -70,7 +70,8 @@ const LastSessionPage = () => {
 
   const { data: favorites } = useSessionFavorites(lastMatch?.id);
 
-  const userPlayerSession = lastMatch?.playerSessions.find(
+
+  const userPlayerSession = lastMatch?.playerSessions?.find(
     playerSession => playerSession.user.id === user?.id
   );
 
@@ -144,7 +145,7 @@ const LastSessionPage = () => {
                     sessionId={lastMatch.id}
                     goals={playerSession.goals ?? 0}
                     assists={playerSession.assists ?? 0}
-                    favorites={playerSession.favoritesCount ?? 0}
+                    favoritesCount={playerSession.favoritesCount ?? 0}
                     isFavorite={userFavoritePlayers?.some(favorite => favorite.favoriteId === playerSession.user.id)}
                     favoriteId={userFavoritePlayers?.find(favorite => favorite.favoriteId === playerSession.user.id)?.id}
                   />

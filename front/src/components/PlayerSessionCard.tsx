@@ -1,10 +1,11 @@
 import { Card, Text, Box, Button } from '@radix-ui/themes';
 import { FiAward, FiTarget, FiHeart } from 'react-icons/fi';
 import { styled } from 'styled-components';
-import { useCreatePlayerFavorite, useDeletePlayerFavorite } from '../services/player-favorites/player-favorites.queries';
+import { useCreatePlayerFavorite, useDeletePlayerFavorite, useSessionFavorites } from '../services/player-favorites/player-favorites.queries';
 import { useAuthStore } from '../context/authStore';
 import { FaRegStar, FaStar } from 'react-icons/fa';
-import { useToast } from '../components/ui/Toast';
+import { useToast } from './ui/Toast';
+
 
 const StyledCard = styled(Card)`
   margin: 0.5rem 0;
@@ -160,7 +161,7 @@ interface PlayerSessionCardProps {
   sessionId: number;
   goals: number;
   assists: number;
-  favorites: number;
+  favoritesCount: number;
   isFavorite?: boolean
   favoriteId?: number
 }
@@ -170,7 +171,7 @@ export const PlayerSessionCard = ({
   sessionId,
   goals,
   assists,
-  favorites,
+  favoritesCount: favoritesCount,
   isFavorite,
   favoriteId,
 }: PlayerSessionCardProps) => {
@@ -179,6 +180,10 @@ export const PlayerSessionCard = ({
   const { mutate: deleteFavorite } = useDeletePlayerFavorite();
   const { showToast } = useToast();
 
+  const { data: favorites } = useSessionFavorites(sessionId);
+
+  const loggedUserFavoritesCount = favorites?.filter(favorite => favorite.voterId === loggedUser?.id)?.length || 0;  
+
   const handleFavorite = () => {
     if (!loggedUser) {
       showToast('Você precisa estar logado para favoritar um jogador.', {
@@ -186,6 +191,23 @@ export const PlayerSessionCard = ({
         duration: 5000
       });
       return;
+    }
+
+    if(loggedUser.id === user.id) {
+      showToast('Você não pode favoritar a si mesmo.', {
+        type: 'error',
+        duration: 5000
+      });
+      return
+    }
+
+
+    if (loggedUserFavoritesCount >= 5) {
+      showToast('Você já favoritou 5 jogadores nesta partida.', {
+        type: 'error',
+        duration: 5000
+      });
+      return
     }
 
     createFavorite(
@@ -274,7 +296,7 @@ export const PlayerSessionCard = ({
         <StatItem>
           <FiHeart size={14} />
           <Text size="1" weight="medium">
-            {favorites} favs
+            {favoritesCount} favs
           </Text>
         </StatItem>
       </StatContainer>
