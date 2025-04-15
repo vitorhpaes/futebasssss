@@ -23,8 +23,9 @@ jobs:
             
             git pull origin main
             
-            # updates docker containers
-            docker compose pull
-            docker compose up -d --force-recreate --build --no-cache
+            # build containers
+            docker compose build --no-cache
+            # run new containers
+            docker compose up -d --force-recreate
             # remove docker cache and unused things
             docker system prune -af
