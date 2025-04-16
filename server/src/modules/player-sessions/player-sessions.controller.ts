@@ -180,8 +180,6 @@ export class PlayerSessionsController {
     summary: 'Atualizar estatísticas de um jogador em uma sessão',
   })
   @ApiParam({ name: 'id', description: 'ID da associação' })
-  @ApiQuery({ name: 'goals', required: true, type: Number })
-  @ApiQuery({ name: 'assists', required: true, type: Number })
   @ApiResponse({
     status: 200,
     description: 'Estatísticas atualizadas com sucesso',
@@ -189,10 +187,13 @@ export class PlayerSessionsController {
   })
   async updateStats(
     @Param('id', ParseIntPipe) id: number,
-    @Query('goals', ParseIntPipe) goals: number,
-    @Query('assists', ParseIntPipe) assists: number,
+    @Body() body: { goals: number; assists: number },
   ): Promise<PlayerSession> {
-    return await this.playerSessionsService.updateStats(id, goals, assists);
+    return await this.playerSessionsService.updateStats(
+      id,
+      body.goals,
+      body.assists,
+    );
   }
 
   @Delete(':id')

@@ -30,7 +30,15 @@ export class SessionsService {
       include: {
         playerSessions: true,
         gameResult: true,
-        teams: true,
+        teams: {
+          orderBy: {
+            captain: {
+              user: {
+                name: 'asc',
+              },
+            },
+          },
+        },
       },
     });
   }

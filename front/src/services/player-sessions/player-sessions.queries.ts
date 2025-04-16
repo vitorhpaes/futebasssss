@@ -234,7 +234,11 @@ export const useUpdatePlayerStats = () => {
   return useMutation({
     mutationFn: async ({ id, goals, assists }: { id: number; goals: number; assists: number }) => {
       const response = await api.patch<PlayerSession>(
-        `/player-sessions/${id}/stats?goals=${goals}&assists=${assists}`
+        `/player-sessions/${id}/stats`,
+        {
+          goals,
+          assists
+        }
       );
       return response.data;
     },
