@@ -8,7 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { SessionsModule } from './modules/sessions/sessions.module';
 import { TeamsModule } from './modules/teams/teams.module';
 import { PlayerSessionsModule } from './modules/player-sessions/player-sessions.module';
-import { GameResultsModule } from './modules/game-results/game-results.module';
+import { SeasonModule } from './modules/season/season.module';
 import { PlayerFavoritesModule } from './modules/player-favorites/player-favorites.module';
 
 @Module({
@@ -22,7 +22,7 @@ import { PlayerFavoritesModule } from './modules/player-favorites/player-favorit
     SessionsModule,
     TeamsModule,
     PlayerSessionsModule,
-    GameResultsModule,
+    SeasonModule,
     PlayerFavoritesModule,
   ],
   controllers: [AppController],

@@ -104,33 +104,6 @@ const LastSessionPage = () => {
             <StatsForm playerSessionId={userPlayerSession.id} />
           )}
 
-          {lastMatch.gameResult && (
-            <Section>
-              <SectionTitle size="4">
-                <FiAward size={20} />
-                Resultado
-              </SectionTitle>
-              <Grid columns="2" gap="4" mt="3" width="100%">
-                <ScoreCard>
-                  <TeamName size="2" align="center">
-                    {lastMatch.gameResult.teamA?.name || 'Time A'}
-                  </TeamName>
-                  <ScoreText>
-                    {lastMatch.gameResult.teamAScore || 0}
-                  </ScoreText>
-                </ScoreCard>
-                <ScoreCard>
-                  <TeamName size="2" align="center">
-                    {lastMatch.gameResult.teamB?.name || 'Time B'}
-                  </TeamName>
-                  <ScoreText>
-                    {lastMatch.gameResult.teamBScore || 0}
-                  </ScoreText>
-                </ScoreCard>
-              </Grid>
-            </Section>
-          )}
-
           {userFilledStats && lastMatch.playerSessions && lastMatch.playerSessions.length > 0 && (
             <Section>
               <SectionTitle size="4">

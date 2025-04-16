@@ -15,7 +15,6 @@ export class SessionsService {
       },
       include: {
         playerSessions: true,
-        gameResult: true,
         teams: true,
       },
     });
@@ -29,7 +28,6 @@ export class SessionsService {
       },
       include: {
         playerSessions: true,
-        gameResult: true,
         teams: {
           orderBy: {
             captain: {
@@ -126,12 +124,6 @@ export class SessionsService {
             user: true,
           },
         },
-        gameResult: {
-          include: {
-            teamA: true,
-            teamB: true,
-          },
-        },
       },
     });
   }
@@ -192,12 +184,6 @@ export class SessionsService {
         playerSessions: {
           include: {
             user: true,
-          },
-        },
-        gameResult: {
-          include: {
-            teamA: true,
-            teamB: true,
           },
         },
       },

@@ -150,9 +150,9 @@ A aplicação utiliza um modelo de dados relacional com as seguintes entidades p
 - Associa jogadores a sessões
 - Armazena informações como time e presença
 
-### GameResult (Resultado de Jogo)
-- Armazena resultados de partidas
-- Inclui pontuação e outros dados estatísticos
+### Season (Temporada)
+- Registra uma temporada completa
+- Inclui jogos, que incluem o restante das estatísticas
 
 ### PlayerFavorite (Jogadores Favoritos)
 - Relacionamento many-to-many entre jogadores

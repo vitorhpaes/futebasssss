@@ -14,14 +14,6 @@ export interface BaseTeam {
   name: string;
 }
 
-export interface GameResult {
-  id: number;
-  teamA: BaseTeam;
-  teamB: BaseTeam;
-  teamAScore: number;
-  teamBScore: number;
-}
-
 export interface PlayerSession {
   id: number;
   user: User;
@@ -36,7 +28,6 @@ export interface BaseMatch {
   location: string;
   status: 'SCHEDULED' | 'COMPLETED' | 'CANCELED';
   notes?: string;
-  gameResult?: GameResult;
   playerSessions: PlayerSession[];
 }
 
@@ -53,19 +44,6 @@ export const matchSchema = z.object({
   location: z.string(),
   status: z.enum(['SCHEDULED', 'COMPLETED', 'CANCELED']),
   notes: z.string().optional(),
-  gameResult: z.object({
-    id: z.number(),
-    teamA: z.object({
-      id: z.number(),
-      name: z.string(),
-    }),
-    teamB: z.object({
-      id: z.number(),
-      name: z.string(),
-    }),
-    teamAScore: z.number(),
-    teamBScore: z.number(),
-  }).optional(),
   playerSessions: z.array(z.object({
     id: z.number(),
     statsSubmitted: z.boolean(),
