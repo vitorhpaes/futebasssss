@@ -1,10 +1,11 @@
-import { Card, Text, Box, Button } from '@radix-ui/themes';
-import { FiAward, FiTarget, FiHeart } from 'react-icons/fi';
+import { Card, Text, Box } from '@radix-ui/themes';
+import { FiAward, FiTarget } from 'react-icons/fi';
 import { styled } from 'styled-components';
 import { useCreatePlayerFavorite, useDeletePlayerFavorite, useSessionFavorites } from '../services/player-favorites/player-favorites.queries';
 import { useAuthStore } from '../context/authStore';
-import { FaRegStar, FaStar } from 'react-icons/fa';
+import { FaHeart, FaRegHeart } from 'react-icons/fa';
 import { useToast } from './ui/Toast';
+import { Oval } from 'react-loader-spinner';
 
 
 const StyledCard = styled(Card)`
@@ -41,34 +42,12 @@ const PlayerInfo = styled(Box)`
   }
 `;
 
-const CircleInitial = styled(Box)`
-  width: 40px;
-  height: 40px;
-  border-radius: ${({ theme }) => theme.borderRadius.round};
-  background-color: ${({ theme }) => theme.colors.primary.light}20;
-  border: 2px solid ${({ theme }) => theme.colors.primary.main}40;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 500;
-  color: ${({ theme }) => theme.colors.primary.dark};
-  flex-shrink: 0;
-
-  @media (max-width: 480px) {
-    width: 36px;
-    height: 36px;
-    font-size: 0.9rem;
-  }
-`;
-
 const StatContainer = styled(Box)`
   display: flex;
   gap: 0.5rem;
-  margin-left: 52px;
   flex-wrap: wrap;
 
   @media (max-width: 480px) {
-    margin-left: 46px;
     gap: 0.35rem;
   }
 
@@ -102,40 +81,6 @@ const StatItem = styled(Box)`
     svg {
       width: 12px;
       height: 12px;
-    }
-  }
-`;
-
-const FavoriteButton = styled(Button)`
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  width: 32px;
-  height: 32px;
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-  color: ${({ theme }) => theme.colors.accent.main};
-  
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.accent.light}20;
-    
-    svg {
-      transform: scale(1.1);
-    }
-  }
-  
-  svg {
-    transition: transform 0.2s ease-in-out;
-  }
-
-  @media (max-width: 480px) {
-    top: 0.75rem;
-    right: 0.75rem;
-    width: 28px;
-    height: 28px;
-
-    svg {
-      width: 16px;
-      height: 16px;
     }
   }
 `;
@@ -258,21 +203,9 @@ export const PlayerSessionCard = ({
     });
   };
 
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   return (
     <StyledCard>
       <PlayerInfo>
-        <CircleInitial>
-          {getInitials(user.name)}
-        </CircleInitial>
         <Box style={{ minWidth: 0 }}>
           <PlayerName as="div">
             {user.name}
@@ -293,17 +226,13 @@ export const PlayerSessionCard = ({
             {assists} assists
           </Text>
         </StatItem>
-        <StatItem>
-          <FiHeart size={14} />
+        <StatItem onClick={isFavorite ? () => handleDeleteFavorite(favoriteId!) : handleFavorite}>
+          {isFavorite && !isPending ? <FaHeart size={14} /> : !isPending ? <FaRegHeart size={14} /> : <Oval />}
           <Text size="1" weight="medium">
             {favoritesCount} favs
           </Text>
         </StatItem>
       </StatContainer>
-
-      <FavoriteButton variant="ghost" onClick={isFavorite ? () => handleDeleteFavorite(favoriteId!) : handleFavorite} disabled={isPending}>
-        {isFavorite ? <FaStar size={24} /> : <FaRegStar size={24} />}
-      </FavoriteButton>
     </StyledCard>
   );
 }; 
