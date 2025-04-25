@@ -17,12 +17,6 @@ const StyledCard = styled(Card)`
   box-shadow: ${({ theme }) => theme.shadows.small};
   width: 100%;
   position: relative;
-  
-  &:hover {
-    transform: translateY(-2px);
-    border-color: ${({ theme }) => theme.colors.primary.main};
-    box-shadow: ${({ theme }) => theme.shadows.medium};
-  }
 
   @media (max-width: 480px) {
     padding: 0.75rem;
