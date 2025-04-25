@@ -45,7 +45,7 @@ const MainNavigation = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
-  
+
   // Prevenir rolagem do body quando o menu móvel estiver aberto
   useEffect(() => {
     if (mobileMenuOpen) {
@@ -53,12 +53,12 @@ const MainNavigation = () => {
     } else {
       document.body.style.overflow = '';
     }
-    
+
     return () => {
       document.body.style.overflow = '';
     };
   }, [mobileMenuOpen]);
-  
+
   // Fechar menu ao clicar fora dele (excluindo o botão de menu)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -66,63 +66,64 @@ const MainNavigation = () => {
       if (menuButtonRef.current && menuButtonRef.current.contains(event.target as Node)) {
         return;
       }
-      
+
       // Fecha o menu se clicar fora dele
       if (mobileMenuOpen && menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setMobileMenuOpen(false);
       }
     };
-    
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [mobileMenuOpen]);
-  
+
   // Toggle do menu - função explícita para garantir o comportamento correto
   const toggleMobileMenu = () => {
     setMobileMenuOpen(prevState => !prevState);
   };
-  
+
   const isAdmin = user?.role === 'admin';
-  
+
   // Links de navegação baseados no tipo de usuário
   const navLinks = isAdmin
     ? [
-        { to: '/admin/dashboard', label: 'Dashboard' },
-        { to: '/admin/players', label: 'Jogadores' },
-        { to: '/admin/matches', label: 'Partidas' },
-      ]
+      { to: '/admin/dashboard', label: 'Dashboard' },
+      { to: '/admin/players', label: 'Jogadores' },
+      { to: '/admin/matches', label: 'Partidas' },
+      { to: '/admin/last-session', label: 'Última Sessão' }
+    ]
     : [
-        { to: '/player/last-session', label: 'Última Sessão' },
-      ];
-  
+      { to: '/player/last-session', label: 'Última Sessão' },
+    ];
+
   // Fecha o menu móvel quando um link é clicado
   const handleMobileLinkClick = () => {
     setMobileMenuOpen(false);
   };
-  
+
   return (
     <NavContainer>
       <NavInner>
-        <MobileMenuButton 
+        <MobileMenuButton
           onClick={toggleMobileMenu}
           aria-label="Menu de navegação"
           ref={menuButtonRef}
         >
           {mobileMenuOpen ? '✕' : '☰'}
         </MobileMenuButton>
-        
+
         <LogoLink to={isAdmin ? '/admin/dashboard' : '/player/dashboard'}>
           Futebasssss
         </LogoLink>
-        
+
         <NavMenuRoot>
           <NavList>
             {navLinks.map((link) => (
               <NavItem key={link.to}>
-                <NavLink 
-                  asChild 
+                <NavLink
+                  asChild
                   $active={location.pathname === link.to}
                 >
                   <Link to={link.to}>{link.label}</Link>
@@ -131,19 +132,19 @@ const MainNavigation = () => {
             ))}
           </NavList>
         </NavMenuRoot>
-        
+
         <UserSection>
           <ThemeToggle onClick={toggleTheme} title="Alternar tema">
             {isDarkMode ? '🌞' : '🌙'}
           </ThemeToggle>
-          
+
           <UserName>{user?.name}</UserName>
-          
+
           <DropdownMenu.Root>
             <UserMenuTrigger>
               {user?.name?.charAt(0).toUpperCase() || 'U'}
             </UserMenuTrigger>
-            
+
             <DropdownMenu.Portal>
               <UserMenuContent>
                 <MenuItem>
@@ -160,16 +161,16 @@ const MainNavigation = () => {
             </DropdownMenu.Portal>
           </DropdownMenu.Root>
         </UserSection>
-        
+
         {/* Menu móvel */}
-        <MobileMenuContainer 
+        <MobileMenuContainer
           $isOpen={mobileMenuOpen}
           ref={menuRef}
         >
           <MobileNavList>
             {navLinks.map((link) => (
               <MobileNavItem key={link.to}>
-                <MobileNavLink 
+                <MobileNavLink
                   to={link.to}
                   $active={location.pathname === link.to}
                   onClick={handleMobileLinkClick}
@@ -179,7 +180,7 @@ const MainNavigation = () => {
               </MobileNavItem>
             ))}
           </MobileNavList>
-          
+
           <MobileUserSection>
             <MobileUserInfo>
               <MobileAvatar>
@@ -190,11 +191,11 @@ const MainNavigation = () => {
                 <MobileUserRole>{isAdmin ? 'Administrador' : 'Jogador'}</MobileUserRole>
               </MobileUserDetails>
             </MobileUserInfo>
-            
+
             <MobileThemeToggle>
               <span>Modo escuro</span>
-              <ThemeToggleSwitch 
-                onClick={toggleTheme} 
+              <ThemeToggleSwitch
+                onClick={toggleTheme}
                 title="Alternar tema"
                 $active={isDarkMode}
                 aria-label="Alternar tema escuro"
@@ -204,7 +205,7 @@ const MainNavigation = () => {
                 </span>
               </ThemeToggleSwitch>
             </MobileThemeToggle>
-            
+
             <MobileActionButtons>
               <MobileActionButton onClick={() => {
                 handleMobileLinkClick();
@@ -216,7 +217,7 @@ const MainNavigation = () => {
                 </svg>
                 Perfil
               </MobileActionButton>
-              
+
               <MobileActionButton onClick={() => {
                 handleMobileLinkClick();
                 // Navegação para configurações aqui
@@ -227,8 +228,8 @@ const MainNavigation = () => {
                 </svg>
                 Config.
               </MobileActionButton>
-              
-              <MobileLogoutButton 
+
+              <MobileLogoutButton
                 onClick={() => {
                   logout();
                   handleMobileLinkClick();

@@ -47,6 +47,7 @@ const AppRoutes = () => {
             <Route path="matches" element={<MatchListPage />} />
             <Route path="matches/create" element={<MatchCreatePage />} />
             <Route path="matches/manage/:id" element={<MatchManagePage />} />
+            <Route path="last-session" element={<LastSessionPage />} />
           </Route>
         </Route>
 

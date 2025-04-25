@@ -15,7 +15,6 @@ export class SessionsService {
       },
       include: {
         playerSessions: true,
-        gameResult: true,
         teams: true,
       },
     });
@@ -29,8 +28,15 @@ export class SessionsService {
       },
       include: {
         playerSessions: true,
-        gameResult: true,
-        teams: true,
+        teams: {
+          orderBy: {
+            captain: {
+              user: {
+                name: 'asc',
+              },
+            },
+          },
+        },
       },
     });
   }
@@ -118,12 +124,6 @@ export class SessionsService {
             user: true,
           },
         },
-        gameResult: {
-          include: {
-            teamA: true,
-            teamB: true,
-          },
-        },
       },
     });
   }
@@ -182,14 +182,11 @@ export class SessionsService {
           },
         },
         playerSessions: {
+          where: {
+            willPlay: true,
+          },
           include: {
             user: true,
-          },
-        },
-        gameResult: {
-          include: {
-            teamA: true,
-            teamB: true,
           },
         },
       },
@@ -201,48 +198,20 @@ export class SessionsService {
       },
     });
 
-    const teamA = lastSession.teams.at(0);
-    const teamB = lastSession.teams.at(1);
-    delete lastSession.teams;
-
-    const teamAGoals = lastSession.playerSessions.reduce(
-      (acc, playerSession) => {
-        if (playerSession.teamId === teamA.id) {
-          return acc + playerSession.goals;
-        }
-        return acc;
-      },
-      0,
-    );
-
-    const teamBGoals = lastSession.playerSessions.reduce(
-      (acc, playerSession) => {
-        if (playerSession.teamId === teamB.id) {
-          return acc + playerSession.goals;
-        }
-        return acc;
-      },
-      0,
-    );
-
     const lastSessionWithFavoritesCount = {
       ...lastSession,
-      playerSessions: lastSession.playerSessions.map((playerSession) => ({
-        ...playerSession,
-        favoritesCount: lastSessionFavorites.filter(
-          (favorite) => favorite.favoriteId === playerSession.userId,
-        ).length,
-      })),
-      previewResult: {
-        teamA: {
-          ...teamA,
-          goals: teamAGoals,
-        },
-        teamB: {
-          ...teamB,
-          goals: teamBGoals,
-        },
-      },
+      playerSessions: lastSession.playerSessions
+        .map((playerSession) => ({
+          ...playerSession,
+          favoritesCount: lastSessionFavorites.filter(
+            (favorite) => favorite.favoriteId === playerSession.userId,
+          ).length,
+        }))
+        .sort((a, b) => {
+          if (a.favoritesCount > b.favoritesCount) return -1;
+          if (a.favoritesCount < b.favoritesCount) return 1;
+          return 0;
+        }),
     };
 
     return lastSessionWithFavoritesCount;

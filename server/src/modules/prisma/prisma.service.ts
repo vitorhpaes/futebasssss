@@ -20,7 +20,7 @@ export class PrismaService
         'Session',
         'Team',
         'PlayerSession',
-        'GameResult',
+        'Season',
         'PlayerFavorite',
       ];
 

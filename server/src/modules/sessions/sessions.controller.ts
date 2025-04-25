@@ -138,29 +138,6 @@ export class SessionsController {
             },
           },
         },
-        gameResult: {
-          type: 'object',
-          nullable: true,
-          properties: {
-            id: { type: 'number' },
-            teamAScore: { type: 'number' },
-            teamBScore: { type: 'number' },
-            teamA: {
-              type: 'object',
-              properties: {
-                id: { type: 'number' },
-                name: { type: 'string' },
-              },
-            },
-            teamB: {
-              type: 'object',
-              properties: {
-                id: { type: 'number' },
-                name: { type: 'string' },
-              },
-            },
-          },
-        },
       },
     },
   })
