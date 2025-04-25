@@ -47,13 +47,13 @@ const LastSessionPage = () => {
   const { data: favorites } = useSessionFavorites(lastMatch?.id);
 
 
-  const userPlayerSession = lastMatch?.playerSessions?.find(
-    playerSession => playerSession.user.id === user?.id
+  const playerSession = lastMatch?.playerSessions?.find(
+    playerSession => playerSession.user?.id === user?.id
   );
 
   const userFavoritePlayers = favorites?.filter(favorite => favorite.voterId === user?.id)
 
-  const userFilledStats = !!userPlayerSession?.statsSubmitted;
+  const userFilledStats = !!playerSession?.statsSubmitted || !playerSession?.willPlay;
 
   return (
     <DashboardContainer>
@@ -76,8 +76,8 @@ const LastSessionPage = () => {
         </PageContainer>
       ) : (
         <PageContainer>
-          {!userFilledStats && userPlayerSession && (
-            <StatsForm playerSessionId={userPlayerSession.id} />
+          {!userFilledStats && playerSession && (
+            <StatsForm playerSessionId={playerSession.id} />
           )}
 
           {userFilledStats && lastMatch.playerSessions && lastMatch.playerSessions.length > 0 && (
@@ -90,13 +90,13 @@ const LastSessionPage = () => {
                 {lastMatch.playerSessions.map((playerSession) => (
                   <PlayerSessionCard
                     key={playerSession.id}
-                    user={playerSession.user}
+                    user={playerSession.user!}
                     sessionId={lastMatch.id}
                     goals={playerSession.goals ?? 0}
                     assists={playerSession.assists ?? 0}
                     favoritesCount={playerSession.favoritesCount ?? 0}
-                    isFavorite={userFavoritePlayers?.some(favorite => favorite.favoriteId === playerSession.user.id)}
-                    favoriteId={userFavoritePlayers?.find(favorite => favorite.favoriteId === playerSession.user.id)?.id}
+                    isFavorite={userFavoritePlayers?.some(favorite => favorite.favoriteId === playerSession.user?.id)}
+                    favoriteId={userFavoritePlayers?.find(favorite => favorite.favoriteId === playerSession.user?.id)?.id}
                   />
                 ))}
               </PlayersList>

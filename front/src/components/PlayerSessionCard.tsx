@@ -70,10 +70,6 @@ const StatItem = styled(Box)`
     color: ${({ theme }) => theme.colors.primary.main};
   }
 
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.primary.light}25;
-  }
-
   @media (max-width: 480px) {
     padding: 0.2rem 0.4rem;
     gap: 0.3rem;
@@ -227,7 +223,7 @@ export const PlayerSessionCard = ({
           </Text>
         </StatItem>
         <StatItem onClick={isFavorite ? () => handleDeleteFavorite(favoriteId!) : handleFavorite}>
-          {isFavorite && !isPending ? <FaHeart size={14} /> : !isPending ? <FaRegHeart size={14} /> : <Oval />}
+          {isFavorite && !isPending ? <FaHeart size={14} /> : !isPending ? <FaRegHeart size={14} /> : <Oval height={14} width={14} />}
           <Text size="1" weight="medium">
             {favoritesCount} favs
           </Text>

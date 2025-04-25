@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { SessionStatus } from '@futebasssss-ia/constants';
 
 import { teamSchema } from '../teams/teams.interfaces';
+import { playerSessionSchema } from '../player-sessions/player-sessions.interfaces';
 
 export interface User {
   id: number;
@@ -44,19 +45,9 @@ export const matchSchema = z.object({
   location: z.string(),
   status: z.enum(['SCHEDULED', 'COMPLETED', 'CANCELED']),
   notes: z.string().optional(),
-  playerSessions: z.array(z.object({
-    id: z.number(),
-    statsSubmitted: z.boolean(),
-    favoritesCount: z.number(),
-    user: z.object({
-      id: z.number(),
-      name: z.string(),
-      email: z.string(),
-    }),
-    goals: z.number(),
-    assists: z.number(),
-    favorites: z.number().optional(),
-  })),
+  playerSessions: z.array(playerSessionSchema.merge(z.object({
+    favoritesCount: z.number().optional(),
+  }))),
   teams: z.array(teamSchema).optional(),
 });
 
