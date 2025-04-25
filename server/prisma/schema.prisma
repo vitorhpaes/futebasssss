@@ -34,10 +34,12 @@ model Season {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
   deletedAt   DateTime? @map("deleted_at")
+  sessions    Session[]
 }
 
 model Session {
   id              Int              @id @default(autoincrement())
+  seasonId        Int?             @map("season_id")
   date            DateTime
   location        String
   status          SessionStatus    @default(SCHEDULED)
@@ -48,6 +50,7 @@ model Session {
   playerFavorites PlayerFavorite[]
   playerSessions  PlayerSession[]
   teams           Team[]
+  season          Season?           @relation(fields: [seasonId], references: [id])
 
   @@map("sessions")
 }

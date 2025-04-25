@@ -6,9 +6,9 @@ import {
   Title,
   LogoutButton,
 } from './DashboardPage.styles';
-import { Card, Flex, Text, Grid, Heading, Container, Section } from '@radix-ui/themes';
+import { Flex, Text, Heading, Container, Section } from '@radix-ui/themes';
 import { styled } from 'styled-components';
-import { FiUsers, FiAward } from 'react-icons/fi';
+import { FiUsers } from 'react-icons/fi';
 import { PlayerSessionCard } from '../../components/PlayerSessionCard';
 import { StatsForm } from '../../components/StatsForm';
 import { useSessionFavorites } from '../../services/player-favorites/player-favorites.queries';
@@ -21,30 +21,6 @@ const PageContainer = styled(Container)`
   @media (max-width: 768px) {
     padding: 1rem;
   }
-`;
-
-const ScoreCard = styled(Card)`
-  background-color: ${({ theme }) => theme.colors.background.paper};
-  border: 1px solid ${({ theme }) => theme.colors.primary.light}30;
-  padding: 1.5rem;
-  text-align: center;
-  width: 100%;
-
-  &:hover {
-    border-color: ${({ theme }) => theme.colors.primary.main}40;
-  }
-`;
-
-const ScoreText = styled(Text)`
-  font-size: 3.5rem;
-  font-weight: bold;
-  color: ${({ theme }) => theme.colors.primary.dark};
-  line-height: 1;
-`;
-
-const TeamName = styled(Heading)`
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: 1rem;
 `;
 
 const SectionTitle = styled(Heading)`

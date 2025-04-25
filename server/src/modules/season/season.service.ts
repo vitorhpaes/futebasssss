@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Season, Prisma } from '@prisma/client';
+import { Season } from '@prisma/client';
 import { CreateSeasonDto } from './dto/create-season.dto';
 import { UpdateSeasonDto } from './dto/update-season.dto';
 
@@ -10,7 +10,11 @@ export class SeasonService {
 
   async findAll(): Promise<Season[]> {
     try {
-      return await this.prisma.season.findMany({});
+      return await this.prisma.season.findMany({
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
     } catch (error) {
       if (error instanceof Error) {
         throw error;
