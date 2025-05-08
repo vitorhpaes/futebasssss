@@ -186,7 +186,7 @@ export const PlayerSessionCard = ({
 
       <StatContainer justify={'between'} >
         <StatItem>
-          <FiTarget size={18} />
+          <FiTarget size={14} />
           <Text size="3" weight="light">
             {goals} gols
           </Text>
@@ -198,7 +198,7 @@ export const PlayerSessionCard = ({
           </Text>
         </StatItem>
         <StatItem onClick={isFavorite ? () => handleDeleteFavorite(favoriteId!) : handleFavorite}>
-          {isFavorite && !isPending ? <FaHeart size={18} /> : !isPending ? <FaRegHeart size={14} /> : <Oval height={14} width={14} />}
+          {isFavorite && !isPending ? <FaHeart size={18} /> : !isPending ? <FaRegHeart size={18} /> : <Oval height={14} width={14} />}
           <Text size="3" weight="light">
             {favoritesCount} favs
           </Text>
