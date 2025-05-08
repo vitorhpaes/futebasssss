@@ -1,4 +1,4 @@
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../context/authStore';
 import { useTheme } from '../../theme/ThemeProvider';
@@ -15,11 +15,6 @@ import {
   UserSection,
   UserName,
   ThemeToggle,
-  UserMenuTrigger,
-  UserMenuContent,
-  MenuItem,
-  LogoutMenuItem,
-  SeparatorItem,
   MobileMenuButton,
   MobileMenuContainer,
   MobileNavList,
@@ -27,7 +22,6 @@ import {
   MobileNavLink,
   MobileUserSection,
   MobileUserInfo,
-  MobileAvatar,
   MobileUserDetails,
   MobileUserName,
   MobileUserRole,
@@ -37,6 +31,7 @@ import {
   MobileActionButton,
   MobileLogoutButton
 } from './MainNavigation.styles';
+import { Avatar } from '@radix-ui/themes';
 
 const MainNavigation = () => {
   const location = useLocation();
@@ -140,26 +135,7 @@ const MainNavigation = () => {
 
           <UserName>{user?.name}</UserName>
 
-          <DropdownMenu.Root>
-            <UserMenuTrigger>
-              {user?.name?.charAt(0).toUpperCase() || 'U'}
-            </UserMenuTrigger>
-
-            <DropdownMenu.Portal>
-              <UserMenuContent>
-                <MenuItem>
-                  Perfil
-                </MenuItem>
-                <MenuItem>
-                  Configurações
-                </MenuItem>
-                <SeparatorItem />
-                <LogoutMenuItem onClick={logout}>
-                  Sair
-                </LogoutMenuItem>
-              </UserMenuContent>
-            </DropdownMenu.Portal>
-          </DropdownMenu.Root>
+          <Avatar fallback={user?.name?.split(' ').map(str => str.charAt(0).toUpperCase()).join('') ?? 'U'} color='blue' variant='soft' radius='full' size="2" />
         </UserSection>
 
         {/* Menu móvel */}
@@ -183,9 +159,8 @@ const MainNavigation = () => {
 
           <MobileUserSection>
             <MobileUserInfo>
-              <MobileAvatar>
-                {user?.name?.charAt(0).toUpperCase() || 'U'}
-              </MobileAvatar>
+              <Avatar mr='4' fallback={user?.name?.split(' ').map(str => str.charAt(0).toUpperCase()).join('') ?? 'U'} color='blue' variant='soft' radius='full' size="5" />
+            
               <MobileUserDetails>
                 <MobileUserName>{user?.name || 'Usuário'}</MobileUserName>
                 <MobileUserRole>{isAdmin ? 'Administrador' : 'Jogador'}</MobileUserRole>

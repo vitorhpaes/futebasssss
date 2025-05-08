@@ -3,6 +3,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ThemeProvider } from './theme/ThemeProvider';
 import { ToastProvider } from './components/ui/Toast';
 import AppRoutes from './routes/AppRoutes';
+import '@radix-ui/themes/styles.css'
 
 // Configuração do React Query
 const queryClient = new QueryClient({

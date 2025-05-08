@@ -29,7 +29,9 @@ COPY --from=builder /app/server/package.json ./package.json
 # Expose application port
 EXPOSE 3000
 
-WORKDIR /app
+# Copia o script de entrypoint
+COPY ./deploy/entry-point/server.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
 
-# Start the server
-CMD [ "yarn", "start:prod" ]
+# Define o entrypoint
+ENTRYPOINT ["./entrypoint.sh"]

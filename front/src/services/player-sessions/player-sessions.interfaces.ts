@@ -6,6 +6,7 @@ export const playerSessionSchema = z.object({
   userId: z.number(),
   sessionId: z.number(),
   teamId: z.number().nullable(),
+  statsSubmitted: z.boolean().optional(),
   confirmed: z.boolean(),
   willPlay: z.boolean(),
   goals: z.number(),

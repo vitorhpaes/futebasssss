@@ -50,7 +50,7 @@ model Session {
   playerFavorites PlayerFavorite[]
   playerSessions  PlayerSession[]
   teams           Team[]
-  season          Season?           @relation(fields: [seasonId], references: [id])
+  season          Season?          @relation(fields: [seasonId], references: [id])
 
   @@map("sessions")
 }
@@ -66,6 +66,7 @@ model Team {
   session        Session?        @relation(fields: [sessionId], references: [id])
   captainId      Int?            @unique @map("captain_id")
   captain        PlayerSession?  @relation("TeamCaptain", fields: [captainId], references: [id])
+  score          Int?            @default(0)
 
   @@map("teams")
 }
