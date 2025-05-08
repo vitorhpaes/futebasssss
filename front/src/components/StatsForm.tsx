@@ -38,7 +38,7 @@ const StyledForm = styled(Form.Root)`
   width: 100%;
 `;
 
-const FormGroup = styled(Form.Field)<{ serverInvalid?: boolean }>`
+const FormGroup = styled(Form.Field) <{ serverInvalid?: boolean }>`
   display: flex;
   flex-direction: column;
   margin-bottom: 20px;
@@ -161,9 +161,9 @@ export const StatsForm = ({ playerSessionId }: StatsFormProps) => {
       <FormContainer>
         <Header>
           <Title>Trouxe o futebol?</Title>
-          <Subtitle>Quais os seus números na partida?</Subtitle>
+          <Subtitle>Quais os seus números na partida mais recente?</Subtitle>
         </Header>
-        
+
         <StyledForm onSubmit={formik.handleSubmit}>
           <FormRow>
             <FormGroup name="goals" serverInvalid={!!formik.errors.goals && formik.touched.goals}>
@@ -177,7 +177,7 @@ export const StatsForm = ({ playerSessionId }: StatsFormProps) => {
                 <FormMessage>{formik.errors.goals}</FormMessage>
               )}
             </FormGroup>
-            
+
             <FormGroup name="assists" serverInvalid={!!formik.errors.assists && formik.touched.assists}>
               <FormLabel>Assistências</FormLabel>
               <FormInput
@@ -190,6 +190,7 @@ export const StatsForm = ({ playerSessionId }: StatsFormProps) => {
               )}
             </FormGroup>
           </FormRow>
+
 
           <ButtonGroup>
             <SubmitButton type="submit" disabled={formik.isSubmitting || isPending}>
