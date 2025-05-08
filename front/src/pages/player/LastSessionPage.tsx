@@ -64,12 +64,10 @@ const LastSessionPage = () => {
       },
       teamB: {
         ...lastMatch?.teams?.at(1),
-        players: lastMatch?.playerSessions?.filter(playerSession => playerSession.teamId === lastMatch?.teams?.at(0)?.id)
+        players: lastMatch?.playerSessions?.filter(playerSession => playerSession.teamId === lastMatch?.teams?.at(1)?.id)
       }
     }
   }, [lastMatch])
-
-  console.log({ teamA, teamB })
 
   return (
     <DashboardContainer>
