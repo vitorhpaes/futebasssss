@@ -1,4 +1,4 @@
-import { Card, Text, Box } from '@radix-ui/themes';
+import { Card, Text, Box, Flex } from '@radix-ui/themes';
 import { FiAward, FiTarget } from 'react-icons/fi';
 import { styled } from 'styled-components';
 import { useCreatePlayerFavorite, useDeletePlayerFavorite, useSessionFavorites } from '../services/player-favorites/player-favorites.queries';
@@ -36,8 +36,8 @@ const PlayerInfo = styled(Box)`
   }
 `;
 
-const StatContainer = styled(Box)`
-  display: flex;
+const StatContainer = styled(Flex)`
+  flex-direction: row;
   gap: 0.5rem;
   flex-wrap: wrap;
 
@@ -51,8 +51,7 @@ const StatContainer = styled(Box)`
   }
 `;
 
-const StatItem = styled(Box)`
-  display: flex;
+const StatItem = styled(Flex)`
   align-items: center;
   gap: 0.4rem;
   padding: 0.25rem 0.5rem;
@@ -67,24 +66,6 @@ const StatItem = styled(Box)`
   @media (max-width: 480px) {
     padding: 0.2rem 0.4rem;
     gap: 0.3rem;
-    
-    svg {
-      width: 12px;
-      height: 12px;
-    }
-  }
-`;
-
-const PlayerName = styled(Text)`
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  color: ${({ theme }) => theme.colors.text.primary};
-  font-weight: 600;
-  font-size: ${({ theme }) => theme.typography.body1.fontSize};
-
-  @media (max-width: 480px) {
-    font-size: 0.95rem;
   }
 `;
 
@@ -197,28 +178,28 @@ export const PlayerSessionCard = ({
     <StyledCard>
       <PlayerInfo>
         <Box style={{ minWidth: 0 }}>
-          <PlayerName as="div">
+          <Text as="div" size='4' weight={'bold'}>
             {user.name}
-          </PlayerName>
+          </Text>
         </Box>
       </PlayerInfo>
 
-      <StatContainer>
+      <StatContainer justify={'between'} >
         <StatItem>
-          <FiTarget size={14} />
-          <Text size="1" weight="medium">
+          <FiTarget size={18} />
+          <Text size="3" weight="light">
             {goals} gols
           </Text>
         </StatItem>
         <StatItem>
-          <FiAward size={14} />
-          <Text size="1" weight="medium">
+          <FiAward size={18} />
+          <Text size="3" weight="light">
             {assists} assists
           </Text>
         </StatItem>
         <StatItem onClick={isFavorite ? () => handleDeleteFavorite(favoriteId!) : handleFavorite}>
-          {isFavorite && !isPending ? <FaHeart size={14} /> : !isPending ? <FaRegHeart size={14} /> : <Oval height={14} width={14} />}
-          <Text size="1" weight="medium">
+          {isFavorite && !isPending ? <FaHeart size={18} /> : !isPending ? <FaRegHeart size={14} /> : <Oval height={14} width={14} />}
+          <Text size="3" weight="light">
             {favoritesCount} favs
           </Text>
         </StatItem>

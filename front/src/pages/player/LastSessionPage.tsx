@@ -6,23 +6,13 @@ import {
   Title,
   LogoutButton,
 } from './DashboardPage.styles';
-import { Flex, Text, Heading, Container, Section, Box } from '@radix-ui/themes';
+import { Flex, Text, Heading, Section, Box, Container } from '@radix-ui/themes';
 import { styled } from 'styled-components';
 import { FiUsers } from 'react-icons/fi';
 import { PlayerSessionCard } from '../../components/PlayerSessionCard';
 import { StatsForm } from '../../components/StatsForm';
 import { useSessionFavorites } from '../../services/player-favorites/player-favorites.queries';
 import { useMemo } from 'react';
-
-const PageContainer = styled(Container)`
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
-`;
 
 const SectionTitle = styled(Heading)`
   display: flex;
@@ -75,71 +65,66 @@ const LastSessionPage = () => {
         <Title>Última Partida</Title>
         <LogoutButton onClick={logout}>Sair</LogoutButton>
       </Header>
-
-      {isLoading ? (
-        <PageContainer>
+      <Container>
+        {isLoading ? (
           <Text size="3">Carregando...</Text>
-        </PageContainer>
-      ) : error ? (
-        <PageContainer>
+        ) : error ? (
           <Text size="3" color="red">Erro ao carregar os dados da última partida</Text>
-        </PageContainer>
-      ) : !lastMatch ? (
-        <PageContainer>
+        ) : !lastMatch ? (
           <Text size="3">Nenhuma partida encontrada</Text>
-        </PageContainer>
-      ) : (
-        <PageContainer>
-          {!userFilledStats && playerSession && (
-            <StatsForm playerSessionId={playerSession.id} />
-          )}
+        ) : (
+          <>
+            {!userFilledStats && playerSession && (
+              <StatsForm playerSessionId={playerSession.id} />
+            )}
 
-          {userFilledStats && lastMatch.playerSessions && lastMatch.playerSessions.length > 0 && (
-            <Section>
-              <SectionTitle size="4">
-                <FiUsers size={20} />
-                Jogadores da Partida
-              </SectionTitle>
-              <PlayersList direction="column" mt="3">
-                <Box mb="3">
-                  <Text>
-                    {teamA?.name}
-                  </Text>
-                  {teamA?.players?.map(playerSession => (
-                    <PlayerSessionCard
-                      key={playerSession.id}
-                      user={playerSession.user!}
-                      sessionId={lastMatch.id}
-                      goals={playerSession.goals ?? 0}
-                      assists={playerSession.assists ?? 0}
-                      favoritesCount={playerSession.favoritesCount ?? 0}
-                      isFavorite={userFavoritePlayers?.some(favorite => favorite.favoriteId === playerSession.user?.id)}
-                      favoriteId={userFavoritePlayers?.find(favorite => favorite.favoriteId === playerSession.user?.id)?.id}
-                    />
-                  ))}
-                </Box>
-                <Box mb="3">
-                  <Text align={'right'}>
-                    {teamB?.name}
-                  </Text>
-                  {teamB?.players?.map(playerSession => (
-                    <PlayerSessionCard
-                      key={playerSession.id}
-                      user={playerSession.user!}
-                      sessionId={lastMatch.id}
-                      goals={playerSession.goals ?? 0}
-                      assists={playerSession.assists ?? 0}
-                      favoritesCount={playerSession.favoritesCount ?? 0}
-                      isFavorite={userFavoritePlayers?.some(favorite => favorite.favoriteId === playerSession.user?.id)}
-                      favoriteId={userFavoritePlayers?.find(favorite => favorite.favoriteId === playerSession.user?.id)?.id}
-                    />
-                  ))}
-                </Box>
-              </PlayersList>
-            </Section>
-          )}
-        </PageContainer>
-      )}
+            {userFilledStats && lastMatch.playerSessions && lastMatch.playerSessions.length > 0 && (
+              <Section mt='0' pt='0'>
+                <SectionTitle size="4">
+                  <FiUsers size={20} />
+                  Jogadores da Partida
+                </SectionTitle>
+                <PlayersList direction="column" mt="3">
+                  <Box mb="3">
+                    <Text size={'6'} weight={'medium'} as='div' mt='5' mb='4'>
+                      {teamA?.name}
+                    </Text>
+                    {teamA?.players?.map(playerSession => (
+                      <PlayerSessionCard
+                        key={playerSession.id}
+                        user={playerSession.user!}
+                        sessionId={lastMatch.id}
+                        goals={playerSession.goals ?? 0}
+                        assists={playerSession.assists ?? 0}
+                        favoritesCount={playerSession.favoritesCount ?? 0}
+                        isFavorite={userFavoritePlayers?.some(favorite => favorite.favoriteId === playerSession.user?.id)}
+                        favoriteId={userFavoritePlayers?.find(favorite => favorite.favoriteId === playerSession.user?.id)?.id}
+                      />
+                    ))}
+                  </Box>
+                  <Box mb="3">
+                    <Text size={'6'} weight={'medium'} as='div' mt='5' mb='4'>
+                      {teamB?.name}
+                    </Text>
+                    {teamB?.players?.map(playerSession => (
+                      <PlayerSessionCard
+                        key={playerSession.id}
+                        user={playerSession.user!}
+                        sessionId={lastMatch.id}
+                        goals={playerSession.goals ?? 0}
+                        assists={playerSession.assists ?? 0}
+                        favoritesCount={playerSession.favoritesCount ?? 0}
+                        isFavorite={userFavoritePlayers?.some(favorite => favorite.favoriteId === playerSession.user?.id)}
+                        favoriteId={userFavoritePlayers?.find(favorite => favorite.favoriteId === playerSession.user?.id)?.id}
+                      />
+                    ))}
+                  </Box>
+                </PlayersList>
+              </Section>
+            )}
+          </>
+        )}
+      </Container>
     </DashboardContainer>
   );
 };

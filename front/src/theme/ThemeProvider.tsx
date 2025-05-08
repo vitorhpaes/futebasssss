@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import { lightTheme, darkTheme, ThemeType } from './theme';
 import { GlobalStyles } from './GlobalStyles';
+import { Theme } from '@radix-ui/themes';
 
 type ThemeContextType = {
   theme: ThemeType;
@@ -41,10 +42,12 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
 
   return (
     <ThemeContext.Provider value={{ theme, isDarkMode, toggleTheme }}>
-      <StyledThemeProvider theme={theme}>
-        <GlobalStyles />
-        {children}
-      </StyledThemeProvider>
+      <Theme appearance={isDarkMode ? 'dark' : 'light'}>
+        <StyledThemeProvider theme={theme}>
+          <GlobalStyles />
+          {children}
+        </StyledThemeProvider>
+      </Theme>
     </ThemeContext.Provider>
   );
 }; 
